@@ -73,7 +73,7 @@ exports.signin = async (req, res) => {
             message: "Invalid Password!"
         });
     }
-    const token = jwt.sign({ id: user.user_id, username: user.username, firstname: user.firstname }, config.secret, {
+    const token = jwt.sign({ id: user.user_id }, config.secret, {
         expiresIn: config.jwtExpiration
     });
     let refreshToken = await authJwt.createRefresh(user.user_id);
@@ -100,28 +100,23 @@ exports.refreshToken = async (req, res) => {
     return res.status(403).json({ message: "Refresh Token is required!" });
   }
   try {
-    let refreshToken = await RefreshToken.findOne({ where: { token: requestToken } });
+    let refreshToken = await authJwt.getRefreshToken(requestToken);
     console.log(refreshToken)
     if (!refreshToken) {
       res.status(403).json({ message: "Refresh token is not in database!" });
       return;
-    }
-    if (RefreshToken.verifyExpiration(refreshToken)) {
-      RefreshToken.destroy({ where: { id: refreshToken.id } });
-      
+    }else if(refreshToken=="expire"){
       res.status(403).json({
         message: "Refresh token was expired. Please make a new signin request",
       });
       return;
+    }else{
+      return res.status(200).json({
+        accessToken: refreshToken.accessToken,
+        refreshToken: refreshToken.refreshToken,
+      });
     }
-    const user = await refreshToken.getUser();
-    let newAccessToken = jwt.sign({ id: user.id }, config.secret, {
-      expiresIn: config.jwtExpiration,
-    });
-    return res.status(200).json({
-      accessToken: newAccessToken,
-      refreshToken: refreshToken.token,
-    });
+    
   } catch (err) {
     return res.status(500).send({ message: err });
   }
