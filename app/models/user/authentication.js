@@ -21,51 +21,68 @@ verifyToken = (req, res, next) => {
     if (err) {
       return catchError(err, res);
     }
-    req.userId = decoded.id;
+    req.user_id = decoded.id;
     next();
   });
 };
 
+isAdmin = (req, res, next) => {
+  console.log(req.user_id)
+  const query = "SELECT b.* FROM user_role a inner join role b on a.role_id=b.role_id WHERE a.user_id=$1 AND a.active=$2 AND a.role_id=1"
+  const dataquery = [req.user_id, "T"];
+  db.query(query, dataquery).then((results) => {
+    console.log(results.rows)
+    if(results.rows.length<=0){
+        var ret = {"code":400,"description":"Missing Permission"}
+        res.status(400).json(ret)
+    }else{
+      next();
+    }
+  }).catch(error => {
+    res.status(500).send({
+      message: error.message
+    });
+  });
+};
+
 function signIn(req){
-    return new Promise(function(resolve){
-        const query = "SELECT password, user_id FROM users WHERE username=$1 AND active=$2 ORDER BY user_id DESC"
-        const dataquery = [req.body.username, "T"];
-        db.query(query, dataquery).then((results) => {
-            if(results.rows.length>0){
-                console.log(results)
-                
-                resolve(results.rows)
-                
-            }else{
-                
-                resolve(results.rows)
-            }
-        })
-        .catch(error => {
-            console.log(error)
-            resolve(error)
-        });
+  return new Promise(function(resolve){
+    const query = "SELECT password, user_id FROM users WHERE username=$1 AND active=$2 ORDER BY user_id DESC"
+    const dataquery = [req.body.username, "T"];
+    db.query(query, dataquery).then((results) => {
+      if(results.rows.length>0){
+        resolve(results.rows)
+      }else{
+        resolve(results.rows)
+      }
     })
+    .catch(error => {
+      res.status(500).send({
+        message: error
+      });
+    });
+  })
 }
 
 function createRefresh(userId){
-    let expiredAt = new Date();
-    expiredAt.setSeconds(expiredAt.getSeconds() + config.jwtRefreshExpiration);
-    let _token = uuidv4();
-    var date = new Date().toISOString().slice(0, 19);
-    aDatetime = String(date).split("T")
-    var dateNow = aDatetime[0] + " " + aDatetime[1]
-    return new Promise(function(resolve){
-        const query = "INSERT INTO refresh_token(token, expiredate, user_id, createdate, updatedate) VALUES ($1, $2, $3, $4, $5);"
-        const dataquery = [_token, expiredAt, userId, dateNow, dateNow];
-        db.query(query, dataquery).then(() => {
-          resolve(_token)
-        })
-        .catch(error => {
-            console.log(error)
-            resolve(error)
-        });
+  let expiredAt = new Date();
+  expiredAt.setSeconds(expiredAt.getSeconds() + config.jwtRefreshExpiration);
+  let _token = uuidv4();
+  var date = new Date().toISOString().slice(0, 19);
+  aDatetime = String(date).split("T")
+  var dateNow = aDatetime[0] + " " + aDatetime[1]
+  return new Promise(function(resolve){
+    const query = "INSERT INTO refresh_token(token, expiredate, user_id, createdate, updatedate) VALUES ($1, $2, $3, $4, $5);"
+    const dataquery = [_token, expiredAt, userId, dateNow, dateNow];
+    db.query(query, dataquery).then(() => {
+      resolve(_token)
     })
+    .catch(error => {
+      res.status(500).send({
+        message: error
+      });
+    });
+  })
 }
 
 function getRoles(userId){
@@ -79,8 +96,9 @@ function getRoles(userId){
           resolve(results.rows)
         }
     }).catch(error => {
-      console.log(error)
-      resolve(error)
+      res.status(500).send({
+        message: error
+      });
     });
   })
 }
@@ -120,19 +138,20 @@ function getRefreshToken(refresh_token){
           resolve()
         }
       }).catch(error => {
-         resolve(error)
+        res.status(500).send({
+          message: error
+        });
       });
     })
   }
 }
-
-
 
 const authJwt = {
   verifyToken: verifyToken,
   signIn: signIn,
   createRefresh: createRefresh,
   getRoles: getRoles,
-  getRefreshToken: getRefreshToken
+  getRefreshToken: getRefreshToken,
+  isAdmin: isAdmin
 };
 module.exports = authJwt;

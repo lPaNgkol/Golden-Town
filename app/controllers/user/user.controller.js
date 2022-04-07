@@ -1,60 +1,19 @@
 const db = require("../../models/dbconnection");
 const config = require("../../config/auth.config");
 const authJwt = require("../../models/user/authentication");
+const signupModule = require("../../models/user/verifySignUp");
 var jwt = require("jsonwebtoken");
 var crypto = require('crypto');
-exports.signup = (req, res) => {
+exports.signup = async (req, res) => {
   // Save User to Database
-  var aDatetime = new Date();
-  aDatetime = aDatetime.split("T")
-  var dateNow = aDatetime[0] + " " + aDatetime[1]
-  Users.create({
-    username: req.body.username,
-    password: crypto.createHash('md5').update(req.body.password).digest("hex"),
-    employeeId: req.body.employeeId,
-    firstName: req.body.firstName,
-    lastName: req.body.lastName,
-    nickName: req.body.nickName,
-    gender: req.body.firstName=="ชาย" ? "M" : "F",
-    dob: req.body.dob,
-    jobStartDate: req.body.dob,
-    workingStatus: req.body.workingStatus,
-    positionId: req.body.positionId,
-    mobileNo: req.body.mobileNo,
-    companyId: req.body.companyId,
-    workStartTime: req.body.workStartTime,
-    workStopTime: req.body.workStopTime,
-    workHours: req.body.workHours,
-    imageUrl: req.body.imageUrl,
-    active: "T",
-    createBy: req.body.createBy,
-    createDate: dateNow,
-    updateBy: req.body.updateBy,
-    updateDate: dateNow
-  })
-    .then(user => {
-      if (req.body.roles) {
-        Role.findAll({
-          where: {
-            name: {
-              [Op.or]: req.body.roles
-            }
-          }
-        }).then(roles => {
-          user.setRoles(roles).then(() => {
-            res.send({ message: "User was registered successfully!" });
-          });
-        });
-      } else {
-        // user role = 1
-        user.setRoles([1]).then(() => {
-          res.send({ message: "User was registered successfully!" });
-        });
-      }
-    })
-    .catch(err => {
-      res.status(500).send({ message: err.message });
+  user = await signupModule.createAccount(req, res)
+  if (!user) {
+      res.status(500).send({ message: "Internal error." });
+  }else{
+    res.status(200).send({
+      message: "Register complete."
     });
+  }
 };
 exports.signin = async (req, res) => {
     var user = ""
@@ -120,4 +79,17 @@ exports.refreshToken = async (req, res) => {
   } catch (err) {
     return res.status(500).send({ message: err });
   }
+};
+
+exports.allAccess = (req, res) => {
+  res.status(200).send("Public Content.");
+};
+exports.userBoard = (req, res) => {
+  res.status(200).send("User Content.");
+};
+exports.adminBoard = (req, res) => {
+  res.status(200).send("Admin Content.");
+};
+exports.moderatorBoard = (req, res) => {
+  res.status(200).send("Moderator Content.");
 };
