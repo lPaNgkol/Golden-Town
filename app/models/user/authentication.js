@@ -58,7 +58,7 @@ function signIn(req){
     })
     .catch(error => {
       res.status(500).send({
-        message: error
+        message: error.message
       });
     });
   })
@@ -79,7 +79,7 @@ function createRefresh(userId){
     })
     .catch(error => {
       res.status(500).send({
-        message: error
+        message: error.message
       });
     });
   })
@@ -97,7 +97,7 @@ function getRoles(userId){
         }
     }).catch(error => {
       res.status(500).send({
-        message: error
+        message: error.message
       });
     });
   })
@@ -139,7 +139,7 @@ function getRefreshToken(refresh_token){
         }
       }).catch(error => {
         res.status(500).send({
-          message: error
+          message: error.message
         });
       });
     })
