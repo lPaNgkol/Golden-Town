@@ -1,4 +1,4 @@
-const db = require("../../models/dbconnection");
+const db = require("../dbconnection");
 var crypto = require('crypto');
 var format = require('pg-format');
 
@@ -133,11 +133,70 @@ function createAccount(req, res){
         message: error.message
       });
     });
-})
+  })
 }
-const verifySignUp = {
+
+function listEmployee(req, res){
+  return new Promise(function(resolve){
+    let query = `SELECT username, employee_id, user_id, firstname, lastname, nickname, gender,
+                      dob, job_start_date, working_status, a.position_id, mobileno, a.company_id, work_start_time,
+                      work_end_time, work_hours, imageurl, b.position_name, c.company_name, count(a.*) OVER() AS total_row
+                  FROM users a
+                  INNER JOIN positions b on a.position_id=b.position_id
+                  INNER JOIN company c on c.company_id=a.company_id
+                  WHERE a.active=$1 AND c.company_id=$2`
+    let dataquery = ["T", req.body.company_id];
+    if(req.body.limit){
+      query = query + " LIMIT $3"
+      dataquery.push(req.body.limit)
+    }
+    if(req.body.offset){
+      query = query + " OFFSET $4"
+      dataquery.push(req.body.offset)
+    }
+
+    console.log(query)
+    console.log(dataquery)
+    db.query(query, dataquery).then((results) => {
+      resolve(results.rows)
+    })
+    .catch(error => {
+      res.status(500).send({
+        message: error.message
+      });
+    });
+  })
+}
+
+function getEmployee(req, res){
+  return new Promise(function(resolve){
+    let query = `SELECT username, employee_id, user_id, firstname, lastname, nickname, gender,
+                      dob, job_start_date, working_status, a.position_id, mobileno, a.company_id, work_start_time,
+                      work_end_time, work_hours, imageurl, b.position_name, c.company_name, count(a.*) OVER() AS total_row
+                  FROM users a
+                  INNER JOIN positions b on a.position_id=b.position_id
+                  INNER JOIN company c on c.company_id=a.company_id
+                  WHERE a.active=$1 AND UPPER(a.employee_id)=$2`
+    let dataquery = ["T", req.params.employee_id.toUpperCase()];
+
+    console.log(query)
+    console.log(dataquery)
+    db.query(query, dataquery).then((results) => {
+      resolve(results.rows)
+    })
+    .catch(error => {
+      res.status(500).send({
+        message: error.message
+      });
+    });
+  })
+}
+
+const employee = {
     checkDuplicateUsername: checkDuplicateUsername,
     createAccount: createAccount,
-    checkRolesExisted: checkRolesExisted
+    checkRolesExisted: checkRolesExisted,
+    listEmployee: listEmployee,
+    getEmployee: getEmployee
 };
-module.exports = verifySignUp;
+module.exports = employee;
