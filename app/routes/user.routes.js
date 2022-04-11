@@ -1,4 +1,5 @@
-const verifySignUp = require("../models/user/verifySignUp");
+const employee = require("../models/user/employee");
+const authJwt = require("../models/user/authentication");
 const controller = require("../controllers/user/user.controller");
 module.exports = function(app) {
   app.use(function(req, res, next) {
@@ -9,13 +10,17 @@ module.exports = function(app) {
     next();
   });
   app.post(
-    "/api/auth/signup",
+    "/employee",
     [
-      verifySignUp.checkDuplicateUsername,
-      verifySignUp.checkRolesExisted
+      employee.checkDuplicateUsername,
+      employee.checkRolesExisted
     ],
     controller.signup
   );
-  app.post("/api/auth/signin", controller.signin);
-  app.post("/api/auth/refreshtoken", controller.refreshToken);
+  app.post("/users/login", controller.signin);
+  app.post("/users/logout", controller.logout);
+  app.post("/auth/refreshtoken",
+    [authJwt.verifyToken], 
+    controller.refreshToken
+  );
 };

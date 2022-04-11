@@ -146,12 +146,43 @@ function getRefreshToken(refresh_token){
   }
 }
 
+logout = (req, res) => {
+  let token = req.headers["x-access-token"];
+  jwt.verify(token, config.secret, (err, decoded) => {
+    if (err) {
+      res.status(500).send({
+        message: error
+      });
+    }else{
+      if(req.user_id==decoded.id){
+        const query = "DELETE FROM refresh_token WHERE user_id=$1"
+        const dataquery = [req.body.user_id];
+        db.query(query, dataquery).then((results) => {
+          res.status(200).send({
+            message: "Logout Complete."
+          });
+        }).catch(error => {
+          res.status(500).send({
+            message: error.message
+          });
+        });
+      }else{
+        res.status(500).send({
+          message: "Token not match user"
+        });
+      }
+    }
+  });
+  
+};
+
 const authJwt = {
   verifyToken: verifyToken,
   signIn: signIn,
   createRefresh: createRefresh,
   getRoles: getRoles,
   getRefreshToken: getRefreshToken,
-  isAdmin: isAdmin
+  isAdmin: isAdmin,
+  logout: logout
 };
 module.exports = authJwt;
