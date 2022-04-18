@@ -25,7 +25,7 @@ exports.signin = async (req, res) => {
      return res.status(404).send({ message: "User Not found." });
   }
   var passwordIsValid = false
-  if(user.password==crypto.createHash('md5').update(req.body.password).digest("hex")){
+  if(user.password==req.body.password){
     passwordIsValid = true
   }
   if (!passwordIsValid) {

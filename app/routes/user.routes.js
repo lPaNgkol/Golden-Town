@@ -12,6 +12,7 @@ module.exports = function(app) {
   app.post(
     "/employee",
     [
+      authJwt.verifyToken,
       employee.checkDuplicateUsername,
       employee.checkRolesExisted
     ],
