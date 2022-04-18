@@ -3,10 +3,11 @@ const employee = require("../../models/user/employee");
 exports.employeeList = async (req, res) => {
     var listEmployee = ""
     if(!req.body.company_id){
-        res.status(400).send({ message: "Company Id cannot Be Null." });
+        res.status(400).send({ message: "Company_Id cannot Be Null." });
     }
     listEmployee = await employee.listEmployee(req, res)
-    if (!listEmployee) {
+    console.log(listEmployee)
+    if (listEmployee.length==0) {
         res.status(404).send({ message: "Employee Not found." });
     }else{
         res.status(200).send({"listEmployee": listEmployee, totalRow:listEmployee[0].total_row});
@@ -18,7 +19,7 @@ exports.employee = async (req, res) => {
         res.status(400).send({ message: "Employee Id cannot Be Null." });
     }
     employeeData = await employee.getEmployee(req, res)
-    if (!employeeData) {
+    if (listEmployee.length==0) {
         res.status(404).send({ message: "Employee Not found." });
     }else{
         res.status(200).send({"employee": employeeData});

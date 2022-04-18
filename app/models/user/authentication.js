@@ -151,7 +151,7 @@ logout = (req, res) => {
   jwt.verify(token, config.secret, (err, decoded) => {
     if (err) {
       res.status(500).send({
-        message: error
+        message: err
       });
     }else{
       if(req.user_id==decoded.id){
