@@ -64,25 +64,25 @@ function createAccount(req, res){
   var dateNow = aDatetime[0] + " " + aDatetime[1]
   const username = req.body.username
   const password = crypto.createHash('md5').update(req.body.password).digest("hex")
-  const employee_id = req.body.employeeId
+  const employee_id = req.body.employee_id
   const firstname = req.body.firstname
   const lastname = req.body.lastname
   const nickname = req.body.nickname
   const gender = req.body.gender=="ชาย" ? "M" : "F"
   const dob = req.body.dob
-  const job_start_date = req.body.jobStartDate
-  const working_status = req.body.workingStatus
-  const position_id = req.body.positionId
-  const mobileno = req.body.mobileNo
-  const company_id = req.body.companyId
-  const work_start_time = req.body.workStartTime
-  const work_end_time = req.body.workEndTime
-  const work_hours = req.body.workHours
-  const imageurl = req.body.imageUrl
+  const job_start_date = req.body.job_start_date
+  const working_status = req.body.working_status
+  const position_id = req.body.position_id
+  const mobileno = req.body.mobileno
+  const company_id = req.body.company_id
+  const work_start_time = req.body.work_start_time
+  const work_end_time = req.body.work_end_time
+  const work_hours = req.body.work_hours
+  const imageurl = req.body.imageurl
   const active = "T"
-  const createby = req.body.createBy
+  const createby = req.body.createby
   const createdate = dateNow
-  const updateby = req.body.updateBy
+  const updateby = req.body.updateby
   const updatedate = dateNow
   return new Promise(function(resolve){
     const query = `INSERT INTO users(username, password, employee_id, firstname, lastname, nickname,
@@ -145,7 +145,7 @@ function listEmployee(req, res){
                   INNER JOIN positions b on a.position_id=b.position_id
                   INNER JOIN company c on c.company_id=a.company_id
                   WHERE a.active=$1 AND c.company_id=$2`
-    let dataquery = ["T", req.body.companyId];
+    let dataquery = ["T", req.body.company_id];
     if(req.body.limit){
       query = query + " LIMIT $3"
       dataquery.push(req.body.limit)
@@ -177,7 +177,7 @@ function getEmployee(req, res){
                   INNER JOIN positions b on a.position_id=b.position_id
                   INNER JOIN company c on c.company_id=a.company_id
                   WHERE a.active=$1 AND UPPER(a.employee_id)=$2`
-    let dataquery = ["T", req.params.employeeId.toUpperCase()];
+    let dataquery = ["T", req.params.employee_id.toUpperCase()];
 
     console.log(query)
     console.log(dataquery)
@@ -192,11 +192,86 @@ function getEmployee(req, res){
   })
 }
 
+function updateEmployee(req, res){
+  var date = new Date().toISOString().slice(0, 19);
+  aDatetime = String(date).split("T")
+  var dateNow = aDatetime[0] + " " + aDatetime[1]
+  const firstname = req.body.firstname
+  const lastname = req.body.lastname
+  const nickname = req.body.nickname
+  const gender = req.body.gender=="ชาย" ? "M" : "F"
+  const dob = req.body.dob
+  const job_start_date = req.body.job_start_date
+  const working_status = req.body.working_status
+  const position_id = req.body.position_id
+  const mobileno = req.body.mobileno
+  const company_id = req.body.company_id
+  const work_start_time = req.body.work_start_time
+  const work_end_time = req.body.work_end_time
+  const work_hours = req.body.work_hours
+  const imageurl = req.body.imageurl
+  const active = req.body.active
+  const updateby = req.body.updateby
+  const updatedate = dateNow
+  const employee_id = req.params.employee_id
+  
+  return new Promise(function(resolve){
+    const query = `UPDATE users
+                   SET firstname=$1, 
+                       lastname=$2, 
+                       nickname=$3 ,
+                       gender=$4, 
+                       dob=$5, 
+                       job_start_date=$6, 
+                       working_status=$7, 
+                       position_id=$8, 
+                       mobileno=$9, 
+                       company_id=$10, 
+                       work_start_time=$11,
+                       work_end_time=$12, 
+                       work_hours=$13, 
+                       imageurl=$14, 
+                       active=$15, 
+                       updateby=$16, 
+                       updatedate=$17
+                   WHERE UPPER(employee_id) = UPPER($18) 
+                   RETURNING user_id;`
+    const dataquery = [firstname, 
+                       lastname, 
+                       nickname, 
+                       gender, 
+                       dob, 
+                       job_start_date, 
+                       working_status, 
+                       position_id, 
+                       mobileno, 
+                       company_id, 
+                       work_start_time, 
+                       work_end_time, 
+                       work_hours,
+                       imageurl,
+                       active,
+                       updateby,
+                       updatedate,
+                       employee_id];
+    db.query(query, dataquery).then((results) => {
+      console.log(results.rows)
+      resolve(results.rows[0])
+    })
+    .catch(error => {
+      res.status(500).send({
+        message: error.message
+      });
+    });
+  })
+}
+
 const employee = {
     checkDuplicateUsername: checkDuplicateUsername,
     createAccount: createAccount,
     checkRolesExisted: checkRolesExisted,
     listEmployee: listEmployee,
-    getEmployee: getEmployee
+    getEmployee: getEmployee,
+    updateEmployee: updateEmployee
 };
 module.exports = employee;

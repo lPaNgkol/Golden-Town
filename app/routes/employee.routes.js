@@ -13,8 +13,12 @@ module.exports = function(app) {
     [authJwt.verifyToken],
     controller.employeeList
   );
-  app.get('/employee/:employeeId',
+  app.get('/employee/:employee_id',
     [authJwt.verifyToken],
     controller.employee 
+  );
+  app.post("/employee/:employee_id",
+    [authJwt.verifyToken], 
+    controller.employeeUpdate
   );
 };

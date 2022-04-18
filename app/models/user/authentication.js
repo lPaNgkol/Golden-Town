@@ -156,7 +156,7 @@ logout = (req, res) => {
     }else{
       if(req.user_id==decoded.id){
         const query = "DELETE FROM refresh_token WHERE user_id=$1"
-        const dataquery = [req.body.userId];
+        const dataquery = [req.body.user_id];
         db.query(query, dataquery).then((results) => {
           res.status(200).send({
             message: "Logout Complete."

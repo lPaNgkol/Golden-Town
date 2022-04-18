@@ -3,7 +3,7 @@ const employee = require("../../models/user/employee");
 // Get employee by companyId id
 exports.employeeList = async (req, res) => {
     var listEmployee = ""
-    if(!req.body.companyId){
+    if(!req.body.company_id){
         res.status(400).send({ message: "Company_Id cannot Be Null." });
     }
     listEmployee = await employee.listEmployee(req, res)
@@ -15,11 +15,10 @@ exports.employeeList = async (req, res) => {
     }
   };
 
-  
 // Get employee by id
 exports.employee = async (req, res) => {
     var employeeData = ""
-    if(!req.params.employeeId){
+    if(!req.params.employee_id){
         res.status(400).send({ message: "Employee Id cannot Be Null." });
     }
     employeeData = await employee.getEmployee(req, res)
@@ -27,5 +26,19 @@ exports.employee = async (req, res) => {
         res.status(404).send({ message: "Employee Not found." });
     }else{
         res.status(200).send({"employee": employeeData});
+    }
+};
+
+// update employee by id
+exports.employeeUpdate = async (req, res) => {
+    var employeeData = ""
+    if(!req.params.employee_id){
+        res.status(400).send({ message: "Employee Id cannot Be Null." });
+    }
+    employeeData = await employee.updateEmployee(req, res)
+    if (employeeData.length==0) {
+        res.status(404).send({ message: "Employee Not found." });
+    }else{
+        res.status(200).send({message: "Employee Update Complete"});
     }
 };
