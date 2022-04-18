@@ -13,7 +13,7 @@ module.exports = function(app) {
     [authJwt.verifyToken],
     controller.employeeList
   );
-  app.get('/employee/:employee_id',
+  app.get('/employee/:employeeId',
     [authJwt.verifyToken],
     controller.employee 
   );

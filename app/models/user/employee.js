@@ -64,25 +64,25 @@ function createAccount(req, res){
   var dateNow = aDatetime[0] + " " + aDatetime[1]
   const username = req.body.username
   const password = crypto.createHash('md5').update(req.body.password).digest("hex")
-  const employee_id = req.body.employee_id
+  const employee_id = req.body.employeeId
   const firstname = req.body.firstname
   const lastname = req.body.lastname
   const nickname = req.body.nickname
   const gender = req.body.gender=="ชาย" ? "M" : "F"
   const dob = req.body.dob
-  const job_start_date = req.body.job_start_date
-  const working_status = req.body.working_status
-  const position_id = req.body.position_id
-  const mobileno = req.body.mobileno
-  const company_id = req.body.company_id
-  const work_start_time = req.body.work_start_time
-  const work_end_time = req.body.work_end_time
-  const work_hours = req.body.work_hours
-  const imageurl = req.body.imageurl
+  const job_start_date = req.body.jobStartDate
+  const working_status = req.body.workingStatus
+  const position_id = req.body.positionId
+  const mobileno = req.body.mobileNo
+  const company_id = req.body.companyId
+  const work_start_time = req.body.workStartTime
+  const work_end_time = req.body.workEndTime
+  const work_hours = req.body.workHours
+  const imageurl = req.body.imageUrl
   const active = "T"
-  const createby = req.body.createby
+  const createby = req.body.createBy
   const createdate = dateNow
-  const updateby = req.body.updateby
+  const updateby = req.body.updateBy
   const updatedate = dateNow
   return new Promise(function(resolve){
     const query = `INSERT INTO users(username, password, employee_id, firstname, lastname, nickname,
@@ -145,7 +145,7 @@ function listEmployee(req, res){
                   INNER JOIN positions b on a.position_id=b.position_id
                   INNER JOIN company c on c.company_id=a.company_id
                   WHERE a.active=$1 AND c.company_id=$2`
-    let dataquery = ["T", req.body.company_id];
+    let dataquery = ["T", req.body.companyId];
     if(req.body.limit){
       query = query + " LIMIT $3"
       dataquery.push(req.body.limit)
@@ -177,7 +177,7 @@ function getEmployee(req, res){
                   INNER JOIN positions b on a.position_id=b.position_id
                   INNER JOIN company c on c.company_id=a.company_id
                   WHERE a.active=$1 AND UPPER(a.employee_id)=$2`
-    let dataquery = ["T", req.params.employee_id.toUpperCase()];
+    let dataquery = ["T", req.params.employeeId.toUpperCase()];
 
     console.log(query)
     console.log(dataquery)

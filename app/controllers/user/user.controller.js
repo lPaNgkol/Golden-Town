@@ -3,7 +3,6 @@ const config = require("../../config/auth.config");
 const authJwt = require("../../models/user/authentication");
 const employee = require("../../models/user/employee");
 var jwt = require("jsonwebtoken");
-var crypto = require('crypto');
 
 exports.signup = async (req, res) => {
   // Save User to Database
@@ -82,7 +81,6 @@ exports.refreshToken = async (req, res) => {
 };
 
 exports.logout = async (req, res) => {
-  // Save User to Database
   await authJwt.logout(req, res)
 };
 
