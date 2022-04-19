@@ -20,6 +20,7 @@ app.get("/", (req, res) => {
 require('./app/routes/attendance.routes')(app);
 require('./app/routes/user.routes')(app);
 require('./app/routes/employee.routes')(app);
+require('./app/routes/company.routes')(app);
 
 // set port, listen for requests
 const PORT = 3000;
