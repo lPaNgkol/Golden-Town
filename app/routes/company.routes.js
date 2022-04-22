@@ -1,3 +1,4 @@
+const companyModel = require("../models/company/company");
 const authJwt = require("../models/user/authentication");
 const controller = require("../controllers/company/company.controller");
 module.exports = function(app) {
@@ -21,7 +22,7 @@ module.exports = function(app) {
 //   );
   //add new company
   app.post("/company",
-    [authJwt.verifyToken], 
+    [authJwt.verifyToken,companyModel.checkDuplicateCompanyName], 
     controller.createCompany
   );
   //edit company

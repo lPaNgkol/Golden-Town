@@ -9,7 +9,7 @@ exports.employeeList = async (req, res) => {
     listEmployee = await employee.listEmployee(req, res)
     console.log(listEmployee)
     if (listEmployee.length==0) {
-        res.status(404).send({ message: "Employee Not found." });
+        res.status(404).send({ message: "Company Not found." });
     }else{
         res.status(200).send({"listEmployee": listEmployee, totalRow:listEmployee[0].total_row});
     }
@@ -18,8 +18,8 @@ exports.employeeList = async (req, res) => {
 // Get employee by id
 exports.employee = async (req, res) => {
     var employeeData = ""
-    if(!req.params.employee_id){
-        res.status(400).send({ message: "Employee Id cannot Be Null." });
+    if(!req.params.user_id){
+        res.status(400).send({ message: "User Id cannot Be Null." });
     }
     employeeData = await employee.getEmployee(req, res)
     if (employeeData.length==0) {
@@ -32,8 +32,8 @@ exports.employee = async (req, res) => {
 // update employee by id
 exports.employeeUpdate = async (req, res) => {
     var employeeData = ""
-    if(!req.params.employee_id){
-        res.status(400).send({ message: "Employee Id cannot Be Null." });
+    if(!req.params.user_id){
+        res.status(400).send({ message: "User Id cannot Be Null." });
     }
     employeeData = await employee.updateEmployee(req, res)
     if (employeeData.length==0) {

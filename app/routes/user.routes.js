@@ -14,6 +14,7 @@ module.exports = function(app) {
     [
       authJwt.verifyToken,
       employee.checkDuplicateUsername,
+      employee.checkDuplicateEmployeeId,
       employee.checkRolesExisted
     ],
     controller.signup

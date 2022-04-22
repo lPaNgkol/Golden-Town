@@ -1,18 +1,18 @@
 const company = require("../../models/company/company");
 
-// Get employee by companyId id
+// Get company List
 exports.companyList = async (req, res) => {
     var listCompany = ""
     listCompany = await company.companyList(req, res)
     console.log(listCompany)
     if (listCompany.length==0) {
-        res.status(404).send({ message: "Employee Not found." });
+        res.status(404).send({ message: "Company Id Not found." });
     }else{
         res.status(200).send({"listCompany": listCompany, totalRow:listCompany[0].total_row});
     }
   };
 
-// Get employee by id
+// create company
 exports.createCompany = async (req, res) => {
     var companyData = ""
     if(!req.body.company_name){
@@ -20,7 +20,7 @@ exports.createCompany = async (req, res) => {
     }
     companyData = await company.createCompany(req, res)
     if (companyData.length==0) {
-        res.status(404).send({ message: "Employee Not found." });
+        res.status(404).send({ message: "Company Id Not found." });
     }else{
         res.status(200).send({companyData});
     }

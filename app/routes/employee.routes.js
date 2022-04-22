@@ -1,4 +1,5 @@
 const authJwt = require("../models/user/authentication");
+const employee = require("../models/user/employee");
 const controller = require("../controllers/employee/employee.controller");
 module.exports = function(app) {
   app.use(function(req, res, next) {
@@ -13,12 +14,16 @@ module.exports = function(app) {
     [authJwt.verifyToken],
     controller.employeeList
   );
-  app.get('/employee/:employee_id',
+  app.get('/employee/:user_id',
     [authJwt.verifyToken],
     controller.employee 
   );
-  app.post("/employee/:employee_id",
-    [authJwt.verifyToken], 
+  app.post("/employee/:user_id",
+    [
+      authJwt.verifyToken,
+      employee.checkDuplicateUsername,
+      employee.checkDuplicateEmployeeId,
+    ], 
     controller.employeeUpdate
   );
 };

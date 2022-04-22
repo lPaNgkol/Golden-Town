@@ -20,6 +20,25 @@ checkDuplicateUsername = (req, res, next) => {
   });
 };
 
+checkDuplicateEmployeeId = (req, res, next) => {
+  // Username
+  const query = "SELECT * FROM users WHERE employee_id=$1 AND active=$2 ORDER BY user_id DESC"
+  const dataquery = [req.body.employee_id, "T"];
+  db.query(query, dataquery).then((results) => {
+    console.log("dupemployee")
+    console.log(results.rows)
+    if(results.rows.length>0){
+        var ret = {"code":400,"description":"Employee_Id already in use"}
+        res.status(400).json(ret)
+    }else{
+      next();
+    }
+  }).catch(error => {
+    res.status(500).send({
+      message: error.message
+    });
+  });
+};
 
 checkRolesExisted = (req, res, next) => {
   if (req.body.roles) {
@@ -170,19 +189,38 @@ function listEmployee(req, res){
 
 function getEmployee(req, res){
   return new Promise(function(resolve){
-    let query = `SELECT username, employee_id, user_id, firstname, lastname, nickname, gender,
-                      dob, job_start_date, working_status, a.position_id, mobileno, a.company_id, work_start_time,
-                      work_end_time, work_hours, imageurl, b.position_name, c.company_name, count(a.*) OVER() AS total_row
-                  FROM users a
-                  INNER JOIN positions b on a.position_id=b.position_id
-                  INNER JOIN company c on c.company_id=a.company_id
-                  WHERE a.active=$1 AND UPPER(a.employee_id)=$2`
-    let dataquery = ["T", req.params.employee_id.toUpperCase()];
-
-    console.log(query)
-    console.log(dataquery)
+    var date = new Date().toISOString().slice(0, 19);
+    aDatetime = String(date).split("T")
+    var dateNow = aDatetime[0] + " 00:00:00"
+    let query = `SELECT username, employee_id, a.user_id, firstname, lastname, nickname, gender
+                        dob, job_start_date, working_status, a.position_id, mobileno, a.company_id, work_start_time,
+                        work_end_time, work_hours, a.imageurl as profile_url, b.position_name, c.company_name, count(a.*) OVER() AS total_row
+                    FROM users a
+                    INNER JOIN positions b on a.position_id=b.position_id
+                    INNER JOIN company c on c.company_id=a.company_id
+                    WHERE a.active=$1 AND user_id=$2`
+    let dataquery = ["T", req.params.user_id];
     db.query(query, dataquery).then((results) => {
-      resolve(results.rows)
+      let returnData = results.rows[0]
+      let queryAttendance = `SELECT checkin_date, checkout_date
+                              FROM attendance
+                              WHERE active=$1 AND user_id=$2`
+      let attendanceDataQuery = ["T", req.params.user_id];
+      db.query(queryAttendance, attendanceDataQuery).then((results) => {
+        if(results.rows.length>0){
+          returnData['checkin_date'] = results.rows[0]['checkin_date']==undefined ? '' : results.rows[0]['checkin_date']
+          returnData['checkout_date'] = results.rows[0]['checkout_date']==undefined ? '' : results.rows[0]['checkout_date']
+        }else{
+          returnData['checkin_date'] = ''
+          returnData['checkout_date'] = ''
+        }
+        resolve(returnData)
+      })
+      .catch(error => {
+        res.status(500).send({
+          message: error.message
+        });
+      });
     })
     .catch(error => {
       res.status(500).send({
@@ -213,7 +251,8 @@ function updateEmployee(req, res){
   const active = req.body.active
   const updateby = req.body.updateby
   const updatedate = dateNow
-  const employee_id = req.params.employee_id
+  const employee_id = req.body.employee_id
+  const user_id = req.params.user_id
   
   return new Promise(function(resolve){
     const query = `UPDATE users
@@ -233,8 +272,9 @@ function updateEmployee(req, res){
                        imageurl=$14, 
                        active=$15, 
                        updateby=$16, 
-                       updatedate=$17
-                   WHERE UPPER(employee_id) = UPPER($18) 
+                       updatedate=$17,
+                       employee_id=$18
+                   WHERE user_id = $19
                    RETURNING user_id;`
     const dataquery = [firstname, 
                        lastname, 
@@ -253,7 +293,8 @@ function updateEmployee(req, res){
                        active,
                        updateby,
                        updatedate,
-                       employee_id];
+                       employee_id,
+                       user_id];
     db.query(query, dataquery).then((results) => {
       console.log(results.rows)
       resolve(results.rows[0])
@@ -272,6 +313,7 @@ const employee = {
     checkRolesExisted: checkRolesExisted,
     listEmployee: listEmployee,
     getEmployee: getEmployee,
-    updateEmployee: updateEmployee
+    updateEmployee: updateEmployee,
+    checkDuplicateEmployeeId: checkDuplicateEmployeeId
 };
 module.exports = employee;

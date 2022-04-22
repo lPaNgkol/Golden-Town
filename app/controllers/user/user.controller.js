@@ -44,7 +44,7 @@ exports.signin = async (req, res) => {
   }
   res.status(200).send({
     user_id: user.user_id,
-    employee_id: user.employeeid,
+    employee_id: user.employee_id,
     username: user.username,
     roles: authorities,
     accessToken: token,

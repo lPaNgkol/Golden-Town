@@ -47,7 +47,7 @@ isAdmin = (req, res, next) => {
 
 function signIn(req){
   return new Promise(function(resolve){
-    const query = "SELECT password, user_id FROM users WHERE username=$1 AND active=$2 ORDER BY user_id DESC"
+    const query = "SELECT password, user_id, username, employee_id FROM users WHERE UPPER(username)=UPPER($1) AND active=$2 ORDER BY user_id DESC"
     const dataquery = [req.body.username, "T"];
     db.query(query, dataquery).then((results) => {
       if(results.rows.length>0){

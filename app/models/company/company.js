@@ -1,6 +1,23 @@
 const db = require("../dbconnection");
 var format = require('pg-format');
 
+checkDuplicateCompanyName = (req, res, next) => {
+    const query = "SELECT * FROM company WHERE company_name=$1 AND active=$2 ORDER BY company_id DESC"
+    const dataquery = [req.body.company_name, "T"];
+    db.query(query, dataquery).then((results) => {
+      if(results.rows.length>0){
+          var ret = {"code":400,"description":"Company name already in use"}
+          res.status(400).json(ret)
+      }else{
+        next();
+      }
+    }).catch(error => {
+      res.status(500).send({
+        message: error.message
+      });
+    });
+  };
+
 function companyList(req, res){
     return new Promise(function(resolve){
       let query = `SELECT * FROM company WHERE active=$1`
@@ -58,6 +75,7 @@ function createCompany(req, res){
 
 const company = {
     companyList: companyList,
-    createCompany: createCompany
+    createCompany: createCompany,
+    checkDuplicateCompanyName:checkDuplicateCompanyName
 };
 module.exports = company;
