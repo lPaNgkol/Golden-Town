@@ -196,8 +196,8 @@ function getEmployee(req, res){
     aDatetime = String(date).split("T")
     var dateNow = aDatetime[0] + " 00:00:00"
     let query = `SELECT username, employee_id, a.user_id, firstname, lastname, nickname, gender, a.createdate, a.updatedate, a.updateby
-                        dob, job_start_date, working_status, a.position_id, mobileno, a.company_id, work_start_time, d.department_name, d.department_name,
-                        work_end_time, work_hours, a.imageurl as profile_url, b.position_name, c.company_name
+                        dob, job_start_date, working_status, a.position_id, mobileno, a.company_id, work_start_time + interval '15 minute' as late_work_start, d.department_name, d.department_name,
+                        work_end_time, work_hours, a.imageurl as profile_url, b.position_name, c.company_name, work_start_time
                     FROM users a
                     INNER JOIN positions b on a.position_id=b.position_id
                     INNER JOIN company c on c.company_id=a.company_id
@@ -209,7 +209,8 @@ function getEmployee(req, res){
       if(results.rows[0]!==undefined){
         let queryAttendance = `SELECT checkin_date, checkout_date
                                 FROM attendance
-                                WHERE active=$1 AND user_id=$2 AND checkin_date>=$3`
+                                WHERE active=$1 AND user_id=$2 AND checkin_date>=$3
+                                ORDER BY attendance_id DESC`
         let attendanceDataQuery = ["T", req.params.user_id, dateNow];
         db.query(queryAttendance, attendanceDataQuery).then((results) => {
           if(results.rows.length>0){
@@ -223,7 +224,7 @@ function getEmployee(req, res){
             var checkinTime = returnData['checkin_date']
             console.log(checkinTime);
             checkinTime = String(checkinTime).split(" ")
-            if(checkinTime[1] > returnData['work_start_time']){
+            if(checkinTime[1] > returnData['late_work_start']){
               returnData["attendance_status"] = "late"
             }else{
               returnData["attendance_status"] = "intime"
