@@ -23,6 +23,7 @@ require('./app/routes/attendance.routes')(app);
 require('./app/routes/user.routes')(app);
 require('./app/routes/employee.routes')(app);
 require('./app/routes/company.routes')(app);
+require('./app/routes/department.routes')(app);
 
 
 // set port, listen for requests
