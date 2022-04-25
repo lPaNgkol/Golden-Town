@@ -13,28 +13,28 @@ exports.attendanceList = async (req, res) => {
   };
 
 // Get employee by id
-exports.checkin = async (req, res) => {
+exports.attendance = async (req, res) => {
     var attendanceData = ""
     if(!req.params.user_id){
         res.status(400).send({ message: "User Id cannot Be Null." });
     }
-    attendanceData = await attendance.checkin(req, res)
-    if (attendanceData.length==0) {
-        res.status(404).send({ message: "Checkin Not Complete." });
+    if(!req.body.attendance_type){
+        res.status(400).send({ message: "Attendance type cannot Be Null." });
     }else{
-        res.status(200).send({"atttendance": attendanceData});
-    }
-};
-
-exports.checkout = async (req, res) => {
-    var attendanceData = ""
-    if(!req.params.user_id){
-        res.status(400).send({ message: "User Id cannot Be Null." });
-    }
-    attendanceData = await attendance.checkout(req, res)
-    if (attendanceData.length==0) {
-        res.status(404).send({ message: "Attendance Not found." });
-    }else{
-        res.status(200).send({"attendanceData": attendanceData});
+        if(req.body.attendance_type=="in"){
+            attendanceData = await attendance.checkin(req, res)
+            if (attendanceData.length==0) {
+                res.status(404).send({ message: "Checkin Not Complete." });
+            }else{
+                res.status(200).send({"atttendance": attendanceData});
+            }
+        }else{
+            attendanceData = await attendance.checkout(req, res)
+            if (attendanceData.length==0) {
+                res.status(404).send({ message: "Checkin Not Complete." });
+            }else{
+                res.status(200).send({"atttendance": attendanceData});
+            }
+        }
     }
 };

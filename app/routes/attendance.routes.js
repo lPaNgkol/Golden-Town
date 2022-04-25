@@ -13,15 +13,8 @@ module.exports = function(app) {
     [authJwt.verifyToken], 
     controller.attendanceList
   );
-  app.post("/attendance/checkin/:user_id",
+  app.post("/attendance/:user_id",
     [authJwt.verifyToken], 
-    controller.checkin
-  );
-  app.post("/attendance/checkout/:user_id",
-    [
-      authJwt.verifyToken,
-      attendanceModel.checkHasCheckin
-    ], 
-    controller.checkout
+    controller.attendance
   );
 };

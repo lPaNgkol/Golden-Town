@@ -91,12 +91,14 @@ function checkout(req, res){
     const checkout_location = req.body.checkout_location
     const updateby = req.body.updateby
     const updatedate = checkout_date
+    const feeling_today = req.body.feeling_today
     return new Promise(function(resolve){
       const query = `UPDATE attendance SET
                         checkout_date=$1,
                         checkout_location=$2,
-                        updateby=$3, 
-                        updatedate=$4
+                        updateby=$3,
+                        updatedate=$4,
+                        feeling_today=$6
                     WHERE user_id = $5
                     RETURNING attendance_id;
                     `
@@ -104,7 +106,8 @@ function checkout(req, res){
                          checkout_location,
                          updateby,
                          updatedate,
-                         user_id];
+                         user_id,
+                         feeling_today];
       db.query(query, dataquery).then((results) => {
           console.log(results.rows)
         resolve(results.rows)
