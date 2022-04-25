@@ -17,7 +17,7 @@ module.exports = function(app) {
     [authJwt.verifyToken],
     controller.createDepartment
   );
-  app.post("/department/:department_id",
+  app.put("/department/:department_id",
     [authJwt.verifyToken], 
     controller.updateDepartment
   );
