@@ -1,6 +1,7 @@
 const db = require("../dbconnection");
 var crypto = require('crypto');
 var format = require('pg-format');
+var moment = require('moment');
 
 checkDuplicateUsername = (req, res, next) => {
   // Username
@@ -78,7 +79,8 @@ checkRolesExisted = (req, res, next) => {
 };
 
 function createAccount(req, res){
-  var date = new Date().toISOString().slice(0, 19);
+  var time = moment();
+  var date = time.format('YYYY-MM-DDTHH:mm:ss');
   aDatetime = String(date).split("T")
   var dateNow = aDatetime[0] + " " + aDatetime[1]
   const username = req.body.username
@@ -189,23 +191,25 @@ function listEmployee(req, res){
 
 function getEmployee(req, res){
   return new Promise(function(resolve){
-    var date = new Date().toISOString().slice(0, 19);
+    var time = moment();
+    var date = time.format('YYYY-MM-DDTHH:mm:ss');
     aDatetime = String(date).split("T")
     var dateNow = aDatetime[0] + " 00:00:00"
-    let query = `SELECT username, employee_id, a.user_id, firstname, lastname, nickname, gender
-                        dob, job_start_date, working_status, a.position_id, mobileno, a.company_id, work_start_time,
-                        work_end_time, work_hours, a.imageurl as profile_url, b.position_name, c.company_name, count(a.*) OVER() AS total_row
+    let query = `SELECT username, employee_id, a.user_id, firstname, lastname, nickname, gender, a.createdate, a.updatedate, a.updateby
+                        dob, job_start_date, working_status, a.position_id, mobileno, a.company_id, work_start_time, d.department_name, d.department_name,
+                        work_end_time, work_hours, a.imageurl as profile_url, b.position_name, c.company_name
                     FROM users a
                     INNER JOIN positions b on a.position_id=b.position_id
                     INNER JOIN company c on c.company_id=a.company_id
+                    INNER JOIN department d on d.department_id=a.department_id
                     WHERE a.active=$1 AND user_id=$2`
     let dataquery = ["T", req.params.user_id];
     db.query(query, dataquery).then((results) => {
       let returnData = results.rows[0]
       let queryAttendance = `SELECT checkin_date, checkout_date
                               FROM attendance
-                              WHERE active=$1 AND user_id=$2`
-      let attendanceDataQuery = ["T", req.params.user_id];
+                              WHERE active=$1 AND user_id=$2 AND checkin_date>=$3`
+      let attendanceDataQuery = ["T", req.params.user_id, dateNow];
       db.query(queryAttendance, attendanceDataQuery).then((results) => {
         if(results.rows.length>0){
           returnData['checkin_date'] = results.rows[0]['checkin_date']==undefined ? '' : results.rows[0]['checkin_date']
@@ -213,6 +217,18 @@ function getEmployee(req, res){
         }else{
           returnData['checkin_date'] = ''
           returnData['checkout_date'] = ''
+        }
+        if(returnData['checkin_date']!=''){
+          var checkinTime = returnData['checkin_date']
+          console.log(checkinTime);
+          checkinTime = String(checkinTime).split(" ")
+          if(checkinTime[1] > returnData['work_start_time']){
+            returnData["attendance_status"] = "late"
+          }else{
+            returnData["attendance_status"] = "intime"
+          }
+        }else{
+          returnData["attendance_status"] = "notin"
         }
         resolve(returnData)
       })
@@ -231,7 +247,8 @@ function getEmployee(req, res){
 }
 
 function updateEmployee(req, res){
-  var date = new Date().toISOString().slice(0, 19);
+  var time = moment();
+  var date = time.format('YYYY-MM-DDTHH:mm:ss');
   aDatetime = String(date).split("T")
   var dateNow = aDatetime[0] + " " + aDatetime[1]
   const firstname = req.body.firstname

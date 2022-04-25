@@ -1,6 +1,7 @@
 const jwt = require("jsonwebtoken");
 const config = require("../../config/auth.config");
 const db = require("../../models/dbconnection");
+var moment = require('moment');
 const { v4: uuidv4 } = require("uuid");
 const User = db.users;
 const { TokenExpiredError } = jwt;
@@ -68,7 +69,8 @@ function createRefresh(userId){
   let expiredAt = new Date();
   expiredAt.setSeconds(expiredAt.getSeconds() + config.jwtRefreshExpiration);
   let _token = uuidv4();
-  var date = new Date().toISOString().slice(0, 19);
+  var time = moment();
+  var date = time.format('YYYY-MM-DDTHH:mm:ss');
   aDatetime = String(date).split("T")
   var dateNow = aDatetime[0] + " " + aDatetime[1]
   return new Promise(function(resolve){
@@ -112,7 +114,8 @@ function getRefreshToken(refresh_token){
       const dataquery = [refresh_token];
       db.query(query, dataquery).then(async (results) => {
         if(results.rows.length>0){
-          var date = new Date().toISOString().slice(0, 19);
+          var time = moment();
+          var date = time.format('YYYY-MM-DDTHH:mm:ss');
           aDatetime = String(date).split("T")
           var dateNow = aDatetime[0] + " " + aDatetime[1]
           var rows = results.rows

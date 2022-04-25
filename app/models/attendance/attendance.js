@@ -1,7 +1,9 @@
 const db = require("../dbconnection");
+var moment = require('moment');
 
 checkHasCheckin = (req, res, next) => {
-    var date = new Date().toISOString().slice(0, 19);
+    var time = moment();
+    var date = time.format('YYYY-MM-DDTHH:mm:ss');
     aDatetime = String(date).split("T")
     var dateNow = aDatetime[0] + " 00:00:00"
     const query = "SELECT * FROM attendance WHERE user_id=$1 AND active=$2 AND checkin_date>=$3 ORDER BY attendance_id DESC"
@@ -44,9 +46,11 @@ function attendanceList(req, res){
   }
 
 function checkin(req, res){
-    var date = new Date().toISOString().slice(0, 19);
+    var time = moment();
+    var date = time.format('YYYY-MM-DDTHH:mm:ss');
     aDatetime = String(date).split("T")
     var checkin_date = aDatetime[0] + " " + aDatetime[1]
+    console.log(checkin_date)
     const user_id = req.params.user_id
     const checkin_location = req.body.checkin_location
     const active = "T"
@@ -79,7 +83,8 @@ function checkin(req, res){
 }
 
 function checkout(req, res){
-    var date = new Date().toISOString().slice(0, 19);
+    var time = moment();
+    var date = time.format('YYYY-MM-DDTHH:mm:ss');
     aDatetime = String(date).split("T")
     var checkout_date = aDatetime[0] + " " + aDatetime[1]
     const user_id = req.params.user_id
@@ -101,6 +106,7 @@ function checkout(req, res){
                          updatedate,
                          user_id];
       db.query(query, dataquery).then((results) => {
+          console.log(results.rows)
         resolve(results.rows)
       })
       .catch(error => {

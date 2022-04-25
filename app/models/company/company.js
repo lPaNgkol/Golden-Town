@@ -1,5 +1,6 @@
 const db = require("../dbconnection");
 var format = require('pg-format');
+var moment = require('moment');
 
 checkDuplicateCompanyName = (req, res, next) => {
     const query = "SELECT * FROM company WHERE company_name=$1 AND active=$2 ORDER BY company_id DESC"
@@ -42,7 +43,8 @@ function companyList(req, res){
   }
 
 function createCompany(req, res){
-    var date = new Date().toISOString().slice(0, 19);
+    var time = moment();
+    var date = time.format('YYYY-MM-DDTHH:mm:ss');
     aDatetime = String(date).split("T")
     var dateNow = aDatetime[0] + " " + aDatetime[1]
     const company_name = req.body.company_name
