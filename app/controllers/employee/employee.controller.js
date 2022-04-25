@@ -22,7 +22,7 @@ exports.employee = async (req, res) => {
         res.status(400).send({ message: "User Id cannot Be Null." });
     }
     employeeData = await employee.getEmployee(req, res)
-    if (employeeData.length==0) {
+    if (employeeData===undefined) {
         res.status(404).send({ message: "Employee Not found." });
     }else{
         res.status(200).send({"employee": employeeData});

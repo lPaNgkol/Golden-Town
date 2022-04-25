@@ -206,37 +206,41 @@ function getEmployee(req, res){
     let dataquery = ["T", req.params.user_id];
     db.query(query, dataquery).then((results) => {
       let returnData = results.rows[0]
-      let queryAttendance = `SELECT checkin_date, checkout_date
-                              FROM attendance
-                              WHERE active=$1 AND user_id=$2 AND checkin_date>=$3`
-      let attendanceDataQuery = ["T", req.params.user_id, dateNow];
-      db.query(queryAttendance, attendanceDataQuery).then((results) => {
-        if(results.rows.length>0){
-          returnData['checkin_date'] = results.rows[0]['checkin_date']==undefined ? '' : results.rows[0]['checkin_date']
-          returnData['checkout_date'] = results.rows[0]['checkout_date']==undefined ? '' : results.rows[0]['checkout_date']
-        }else{
-          returnData['checkin_date'] = ''
-          returnData['checkout_date'] = ''
-        }
-        if(returnData['checkin_date']!=''){
-          var checkinTime = returnData['checkin_date']
-          console.log(checkinTime);
-          checkinTime = String(checkinTime).split(" ")
-          if(checkinTime[1] > returnData['work_start_time']){
-            returnData["attendance_status"] = "late"
+      if(results.rows[0]!==undefined){
+        let queryAttendance = `SELECT checkin_date, checkout_date
+                                FROM attendance
+                                WHERE active=$1 AND user_id=$2 AND checkin_date>=$3`
+        let attendanceDataQuery = ["T", req.params.user_id, dateNow];
+        db.query(queryAttendance, attendanceDataQuery).then((results) => {
+          if(results.rows.length>0){
+            returnData['checkin_date'] = results.rows[0]['checkin_date']==undefined ? '' : results.rows[0]['checkin_date']
+            returnData['checkout_date'] = results.rows[0]['checkout_date']==undefined ? '' : results.rows[0]['checkout_date']
           }else{
-            returnData["attendance_status"] = "intime"
+            returnData['checkin_date'] = ''
+            returnData['checkout_date'] = ''
           }
-        }else{
-          returnData["attendance_status"] = "notin"
-        }
-        resolve(returnData)
-      })
-      .catch(error => {
-        res.status(500).send({
-          message: error.message
+          if(returnData['checkin_date']!=''){
+            var checkinTime = returnData['checkin_date']
+            console.log(checkinTime);
+            checkinTime = String(checkinTime).split(" ")
+            if(checkinTime[1] > returnData['work_start_time']){
+              returnData["attendance_status"] = "late"
+            }else{
+              returnData["attendance_status"] = "intime"
+            }
+          }else{
+            returnData["attendance_status"] = "notin"
+          }
+          resolve(returnData)
+        })
+        .catch(error => {
+          res.status(500).send({
+            message: error.message
+          });
         });
-      });
+      }else{
+        resolve(returnData)
+      }
     })
     .catch(error => {
       res.status(500).send({
