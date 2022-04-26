@@ -52,7 +52,18 @@ function signIn(req){
     const dataquery = [req.body.username, "T"];
     db.query(query, dataquery).then((results) => {
       if(results.rows.length>0){
-        resolve(results.rows)
+        var time = moment();
+        var date = time.format('YYYY-MM-DD HH:mm:ss');
+        const queryLogin = "UPDATE users SET last_login=$1 WHERE user_id=$2"
+        const dataqueryLogin = [date, results.rows[0]['user_id']];
+        db.query(queryLogin, dataqueryLogin).then(() => {
+          resolve(results.rows)
+        })
+        .catch(error => {
+          res.status(500).send({
+            message: error.message
+          });
+        });
       }else{
         resolve(results.rows)
       }
@@ -157,7 +168,7 @@ logout = (req, res) => {
         message: err
       });
     }else{
-      if(req.user_id==decoded.id){
+      if(req.body.user_id==decoded.id){
         const query = "DELETE FROM refresh_token WHERE user_id=$1"
         const dataquery = [req.body.user_id];
         db.query(query, dataquery).then((results) => {

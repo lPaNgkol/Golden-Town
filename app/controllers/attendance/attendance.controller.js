@@ -22,18 +22,31 @@ exports.attendance = async (req, res) => {
         res.status(400).send({ message: "Attendance type cannot Be Null." });
     }else{
         if(req.body.attendance_type=="in"){
-            attendanceData = await attendance.checkin(req, res)
-            if (attendanceData.length==0) {
-                res.status(404).send({ message: "Checkin Not Complete." });
-            }else{
-                res.status(200).send({"atttendance": attendanceData});
+            var notCheckin = await attendance.checkHasCheckin(req, res)
+            console.log(notCheckin)
+            if(notCheckin){
+                attendanceData = await attendance.checkin(req, res)
+                if (attendanceData.length==0) {
+                    res.status(404).send({ message: "Checkin Not Complete." });
+                }else{
+                    res.status(200).send({"atttendance": attendanceData});
+                }
             }
         }else{
-            attendanceData = await attendance.checkout(req, res)
-            if (attendanceData.length==0) {
-                res.status(404).send({ message: "Checkin Not Complete." });
-            }else{
-                res.status(200).send({"atttendance": attendanceData});
+            var notCheckout = false
+            var canCheckout = await attendance.checkCanCheckOut(req, res)
+            if(canCheckout){
+                notCheckout = await attendance.checkHasCheckout(req, res)
+            }
+            console.log(canCheckout)
+            console.log(notCheckout)
+            if(canCheckout==true && notCheckout==true){
+                attendanceData = await attendance.checkout(req, res)
+                if (attendanceData.length==0) {
+                    res.status(404).send({ message: "Checkin Not Complete." });
+                }else{
+                    res.status(200).send({"atttendance": attendanceData});
+                }
             }
         }
     }

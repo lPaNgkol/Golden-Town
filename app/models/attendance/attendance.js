@@ -1,26 +1,75 @@
 const db = require("../dbconnection");
 var moment = require('moment');
 
-checkHasCheckin = (req, res, next) => {
-    var time = moment();
-    var date = time.format('YYYY-MM-DDTHH:mm:ss');
-    aDatetime = String(date).split("T")
-    var dateNow = aDatetime[0] + " 00:00:00"
-    const query = "SELECT * FROM attendance WHERE user_id=$1 AND active=$2 AND checkin_date>=$3 ORDER BY attendance_id DESC"
-    const dataquery = [req.params.user_id, "T", dateNow];
-    db.query(query, dataquery).then((results) => {
-      if(results.rows.length<0){
-          var ret = {"code":400,"description":"Checkin Not Found"}
-          res.status(400).json(ret)
-      }else{
-        next();
-      }
-    }).catch(error => {
-      res.status(500).send({
-        message: error.message
-      });
-    });
-  };
+function checkHasCheckin (req, res){
+    return new Promise(function(resolve){
+        var time = moment();
+        var date = time.format('YYYY-MM-DDTHH:mm:ss');
+        aDatetime = String(date).split("T")
+        var dateNow = aDatetime[0] + " 00:00:00"
+        const query = "SELECT * FROM attendance WHERE user_id=$1 AND active=$2 AND checkin_date>=$3 ORDER BY attendance_id DESC"
+        const dataquery = [req.params.user_id, "T", dateNow];
+        db.query(query, dataquery).then((results) => {
+            if(results.rows.length>0){
+                var ret = {"code":400,"description":"Already Checkin Today"}
+                res.status(400).json(ret)
+            }else{
+                resolve(true)
+            }
+            }).catch(error => {
+            res.status(500).send({
+                message: error.message
+            });
+        });
+    })
+};
+
+function checkCanCheckOut(req, res){
+    return new Promise(function(resolve){
+        var time = moment();
+        var date = time.format('YYYY-MM-DDTHH:mm:ss');
+        aDatetime = String(date).split("T")
+        var dateNow = aDatetime[0] + " 00:00:00"
+        const query = "SELECT * FROM attendance WHERE user_id=$1 AND active=$2 AND checkin_date>=$3 ORDER BY attendance_id DESC"
+        const dataquery = [req.params.user_id, "T", dateNow];
+        db.query(query, dataquery).then((results) => {
+            console.log(results.rows)
+            if(results.rows.length==0){
+                var ret = {"code":400,"description":"Checkin Not Found"}
+                res.status(400).json(ret)
+            }else{
+                resolve(true)
+            }
+            }).catch(error => {
+                res.status(500).send({
+                    message: error.message
+            });
+        });
+    })
+};
+
+function checkHasCheckout(req, res){
+    return new Promise(function(resolve){
+        var time = moment();
+        var date = time.format('YYYY-MM-DDTHH:mm:ss');
+        aDatetime = String(date).split("T")
+        var dateNow = aDatetime[0] + " 00:00:00"
+        const query = "SELECT * FROM attendance WHERE user_id=$1 AND active=$2 AND checkout_date>=$3 ORDER BY attendance_id DESC"
+        const dataquery = [req.params.user_id, "T", dateNow];
+        db.query(query, dataquery).then((results) => {
+            if(results.rows.length>0){
+                var ret = {"code":400,"description":"Already Checkout Today"}
+                res.status(400).json(ret)
+            }else{
+                resolve(true)
+            }
+            }).catch(error => {
+                res.status(500).send({
+                    message: error.message
+            });
+        });
+    })
+};
 
 function attendanceList(req, res){
     return new Promise(function(resolve){
@@ -92,6 +141,8 @@ function checkout(req, res){
     const updateby = req.body.updateby
     const updatedate = checkout_date
     const feeling_today = req.body.feeling_today
+
+    var today = time.format('YYYY-MM-DD') + " 00:00:00";
     return new Promise(function(resolve){
       const query = `UPDATE attendance SET
                         checkout_date=$1,
@@ -99,7 +150,7 @@ function checkout(req, res){
                         updateby=$3,
                         updatedate=$4,
                         feeling_today=$6
-                    WHERE user_id = $5
+                    WHERE user_id = $5 AND checkin_date>=$7
                     RETURNING attendance_id;
                     `
       const dataquery = [checkout_date, 
@@ -107,7 +158,8 @@ function checkout(req, res){
                          updateby,
                          updatedate,
                          user_id,
-                         feeling_today];
+                         feeling_today,
+                         today];
       db.query(query, dataquery).then((results) => {
           console.log(results.rows)
         resolve(results.rows)
@@ -124,6 +176,8 @@ const attendance = {
     attendanceList: attendanceList,
     checkHasCheckin: checkHasCheckin,
     checkin:checkin,
-    checkout:checkout
+    checkout:checkout,
+    checkCanCheckOut:checkCanCheckOut,
+    checkHasCheckout:checkHasCheckout
 };
 module.exports = attendance;

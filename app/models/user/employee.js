@@ -195,8 +195,8 @@ function getEmployee(req, res){
     var date = time.format('YYYY-MM-DDTHH:mm:ss');
     aDatetime = String(date).split("T")
     var dateNow = aDatetime[0] + " 00:00:00"
-    let query = `SELECT username, employee_id, a.user_id, firstname, lastname, nickname, gender, a.createdate, a.updatedate, a.updateby
-                        dob, job_start_date, working_status, a.position_id, mobileno, a.company_id, work_start_time + interval '15 minute' as late_work_start, d.department_name, d.department_name,
+    let query = `SELECT username, employee_id, a.user_id, firstname, lastname, nickname, gender, a.createdate, a.updatedate, a.updateby, a.last_login,
+                        dob, job_start_date, working_status, a.position_id, mobileno, a.company_id, work_start_time + interval '15 minute' as late_work_start, d.department_id, d.department_name,
                         work_end_time, work_hours, a.imageurl as profile_url, b.position_name, c.company_name, work_start_time
                     FROM users a
                     INNER JOIN positions b on a.position_id=b.position_id
