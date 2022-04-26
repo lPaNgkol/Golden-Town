@@ -4,16 +4,7 @@ var format = require('pg-format');
 function departmentList(req, res){
     return new Promise(function(resolve){
       let query = `SELECT * FROM department`
-      let dataquery = ["T"];
-      if(req.body.limit){
-        query = query + " LIMIT $2"
-        dataquery.push(req.body.limit)
-      }
-      if(req.body.offset){
-        query = query + " OFFSET $3"
-        dataquery.push(req.body.offset)
-      }
-      db.query(query, dataquery).then((results) => {
+      db.query(query).then((results) => {
         resolve(results.rows)
       })
       .catch(error => {
