@@ -8,7 +8,19 @@ exports.departmentList = async (req, res) => {
     if (listDepartment.length==0) {
         res.status(404).send({ message: "Department Not found." });
     }else{
-        res.status(200).send({"listDepartment": listDepartment, totalRow:listDepartment[0].total_row});
+        res.status(200).send({"listDepartment": listDepartment});
+    }
+  };
+
+  // Get department by Id
+  exports.departmentById = async (req, res) => {
+    var DepartmentId = ""
+    DepartmentId = await department.departmentById(req, res)
+    console.log(DepartmentId)
+    if (DepartmentId.length==0) {
+        res.status(404).send({ message: "Department Not found." });
+    }else{
+        res.status(200).send({"DepartmentId": DepartmentId});
     }
   };
 
@@ -22,7 +34,7 @@ exports.createDepartment = async (req, res) => {
     if (departmentData.length==0) {
         res.status(404).send({ message: "department Not found." });
     }else{
-        res.status(200).send({departmentData});
+        res.status(200).send({massage: "Department Update Complete", departmentData});
     }
 };
 
@@ -51,8 +63,8 @@ exports.deleteDepartment = async (req, res) => {
     }
     departmentData = await department.deleteDepartment(req, res)
     if (departmentData.length==0) {
-        res.status(404).send({ message: "Department Not found." });
+        res.status(404).send({ message: "Department ID Not Found." });
     }else{
-        res.status(200).send({message: "Department delete Complete"});
+        res.status(200).send({message: "Success"});
     }
 };
