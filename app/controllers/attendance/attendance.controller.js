@@ -29,7 +29,7 @@ exports.attendance = async (req, res) => {
                 if (attendanceData.length==0) {
                     res.status(404).send({ message: "Checkin Not Complete." });
                 }else{
-                    res.status(200).send({"atttendance": attendanceData});
+                    res.status(200).send({"attendance": attendanceData});
                 }
             }
         }else{
@@ -45,7 +45,7 @@ exports.attendance = async (req, res) => {
                 if (attendanceData.length==0) {
                     res.status(404).send({ message: "Checkin Not Complete." });
                 }else{
-                    res.status(200).send({"atttendance": attendanceData});
+                    res.status(200).send({"attendance": attendanceData});
                 }
             }
         }

@@ -121,6 +121,9 @@ function checkin(req, res){
                          updateby,
                          updatedate];
       db.query(query, dataquery).then((results) => {
+        if(results.rows[0]!==undefined){
+            results.rows[0]["checkin_date"] = checkin_date
+        }
         resolve(results.rows)
       })
       .catch(error => {
@@ -161,7 +164,10 @@ function checkout(req, res){
                          feeling_today,
                          today];
       db.query(query, dataquery).then((results) => {
-          console.log(results.rows)
+        console.log(results.rows)
+        if(results.rows[0]!==undefined){
+            results.rows[0]["checkout_date"] = checkout_date
+        }
         resolve(results.rows)
       })
       .catch(error => {
