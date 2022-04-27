@@ -13,6 +13,13 @@ module.exports = function(app) {
     [authJwt.verifyToken],
     controller.departmentList
   );
+
+  app.get(
+    "/department/:company_id",
+    [authJwt.verifyToken],
+    controller.departmentById
+    );
+
   app.post("/department/:department_id",
     [authJwt.verifyToken],
     controller.createDepartment
