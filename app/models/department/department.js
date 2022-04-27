@@ -97,7 +97,7 @@ function createDepartment(req, res) {
   return new Promise(async (resolve) => {
     try {
       let deleteDepartment = req.param.department_id;
-      const data = await db.query(`DELETE FROM department WHERE department_id = $1`, [deleteDepartment]);
+      const data = await db.query(`DELETE FROM department WHERE department_id = ${deleteDepart}`, [deleteDepart]);
       let results = data.rows;
     }
     catch (error) {
