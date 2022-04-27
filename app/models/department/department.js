@@ -1,105 +1,115 @@
 const db = require("../dbconnection");
 var format = require('pg-format');
 
-function departmentList(req, res){
-    return new Promise(function(resolve){
-      let query = `SELECT * FROM department`
-      let dataquery = ["T"];
-      if(req.body.limit){
-        query = query + " LIMIT $2"
-        dataquery.push(req.body.limit)
-      }
-      if(req.body.offset){
-        query = query + " OFFSET $3"
-        dataquery.push(req.body.offset)
-      }
-      db.query(query, dataquery).then((results) => {
-        resolve(results.rows)
+function departmentList(req, res) {
+  return new Promise(async (resolve) => {
+    try {
+      const data = await db.query(
+        `SELECT * FROM department ORDER BY department_id ASC`
+      );
+      let results = data.rows;
+      return resolve(results);
+    } catch (error) {
+      res.status(500).send({
+        message: error.message,
+      });
+    }
+  });
+}
+
+function departmentById(req, res) {
+  return new Promise(async (resolve) => {
+    try {
+      let companyId = req.params.company_id;
+      const data = await db.query(
+        `SELECT department_id, department_name FROM department WHERE company_id = $1 ORDER BY department_id ASC`,
+        [companyId]
+      );
+      let results = data.rows;
+      return resolve(results);
+    } catch (error) {
+      console.error("### Error ", error);
+      return resolve(error);
+    }
+  });
+}
+
+function createDepartment(req, res) {
+
+      return new Promise(async (resolve) => {
+        try {
+          aDatetime = String(Date).split("T")
+          var dateNow = aDatetime[0] + " " + aDatetime[1]
+          const department_name = req.body.department_name;
+          const createby = req.body.createby;
+          const createdate = dateNow;
+          const updateby = req.body.updateby;
+          const updatedate = dateNow;
+          const data = await db.query(
+            `INSERT INTO department(department_name, createby, createdate, updateby, updatedate) 
+            VALUES ($1, $2, $3, $4, $5) RETURNING department_id`,
+            [department_name,
+              createby,
+              createdate,
+              updateby,
+              updatedate,]
+          );
+          let results = data.rows;
+          return resolve(results);
+        } catch (error) {
+          console.error("### Error ", error);
+          return resolve(error);
+        }
+      });
+    }
+
+   function updateDepartment(req, res) {
+  var time = moment();
+  var date = time.format('YYYY-MM-DDTHH:mm:ss');
+  aDatetime = String(date).split("T")
+  var dateNow = aDatetime[0] + " " + aDatetime[1]
+  const department_name = req.body.departmentname;
+
+  const updateby = req.body.updateby;
+  const updatedate = dateNow;
+  const department_id = req.params.department_id;
+
+  return new Promise(function (resolve) {
+    const query = `UPDATE department
+                     SET department_name=$1, updateby=$2, updatedate=$3,
+                     WHERE UPPER(department_id) = UPPER($4) 
+                     RETURNING department_id;`;
+    const dataquery = [department_name, updateby, updatedate, department_id];
+    db.query(query, dataquery)
+      .then((results) => {
+        console.log(results.rows);
+        resolve(results.rows[0]);
       })
-      .catch(error => {
+      .catch((error) => {
         res.status(500).send({
-          message: error.message
+          message: error.message,
         });
       });
-    })
-  }
+  });
+}
 
-function createDepartment(req, res){
-    var Date = new Date().toISOString().slice(0, 19);
-    aDatetime = String(date).split("T")
-    var dateNow = aDatetime[0] + " " + aDatetime[1]
-    const department_name = req.body.department_name
-    const createby = req.body.createby
-    const createdate = dateNow
-    const updateby = req.body.updateby
-    const updatedate = dateNow
-    return new Promise(function(resolve){
-      const query = `INSERT INTO department(department_name, createby, createdate, updateby, updatedate) 
-                     VALUES ($1, $2, $3, $4, $5) RETURNING department_id;`
-      const dataquery = [department_name, 
-                         createby,
-                         createdate,
-                         updateby,
-                         updatedate];
-      db.query(query, dataquery).then((results) => {
-        resolve(results.rows)
-      })
-      .catch(error => {
-        res.status(500).send({
-          message: error.message
-        });
-      });
-    })
-  }
-
-  function updateDepartment(req, res){
-    var date = new Date().toISOString().slice(0, 19);
-    aDatetime = String(date).split("T")
-    var dateNow = aDatetime[0] + " " + aDatetime[1]
-    const department_name = req.body.departmentname
-    const createby = req.body.createby
-    const createdate = dateNow
-    const updateby = req.body.updateby
-    const updatedate = dateNow
-    const department_id = req.params.department_id
-    
-    return new Promise(function(resolve){
-      const query = `UPDATE department
-                     SET department_name=$1, createby=$2, createdate=$3, updateby=$4, updatedate=$5,
-                     WHERE UPPER(department_id) = UPPER($6) 
-                     RETURNING department_id;`
-      const dataquery = [department_name, 
-                          createby,
-        createdate,
-        updateby,
-        updatedate,
-      department_id];
-      db.query(query, dataquery).then((results) => {
-        console.log(results.rows)
-        resolve(results.rows[0])
-      })
-      .catch(error => {
-        res.status(500).send({
-          message: error.message
-        });
-      });
-    })
-  }
-
-  function deleteDepartment(req, res){
-        const id = parseInt(request.params.department_id)
-        pool.query('DELETE FROM department WHERE department_id = $1', [id] = {
-        })
-          .catch(error => {
-            res.status(500).send({
-              message: error.message
-            });
-          });
-      }
-
+ function deleteDepartment(req, res) {
+  return new Promise(async (resolve) => {
+    try {
+      let deleteDepartment = req.param.department_id;
+      const data = await db.query(`DELETE FROM department WHERE department_id = $1`, [deleteDepartment]);
+      let results = data.rows;
+    }
+    catch (error) {
+      console.error("### Error ", error);
+      return resolve(error);
+    }
+  });
+}
 
 const department = {
   departmentList: departmentList,
+  departmentById: departmentById,
   createDepartment: createDepartment,
   updateDepartment: updateDepartment,
   deleteDepartment: deleteDepartment,
