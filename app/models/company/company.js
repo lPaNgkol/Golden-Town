@@ -7,13 +7,14 @@ checkDuplicateCompanyName = (req, res, next) => {
     const dataquery = [req.body.company_name, "T"];
     db.query(query, dataquery).then((results) => {
       if(results.rows.length>0){
-          var ret = {"code":"WECO001", "description":"Company name already in use"}
+          var ret = {"code":"WECO001", "message":"Company name already in use"}
           res.status(200).json(ret)
       }else{
         next();
       }
     }).catch(error => {
       res.status(500).send({
+        code:"WECO500",
         message: error.message
       });
     });
@@ -36,6 +37,7 @@ function companyList(req, res){
       })
       .catch(error => {
         res.status(500).send({
+          code:"WECO500",
           message: error.message
         });
       });
@@ -69,6 +71,7 @@ function createCompany(req, res){
       })
       .catch(error => {
         res.status(500).send({
+          code:"WECO500",
           message: error.message
         });
       });

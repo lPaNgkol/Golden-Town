@@ -8,7 +8,7 @@ exports.attendanceList = async (req, res) => {
     if (listAttendance.length==0) {
         res.status(200).send({code:"WEAT001", message: "Attendance Not found." });
     }else{
-        res.status(200).send({"listAttendance": listAttendance, totalRow:listEmployee[0].total_row});
+        res.status(200).send({code:"WEAT200", "listAttendance": listAttendance, totalRow:listEmployee[0].total_row});
     }
   };
 
@@ -27,9 +27,9 @@ exports.attendance = async (req, res) => {
             if(notCheckin){
                 attendanceData = await attendance.checkin(req, res)
                 if (attendanceData.length==0) {
-                    res.status(404).send({ message: "Checkin Not Complete." });
+                    res.status(404).send({code:"WEAT404", message: "Checkin Not Complete." });
                 }else{
-                    res.status(200).send({"attendance": attendanceData});
+                    res.status(200).send({code:"WEAT200", "attendance": attendanceData});
                 }
             }
         }else{
@@ -43,9 +43,9 @@ exports.attendance = async (req, res) => {
             if(canCheckout==true && notCheckout==true){
                 attendanceData = await attendance.checkout(req, res)
                 if (attendanceData.length==0) {
-                    res.status(404).send({ message: "Checkin Not Complete." });
+                    res.status(404).send({code:"WEAT404", message: "Checkin Not Complete." });
                 }else{
-                    res.status(200).send({"attendance": attendanceData});
+                    res.status(200).send({code:"WEAT200", "attendance": attendanceData});
                 }
             }
         }

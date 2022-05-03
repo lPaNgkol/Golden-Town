@@ -35,13 +35,14 @@ isAdmin = (req, res, next) => {
   db.query(query, dataquery).then((results) => {
     console.log(results.rows)
     if(results.rows.length<=0){
-        var ret = {"code":400,"description":"Missing Permission"}
-        res.status(400).json(ret)
+        var ret = {code:"WEAU400","message":"Missing Permission"}
+        res.status(200).json(ret)
     }else{
       next();
     }
   }).catch(error => {
     res.status(500).send({
+      code:"WEAU500",
       message: error.message
     });
   });
@@ -62,6 +63,7 @@ function signIn(req){
         })
         .catch(error => {
           res.status(500).send({
+            code:"WEAU500",
             message: error.message
           });
         });
@@ -71,6 +73,7 @@ function signIn(req){
     })
     .catch(error => {
       res.status(500).send({
+        code:"WEAU500",
         message: error.message
       });
     });
@@ -93,6 +96,7 @@ function createRefresh(userId){
     })
     .catch(error => {
       res.status(500).send({
+        code:"WEAU500",
         message: error.message
       });
     });
@@ -111,6 +115,7 @@ function getRoles(userId){
         }
     }).catch(error => {
       res.status(500).send({
+        code:"WEAU500",
         message: error.message
       });
     });
@@ -154,6 +159,7 @@ function getRefreshToken(refresh_token){
         }
       }).catch(error => {
         res.status(500).send({
+          code:"WEAU500",
           message: error.message
         });
       });
@@ -166,6 +172,7 @@ logout = (req, res) => {
   jwt.verify(token, config.secret, (err, decoded) => {
     if (err) {
       res.status(500).send({
+        code:"WEAU500",
         message: err
       });
     }else{
@@ -174,15 +181,18 @@ logout = (req, res) => {
         const dataquery = [req.body.user_id];
         db.query(query, dataquery).then((results) => {
           res.status(200).send({
+            code:"WEAU200",
             message: "Logout Complete."
           });
         }).catch(error => {
           res.status(500).send({
+            code:"WEAU500",
             message: error.message
           });
         });
       }else{
         res.status(500).send({
+          code:"WEAU500",
           message: "Token not match user"
         });
       }

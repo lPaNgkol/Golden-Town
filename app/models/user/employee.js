@@ -9,13 +9,14 @@ checkDuplicateUsername = (req, res, next) => {
   const dataquery = [req.body.username, "T"];
   db.query(query, dataquery).then((results) => {
     if(results.rows.length>0){
-        var ret = {"code":"WEEM001","description":"Username already in use"}
+        var ret = {"code":"WEEM001","message":"Username already in use"}
         res.status(200).json(ret)
     }else{
       next();
     }
   }).catch(error => {
     res.status(500).send({
+      code:"WEEM500",
       message: error.message
     });
   });
@@ -29,13 +30,14 @@ checkDuplicateEmployeeId = (req, res, next) => {
     console.log("dupemployee")
     console.log(results.rows)
     if(results.rows.length>0){
-        var ret = {"code":"WEEM002","description":"Employee_Id already in use"}
+        var ret = {"code":"WEEM002","message":"Employee_Id already in use"}
         res.status(200).json(ret)
     }else{
       next();
     }
   }).catch(error => {
     res.status(500).send({
+      code:"WEEM500",
       message: error.message
     });
   });
@@ -54,7 +56,7 @@ checkRolesExisted = (req, res, next) => {
           var indexOfRole = req.body.roles.indexOf(results.rows[i].role_id)
           console.log(indexOfRole);
           if(indexOfRole<0){
-            var ret = {"code":"WEEM001", "description":"Failed! Role does not exist"}
+            var ret = {"code":"WEEM001", "message":"Failed! Role does not exist"}
             res.status(200).json(ret)
             findError = true
             break
@@ -65,11 +67,13 @@ checkRolesExisted = (req, res, next) => {
         }
       }else{
         res.status(500).send({
+          code:"WEEM500",
           message: "Internal error"
         });
       }
     }).catch(error => {
       res.status(500).send({
+        code:"WEEM500",
         message: error.message
       });
     });
@@ -144,12 +148,14 @@ function createAccount(req, res){
       })
       .catch(error => {
         res.status(500).send({
+          code:"WEEM500",
           message: error.message
         });
       });
     })
     .catch(error => {
       res.status(500).send({
+        code:"WEEM500",
         message: error.message
       });
     });
@@ -183,6 +189,7 @@ function listEmployee(req, res){
     })
     .catch(error => {
       res.status(500).send({
+        code:"WEEM500",
         message: error.message
       });
     });
@@ -236,6 +243,7 @@ function getEmployee(req, res){
         })
         .catch(error => {
           res.status(500).send({
+            code:"WEEM500",
             message: error.message
           });
         });
@@ -245,6 +253,7 @@ function getEmployee(req, res){
     })
     .catch(error => {
       res.status(500).send({
+        code:"WEEM500",
         message: error.message
       });
     });
@@ -323,6 +332,7 @@ function updateEmployee(req, res){
     })
     .catch(error => {
       res.status(500).send({
+        code:"WEEM500",
         message: error.message
       });
     });

@@ -6,9 +6,9 @@ exports.companyList = async (req, res) => {
     listCompany = await company.companyList(req, res)
     console.log(listCompany)
     if (listCompany.length==0) {
-        res.status(404).send({ message: "Company Id Not found." });
+        res.status(404).send({code:"WECO404", message: "Company Id Not found." });
     }else{
-        res.status(200).send({"listCompany": listCompany, totalRow:listCompany[0].total_row});
+        res.status(200).send({code:"WECO200", "listCompany": listCompany, totalRow:listCompany[0].total_row});
     }
   };
 
@@ -16,13 +16,13 @@ exports.companyList = async (req, res) => {
 exports.createCompany = async (req, res) => {
     var companyData = ""
     if(!req.body.company_name){
-        res.status(400).send({ message: "company_name cannot Be Null." });
+        res.status(200).send({code:"WECO002", message: "Company name cannot be Null." });
     }
     companyData = await company.createCompany(req, res)
     if (companyData.length==0) {
-        res.status(404).send({ message: "Company Id Not found." });
+        res.status(404).send({code:"WECO404", message: "Company Id Not found." });
     }else{
-        res.status(200).send({companyData});
+        res.status(200).send({code:"WECO200", companyData});
     }
 };
 

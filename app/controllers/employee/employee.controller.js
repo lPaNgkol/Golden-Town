@@ -9,9 +9,9 @@ exports.employeeList = async (req, res) => {
     listEmployee = await employee.listEmployee(req, res)
     console.log(listEmployee)
     if (listEmployee.length==0) {
-        res.status(404).send({ message: "Company Not found." });
+        res.status(404).send({code:"WEEM404", message: "Company Not found." });
     }else{
-        res.status(200).send({"listEmployee": listEmployee, totalRow:listEmployee[0].total_row});
+        res.status(200).send({code:"WEEM200", "listEmployee": listEmployee, totalRow:listEmployee[0].total_row});
     }
   };
 
@@ -23,9 +23,9 @@ exports.employee = async (req, res) => {
     }
     employeeData = await employee.getEmployee(req, res)
     if (employeeData===undefined) {
-        res.status(404).send({ message: "Employee Not found." });
+        res.status(404).send({code:"WEEM404", message: "Employee Not found." });
     }else{
-        res.status(200).send({"employee": employeeData});
+        res.status(200).send({code:"WEEM200", "employee": employeeData});
     }
 };
 
@@ -37,8 +37,8 @@ exports.employeeUpdate = async (req, res) => {
     }
     employeeData = await employee.updateEmployee(req, res)
     if (employeeData.length==0) {
-        res.status(404).send({ message: "Employee Not found." });
+        res.status(404).send({code:"WEEM200", message: "Employee Not found." });
     }else{
-        res.status(200).send({message: "Employee Update Complete"});
+        res.status(200).send({code:"WEEM200", message: "Employee Update Complete"});
     }
 };
