@@ -6,7 +6,7 @@ exports.attendanceList = async (req, res) => {
     listAttendance = await attendance.listAttendance(req, res)
     console.log(listAttendance)
     if (listAttendance.length==0) {
-        res.status(404).send({ message: "Attendance Not found." });
+        res.status(200).send({code:"WEAT001", message: "Attendance Not found." });
     }else{
         res.status(200).send({"listAttendance": listAttendance, totalRow:listEmployee[0].total_row});
     }
@@ -16,10 +16,10 @@ exports.attendanceList = async (req, res) => {
 exports.attendance = async (req, res) => {
     var attendanceData = ""
     if(!req.params.user_id){
-        res.status(400).send({ message: "User Id cannot Be Null." });
+        res.status(200).send({code:"WEAT002", message: "User Id cannot Be Null." });
     }
     if(!req.body.attendance_type){
-        res.status(400).send({ message: "Attendance type cannot Be Null." });
+        res.status(200).send({code:"WEAT003", message: "Attendance type cannot Be Null." });
     }else{
         if(req.body.attendance_type=="in"){
             var notCheckin = await attendance.checkHasCheckin(req, res)

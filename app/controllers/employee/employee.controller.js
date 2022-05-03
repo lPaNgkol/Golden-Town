@@ -4,7 +4,7 @@ const employee = require("../../models/user/employee");
 exports.employeeList = async (req, res) => {
     var listEmployee = ""
     if(!req.body.company_id){
-        res.status(400).send({ message: "Company_Id cannot Be Null." });
+        res.status(200).send({ code:"WEEM003", message: "Company_Id cannot Be Null." });
     }
     listEmployee = await employee.listEmployee(req, res)
     console.log(listEmployee)
@@ -19,7 +19,7 @@ exports.employeeList = async (req, res) => {
 exports.employee = async (req, res) => {
     var employeeData = ""
     if(!req.params.user_id){
-        res.status(400).send({ message: "User Id cannot Be Null." });
+        res.status(200).send({code:"WEEM004", message: "User Id cannot Be Null." });
     }
     employeeData = await employee.getEmployee(req, res)
     if (employeeData===undefined) {
@@ -33,7 +33,7 @@ exports.employee = async (req, res) => {
 exports.employeeUpdate = async (req, res) => {
     var employeeData = ""
     if(!req.params.user_id){
-        res.status(400).send({ message: "User Id cannot Be Null." });
+        res.status(200).send({code:"WEEM004", message: "User Id cannot Be Null." });
     }
     employeeData = await employee.updateEmployee(req, res)
     if (employeeData.length==0) {

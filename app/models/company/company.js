@@ -7,8 +7,8 @@ checkDuplicateCompanyName = (req, res, next) => {
     const dataquery = [req.body.company_name, "T"];
     db.query(query, dataquery).then((results) => {
       if(results.rows.length>0){
-          var ret = {"code":400,"description":"Company name already in use"}
-          res.status(400).json(ret)
+          var ret = {"code":"WECO001", "description":"Company name already in use"}
+          res.status(200).json(ret)
       }else{
         next();
       }

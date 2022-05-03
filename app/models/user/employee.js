@@ -9,8 +9,8 @@ checkDuplicateUsername = (req, res, next) => {
   const dataquery = [req.body.username, "T"];
   db.query(query, dataquery).then((results) => {
     if(results.rows.length>0){
-        var ret = {"code":400,"description":"Username already in use"}
-        res.status(400).json(ret)
+        var ret = {"code":"WEEM001","description":"Username already in use"}
+        res.status(200).json(ret)
     }else{
       next();
     }
@@ -29,8 +29,8 @@ checkDuplicateEmployeeId = (req, res, next) => {
     console.log("dupemployee")
     console.log(results.rows)
     if(results.rows.length>0){
-        var ret = {"code":400,"description":"Employee_Id already in use"}
-        res.status(400).json(ret)
+        var ret = {"code":"WEEM002","description":"Employee_Id already in use"}
+        res.status(200).json(ret)
     }else{
       next();
     }
@@ -54,9 +54,8 @@ checkRolesExisted = (req, res, next) => {
           var indexOfRole = req.body.roles.indexOf(results.rows[i].role_id)
           console.log(indexOfRole);
           if(indexOfRole<0){
-            res.status(400).send({
-              message: "Failed! Role does not exist"
-            });
+            var ret = {"code":"WEEM001", "description":"Failed! Role does not exist"}
+            res.status(200).json(ret)
             findError = true
             break
           }
@@ -159,12 +158,13 @@ function createAccount(req, res){
 
 function listEmployee(req, res){
   return new Promise(function(resolve){
-    let query = `SELECT username, employee_id, user_id, firstname, lastname, nickname, gender,
+    let query = `SELECT username, employee_id, user_id, firstname, lastname, nickname, gender,a.depratment_id, a.depratment_name,
                       dob, job_start_date, working_status, a.position_id, mobileno, a.company_id, work_start_time,
                       work_end_time, work_hours, imageurl, b.position_name, c.company_name, count(a.*) OVER() AS total_row
                   FROM users a
-                  INNER JOIN positions b on a.position_id=b.position_id
-                  INNER JOIN company c on c.company_id=a.company_id
+                  LEFT JOIN positions b on a.position_id=b.position_id
+                  LEFT JOIN company c on c.company_id=a.company_id
+                  LEFT JOIN department d on d.department_id=a.department_id
                   WHERE a.active=$1 AND c.company_id=$2`
     let dataquery = ["T", req.body.company_id];
     if(req.body.limit){
@@ -199,9 +199,9 @@ function getEmployee(req, res){
                         dob, job_start_date, working_status, a.position_id, mobileno, a.company_id, work_start_time + interval '15 minute' as late_work_start, d.department_id, d.department_name,
                         work_end_time, work_hours, a.imageurl as profile_url, b.position_name, c.company_name, work_start_time
                     FROM users a
-                    INNER JOIN positions b on a.position_id=b.position_id
-                    INNER JOIN company c on c.company_id=a.company_id
-                    INNER JOIN department d on d.department_id=a.department_id
+                    LEFT JOIN positions b on a.position_id=b.position_id
+                    LEFT JOIN company c on c.company_id=a.company_id
+                    LEFT JOIN department d on d.department_id=a.department_id
                     WHERE a.active=$1 AND user_id=$2`
     let dataquery = ["T", req.params.user_id];
     db.query(query, dataquery).then((results) => {

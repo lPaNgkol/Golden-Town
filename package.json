@@ -1,6 +1,6 @@
 {
   "name": "we-links-api",
-  "version": "1.0.9",
+  "version": "1.0.10",
   "description": "we-links connecting your teams",
   "main": "index.js",
   "scripts": {
