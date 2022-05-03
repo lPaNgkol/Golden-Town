@@ -8,11 +8,11 @@ exports.signup = async (req, res) => {
   // Save User to Database
   user = await employee.createAccount(req, res)
   if (!user) {
-      res.status(500).send({code:"WEUS500", message: "Internal error." });
+      res.status(500).send({code:"WEUS500", description: "Internal error." });
   }else{
     res.status(200).send({
       code:"WEUS200",
-      message: "Register complete."
+      description: "Register complete."
     });
   }
 };
@@ -22,7 +22,7 @@ exports.signin = async (req, res) => {
   user = await authJwt.signIn(req)
   user = user[0]
   if (!user) {
-     return res.status(404).send({code:"WEUS404", message: "User Not found." });
+     return res.status(404).send({code:"WEUS404", description: "User Not found." });
   }
   var passwordIsValid = false
   if(user.password==req.body.password){
@@ -32,7 +32,7 @@ exports.signin = async (req, res) => {
     return res.status(401).send({
       code:"WEUS401",
       accessToken: null,
-      message: "Invalid Password!"
+      description: "Invalid Password!"
     });
   }
   const token = jwt.sign({ id: user.user_id }, config.secret, {
@@ -58,18 +58,18 @@ exports.signin = async (req, res) => {
 exports.refreshToken = async (req, res) => {
   const { refreshToken: requestToken } = req.body;
   if (requestToken == null) {
-    return res.status(403).json({code:"WEUS403", message: "Refresh Token is required!" });
+    return res.status(403).json({code:"WEUS403", description: "Refresh Token is required!" });
   }
   try {
     let refreshToken = await authJwt.getRefreshToken(requestToken);
     console.log(refreshToken)
     if (!refreshToken) {
-      res.status(403).json({code:"WEUS403", message: "Refresh token is not in database!" });
+      res.status(403).json({code:"WEUS403", description: "Refresh token is not in database!" });
       return;
     }else if(refreshToken=="expire"){
       res.status(403).json({
         code:"WEUS403",
-        message: "Refresh token was expired. Please make a new signin request",
+        description: "Refresh token was expired. Please make a new signin request",
       });
       return;
     }else{
@@ -81,7 +81,7 @@ exports.refreshToken = async (req, res) => {
     }
     
   } catch (err) {
-    return res.status(500).send({code:"WEUS500", message: err });
+    return res.status(500).send({code:"WEUS500", description: err });
   }
 };
 

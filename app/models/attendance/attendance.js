@@ -11,7 +11,7 @@ function checkHasCheckin (req, res){
         const dataquery = [req.params.user_id, "T", dateNow];
         db.query(query, dataquery).then((results) => {
             if(results.rows.length>0){
-                var ret = {"code":"WEAT004","message":"Already Checkin Today"}
+                var ret = {"code":"WEAT004","description":"Already Checkin Today"}
                 res.status(200).json(ret)
             }else{
                 resolve(true)
@@ -19,7 +19,7 @@ function checkHasCheckin (req, res){
             }).catch(error => {
             res.status(500).send({
                 code:"WEAT500",
-                message: error.message
+                description: error.message
             });
         });
     })
@@ -36,7 +36,7 @@ function checkCanCheckOut(req, res){
         db.query(query, dataquery).then((results) => {
             console.log(results.rows)
             if(results.rows.length==0){
-                var ret = {"code":"WEAT005","message":"Checkin Not Found"}
+                var ret = {"code":"WEAT005","description":"Checkin Not Found"}
                 res.status(200).json(ret)
             }else{
                 resolve(true)
@@ -44,7 +44,7 @@ function checkCanCheckOut(req, res){
             }).catch(error => {
                 res.status(500).send({
                   code:"WEAT500",
-                  message: error.message
+                  description: error.message
             });
         });
     })
@@ -60,7 +60,7 @@ function checkHasCheckout(req, res){
         const dataquery = [req.params.user_id, "T", dateNow];
         db.query(query, dataquery).then((results) => {
             if(results.rows.length>0){
-                var ret = {"code":"WEAT006","message":"Already Checkout Today"}
+                var ret = {"code":"WEAT006","description":"Already Checkout Today"}
                 res.status(200).json(ret)
             }else{
                 resolve(true)
@@ -68,7 +68,7 @@ function checkHasCheckout(req, res){
             }).catch(error => {
                 res.status(500).send({
                   code:"WEAT500",
-                  message: error.message
+                  description: error.message
             });
         });
     })
@@ -92,7 +92,7 @@ function attendanceList(req, res){
       .catch(error => {
         res.status(500).send({
           code:"WEAT500",
-          message: error.message
+          description: error.message
         });
       });
     })
@@ -133,7 +133,7 @@ function checkin(req, res){
       .catch(error => {
         res.status(500).send({
           code:"WEAT500",
-          message: error.message
+          description: error.message
         });
       });
     })
@@ -178,7 +178,7 @@ function checkout(req, res){
       .catch(error => {
         res.status(500).send({
           code:"WEAT500",
-          message: error.message
+          description: error.message
         });
       });
     })

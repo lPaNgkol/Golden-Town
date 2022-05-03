@@ -21,6 +21,7 @@ module.exports = function(app) {
   app.post("/employee/:user_id",
     [
       authJwt.verifyToken,
+      employee.checkEmployeeExist,
       employee.checkDuplicateUsername,
       employee.checkDuplicateEmployeeId,
     ], 

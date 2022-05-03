@@ -7,16 +7,16 @@ const User = db.users;
 const { TokenExpiredError } = jwt;
 const catchError = (err, res) => {
   if (err instanceof TokenExpiredError) {
-    return res.status(401).send({code:"WEAU002", message: "Unauthorized! Access Token was expired!" });
+    return res.status(401).send({code:"WEAU002", description: "Unauthorized! Access Token was expired!" });
   }
-  return res.sendStatus(401).send({code:"WEAU001", message: "Unauthorized!" });
+  return res.sendStatus(401).send({code:"WEAU001", description: "Unauthorized!" });
 }
 verifyToken = (req, res, next) => {
   let token = req.headers["x-access-token"];
   if (!token) {
     return res.status(403).send({
       code:"WEAU003",
-      message: "No token provided!"
+      description: "No token provided!"
     });
   }
   jwt.verify(token, config.secret, (err, decoded) => {
@@ -35,7 +35,7 @@ isAdmin = (req, res, next) => {
   db.query(query, dataquery).then((results) => {
     console.log(results.rows)
     if(results.rows.length<=0){
-        var ret = {code:"WEAU400","message":"Missing Permission"}
+        var ret = {code:"WEAU400","description":"Missing Permission"}
         res.status(200).json(ret)
     }else{
       next();
@@ -43,7 +43,7 @@ isAdmin = (req, res, next) => {
   }).catch(error => {
     res.status(500).send({
       code:"WEAU500",
-      message: error.message
+      description: error.message
     });
   });
 };
@@ -64,7 +64,7 @@ function signIn(req){
         .catch(error => {
           res.status(500).send({
             code:"WEAU500",
-            message: error.message
+            description: error.message
           });
         });
       }else{
@@ -74,7 +74,7 @@ function signIn(req){
     .catch(error => {
       res.status(500).send({
         code:"WEAU500",
-        message: error.message
+        description: error.message
       });
     });
   })
@@ -97,7 +97,7 @@ function createRefresh(userId){
     .catch(error => {
       res.status(500).send({
         code:"WEAU500",
-        message: error.message
+        description: error.message
       });
     });
   })
@@ -116,7 +116,7 @@ function getRoles(userId){
     }).catch(error => {
       res.status(500).send({
         code:"WEAU500",
-        message: error.message
+        description: error.message
       });
     });
   })
@@ -124,7 +124,7 @@ function getRoles(userId){
 
 function getRefreshToken(refresh_token){
   if (refresh_token == null) {
-    return res.status(403).json({ message: "Refresh Token is required!" });
+    return res.status(403).json({code:"WEAU403", description: "Refresh Token is required!" });
   }else{
     return new Promise(function(resolve){
       const query = "SELECT token, expiredate, user_id, refresh_token_id FROM refresh_token WHERE token=$1 ORDER BY refresh_token_id DESC LIMIT 1"
@@ -160,7 +160,7 @@ function getRefreshToken(refresh_token){
       }).catch(error => {
         res.status(500).send({
           code:"WEAU500",
-          message: error.message
+          description: error.message
         });
       });
     })
@@ -173,7 +173,7 @@ logout = (req, res) => {
     if (err) {
       res.status(500).send({
         code:"WEAU500",
-        message: err
+        description: err
       });
     }else{
       if(req.body.user_id==decoded.id){
@@ -182,18 +182,18 @@ logout = (req, res) => {
         db.query(query, dataquery).then((results) => {
           res.status(200).send({
             code:"WEAU200",
-            message: "Logout Complete."
+            description: "Logout Complete."
           });
         }).catch(error => {
           res.status(500).send({
             code:"WEAU500",
-            message: error.message
+            description: error.message
           });
         });
       }else{
         res.status(500).send({
           code:"WEAU500",
-          message: "Token not match user"
+          description: "Token not match user"
         });
       }
     }

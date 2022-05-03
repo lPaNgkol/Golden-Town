@@ -9,7 +9,7 @@ checkDuplicateUsername = (req, res, next) => {
   const dataquery = [req.body.username, "T"];
   db.query(query, dataquery).then((results) => {
     if(results.rows.length>0){
-        var ret = {"code":"WEEM001","message":"Username already in use"}
+        var ret = {"code":"WEEM001","description":"Username already in use"}
         res.status(200).json(ret)
     }else{
       next();
@@ -17,7 +17,28 @@ checkDuplicateUsername = (req, res, next) => {
   }).catch(error => {
     res.status(500).send({
       code:"WEEM500",
-      message: error.message
+      description: error.message
+    });
+  });
+};
+
+checkEmployeeExist = (req, res, next) => {
+  // Username
+  const query = "SELECT * FROM users WHERE user_id=$1 AND active=$2 ORDER BY user_id DESC"
+  const dataquery = [req.params.user_id, "T"];
+  db.query(query, dataquery).then((results) => {
+    console.log("checkEmployeeExist")
+    console.log(results.rows)
+    if(results.rows.length<=0){
+        var ret = {"code":"WEEM404","description":"Employee Not found."}
+        res.status(200).json(ret)
+    }else{
+      next();
+    }
+  }).catch(error => {
+    res.status(500).send({
+      code:"WEEM500",
+      description: error.message
     });
   });
 };
@@ -30,7 +51,7 @@ checkDuplicateEmployeeId = (req, res, next) => {
     console.log("dupemployee")
     console.log(results.rows)
     if(results.rows.length>0){
-        var ret = {"code":"WEEM002","message":"Employee_Id already in use"}
+        var ret = {"code":"WEEM002","description":"Employee_Id already in use"}
         res.status(200).json(ret)
     }else{
       next();
@@ -38,7 +59,7 @@ checkDuplicateEmployeeId = (req, res, next) => {
   }).catch(error => {
     res.status(500).send({
       code:"WEEM500",
-      message: error.message
+      description: error.message
     });
   });
 };
@@ -56,7 +77,7 @@ checkRolesExisted = (req, res, next) => {
           var indexOfRole = req.body.roles.indexOf(results.rows[i].role_id)
           console.log(indexOfRole);
           if(indexOfRole<0){
-            var ret = {"code":"WEEM001", "message":"Failed! Role does not exist"}
+            var ret = {"code":"WEEM001", "description":"Failed! Role does not exist"}
             res.status(200).json(ret)
             findError = true
             break
@@ -68,13 +89,13 @@ checkRolesExisted = (req, res, next) => {
       }else{
         res.status(500).send({
           code:"WEEM500",
-          message: "Internal error"
+          description: "Internal error"
         });
       }
     }).catch(error => {
       res.status(500).send({
         code:"WEEM500",
-        message: error.message
+        description: error.message
       });
     });
     
@@ -149,14 +170,14 @@ function createAccount(req, res){
       .catch(error => {
         res.status(500).send({
           code:"WEEM500",
-          message: error.message
+          description: error.message
         });
       });
     })
     .catch(error => {
       res.status(500).send({
         code:"WEEM500",
-        message: error.message
+        description: error.message
       });
     });
   })
@@ -190,7 +211,7 @@ function listEmployee(req, res){
     .catch(error => {
       res.status(500).send({
         code:"WEEM500",
-        message: error.message
+        description: error.message
       });
     });
   })
@@ -244,7 +265,7 @@ function getEmployee(req, res){
         .catch(error => {
           res.status(500).send({
             code:"WEEM500",
-            message: error.message
+            description: error.message
           });
         });
       }else{
@@ -254,7 +275,7 @@ function getEmployee(req, res){
     .catch(error => {
       res.status(500).send({
         code:"WEEM500",
-        message: error.message
+        description: error.message
       });
     });
   })
@@ -333,7 +354,7 @@ function updateEmployee(req, res){
     .catch(error => {
       res.status(500).send({
         code:"WEEM500",
-        message: error.message
+        description: error.message
       });
     });
   })
@@ -346,6 +367,7 @@ const employee = {
     listEmployee: listEmployee,
     getEmployee: getEmployee,
     updateEmployee: updateEmployee,
-    checkDuplicateEmployeeId: checkDuplicateEmployeeId
+    checkDuplicateEmployeeId: checkDuplicateEmployeeId,
+    checkEmployeeExist: checkEmployeeExist
 };
 module.exports = employee;

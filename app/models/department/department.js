@@ -13,7 +13,7 @@ function departmentList(req, res) {
       return resolve(results);
     } catch (error) {
       res.status(500).send({
-        message: error.message,
+        description: error.message,
       });
     }
   });
