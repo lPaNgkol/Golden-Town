@@ -90,7 +90,8 @@ function updateDepartment(req, res) {
       const department_id = req.params.department_id;
       const data = db.query(
         `UPDATE department SET department_name=$1, updateby=1, updatedate=current_timestamp
-                     WHERE department_id=$2`,
+                     WHERE department_id=$2
+                     RETURNING department_id;`,
         [
           department_name,
           department_id
