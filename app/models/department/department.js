@@ -1,6 +1,7 @@
 const db = require("../dbconnection");
 var format = require("pg-format");
 var moment = require("moment");
+const { render } = require("express/lib/response");
 
 // get all
 function departmentList(req, res) {
@@ -9,7 +10,9 @@ function departmentList(req, res) {
       const data = await db.query(
         `SELECT * FROM department ORDER BY department_id ASC`
       );
+      console.log(data);
       let results = data.rows;
+
       return resolve(results);
     } catch (error) {
       res.status(500).send({
@@ -29,9 +32,9 @@ function departmentById(req, res) {
         [companyId]
       );
       let results = data.rows;
-      return resolve(results);
+      return resolve(results, results.length);
     } catch (error) {
-      console.error("### Error ", error);
+      console.error(error);
       return resolve(error);
     }
   });
@@ -53,19 +56,15 @@ function createDepartment(req, res) {
       const createdate = dateNow;
       const updatedate = dateNow;
       const data = db.query(
-        `INSERT INTO department(department_id, department_name, company_id, createby, updateby, createdate, updatedate)
-              VALUES ($1, $2, $3, $4, $5, $6, $7) RETURNING department_id`,
-        [department_id,
+        `INSERT INTO department(department_name, company_id, createby, updateby, createdate, updatedate)
+              VALUES ($1, 1, 1, 1, current_timestamp, current_timestamp) RETURNING department_id`,
+        [
           department_name,
-          company_id,
-          createby,
-          updateby,
-          createdate,
-          updatedate,
 
         ]
       );
-      let results = data.rows[department_id];
+
+      let results = data.rows;
       return resolve(results);
     } catch (error) {
       console.error("### Error ", error);
@@ -88,21 +87,15 @@ function updateDepartment(req, res) {
       const updateby = req.body.updateby;
       const createdate = dateNow;
       const updatedate = dateNow;
+      const department_id = req.params.department_id;
       const data = db.query(
-        `UPDATE department SET department_name=$1,company_id=$2, createby=$3, updateby=$4, createdate=$5, updatedate=$6
-                     WHERE department_id=$7 RETURNING department_name`,
+        `UPDATE department SET department_name=$1, updateby=1, updatedate=current_timestamp
+                     WHERE department_id=$2`,
         [
           department_name,
-          company_id,
-          createby,
-          updateby,
-          createdate,
-          updatedate,
-          req.body.department_id,
+          department_id
         ]
       );
-      return {
-        userIddepartment_name: data.rows[0].department_name ? data.rows[0].department_name : '',}
       let results = data.rows;
       return resolve(results);
     } catch (error) {
