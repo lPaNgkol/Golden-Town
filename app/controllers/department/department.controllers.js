@@ -117,15 +117,15 @@ exports.deleteDepartment = async (req, res) => {
     let departmentData = "";
     departmentCk = await department.departmentBydepartmentId(req, res);
     if (!authJwt) {
-      res.status(401).send({ message: "Access Token Expired" });
+      res.status(401).send({ code: "401", message: "Access Token Expired" });
     }
     console.log("ss test", departmentCk.length);
     if (departmentCk.length == 0) {
-      res.status(404).send({ message: "department_id not Found." });
+      res.status(404).send({ code: "404", message: "department_id not Found." });
     }
     if (!departmentCk.length == 0) {
       departmentData = await department.deleteDepartment(req, res);
-      res.status(200).send({ message: "Success" });
+      res.status(200).send({ code: "200", message: "Success" });
     }
     // console.log("ss testss", departmentData.length);
   } catch (error) {
