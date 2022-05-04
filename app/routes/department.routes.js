@@ -18,17 +18,18 @@ module.exports = function(app) {
     "/department/:company_id",
     [authJwt.verifyToken],
     controller.departmentById
-    );
+  );
 
-  app.post("/department/:department_id",
+  app.post("/department/:company_id",
     [authJwt.verifyToken],
     controller.createDepartment
   );
   app.put("/department/:department_id",
-    [authJwt.verifyToken], 
+    [authJwt.verifyToken],
     controller.updateDepartment
   );
   app.delete("/department/:department_id",
-  [authJwt.verifyToken],
-  controller.deleteDepartment)
+    [authJwt.verifyToken],
+    controller.deleteDepartment
+  )
 };
