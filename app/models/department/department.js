@@ -17,7 +17,7 @@ function departmentList(req, res) {
       console.error("### Error ", error);
       // return resolve(false);
       return res.status(500).send({
-        code: "WEAT500",
+        code: "WEDP500",
         description: error.message,
       });
     }
@@ -39,7 +39,7 @@ function departmentByCompanyId(req, res) {
       console.error("### Error ", error);
       // return resolve(false);
       return res.status(500).send({
-        code: "WEAT500",
+        code: "WEDP500",
         description: error.message,
       });
     }
@@ -61,7 +61,7 @@ function departmentBydepartmentId(req, res) {
       console.error("### Error ", error);
       // return resolve(false);
       return res.status(500).send({
-        code: "WEAT500",
+        code: "WEDP500",
         description: error.message,
       });
     }
@@ -100,7 +100,7 @@ function createDepartment(req, res) {
       console.error("### Error ", error);
       // return resolve(false);
       return res.status(500).send({
-        code: "WEAT500",
+        code: "WEDP500",
         description: error.message,
       });
     }
@@ -132,7 +132,7 @@ function updateDepartment(req, res) {
       console.error("### Error ", error);
       // return resolve(false);
       return res.status(500).send({
-        code: "WEAT500",
+        code: "WEDP500",
         description: error.message,
       });
     }
@@ -156,7 +156,7 @@ function deleteDepartment(req, res) {
       console.error("### Error ", error);
       // return resolve(false);
       return res.status(500).send({
-        code: "WEAT500",
+        code: "WEDP500",
         description: error.message,
       });
     }
