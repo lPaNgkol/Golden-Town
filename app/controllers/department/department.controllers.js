@@ -55,13 +55,32 @@ exports.departmentBydId = async (req, res) => {
 
 // create department
 exports.createDepartment = async (req, res) => {
-  let departmentData;
+  try {
+    let departmentData = "";
+    let companyCk = "";
+    companyCk = await department.ckcompanyId(req, res);
+    // departmentCk = await department.departmentByCompanyId(req, res);
+    console.log("compa", companyCk, "comlength", companyCk.length);
+    // console.log("depart",departmentCk);
+    if (companyCk.length == 0) {
+      res
+        .status(200)
+        .send({ code: "WEDP403", description: "Company not Found" });
+    }
+  } catch (error) {
+    error = res
+      .status(200)
+      .send({ code: "WEDP403", description: "Company not Found" });
+    return error;
+  }
   if (!req.body.department_name) {
-    res
-      .status(400)
-      .send({ Code: "WEDP400", description: "Department_name cannot Be Null." });
+    res.status(400).send({
+      Code: "WEDP400",
+      description: "Department_name cannot Be Null.",
+    });
   }
   departmentData = await department.createDepartment(req, res);
+  console.log("creat", departmentData);
   if (req.body.department_id) {
     res
       .status(200)
