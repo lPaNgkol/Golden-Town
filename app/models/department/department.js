@@ -81,6 +81,12 @@ function createDepartment(req, res) {
       const updateby = req.user_id;
       const createdate = dateNow;
       const updatedate = dateNow;
+      let companyId = req.params.company_id;
+  
+      const datCk = await db.query(`SELECT company_id FROM department WHERE company_id = $1`,
+      [companyId]);
+      datareCk = datCk.rowCount != 0 ? datCk.rows[0] : false;
+
       const data = await db.query(
         `INSERT INTO department(department_name, company_id, createby, updateby, createdate, updatedate)
               VALUES ($1, $2, $3, $4, $5, $6) RETURNING department_id`,
@@ -93,7 +99,7 @@ function createDepartment(req, res) {
           updatedate,
         ]
       );
-
+      
       let results = data.rows;
       return resolve(results);
     } catch (error) {
