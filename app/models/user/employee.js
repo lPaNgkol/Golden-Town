@@ -70,11 +70,15 @@ checkRolesExisted = (req, res, next) => {
     const dataquery = ["T"];
     db.query(query, dataquery).then((results) => {
       if(results.rows.length>0){
-        let findError = false;
+        let roleArray = [];
         for (var i = 0; i < results.rows.length; i++) {
-          console.log(results.rows[i].role_id);
-          console.log(req.body.roles);
-          var indexOfRole = req.body.roles.indexOf(results.rows[i].role_id)
+          roleArray.push(results.rows[i].role_id)
+        }
+        let findError = false;
+        for (var i = 0; i < req.body.roles.length; i++) {
+          console.log(roleArray);
+          console.log(req.body.roles[i]);
+          var indexOfRole = roleArray.indexOf(req.body.roles[i])
           console.log(indexOfRole);
           if(indexOfRole<0){
             var ret = {"code":"WEEM001", "description":"Failed! Role does not exist"}
