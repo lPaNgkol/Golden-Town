@@ -117,7 +117,7 @@ function createAccount(req, res){
   const firstname = req.body.firstname
   const lastname = req.body.lastname
   const nickname = req.body.nickname
-  const gender = req.body.gender=="ชาย" ? "M" : "F"
+  const gender = req.body.gender
   const dob = req.body.dob
   const job_start_date = req.body.job_start_date
   const working_status = req.body.working_status
@@ -293,7 +293,7 @@ function updateEmployee(req, res){
   const firstname = req.body.firstname
   const lastname = req.body.lastname
   const nickname = req.body.nickname
-  const gender = req.body.gender=="ชาย" ? "M" : "F"
+  const gender = req.body.gender
   const dob = req.body.dob
   const job_start_date = req.body.job_start_date
   const working_status = req.body.working_status
