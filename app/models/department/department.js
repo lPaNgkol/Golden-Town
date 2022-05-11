@@ -24,15 +24,41 @@ function departmentList(req, res) {
   });
 }
 
+//get companyId
+function companyList(req, res) {
+  return new Promise(async (resolve) => {
+    try {
+      let companyId = req.params.company_id;
+      const data = await db.query(
+        // `SELECT department_id, department_name FROM department WHERE company_id = $1 ORDER BY department_id ASC`,
+        `SELECT company_id FROM department WHERE company_id = $1`,
+        [companyId]
+      );
+      console.log("testdata", companyId);
+      let results = data.rows;
+      return resolve(results, results.length);
+    } catch (error) {
+      console.error("### Error ", error);
+      // return resolve(false);
+      return res.status(500).send({
+        code: "WEDP500",
+        description: error.message,
+      });
+    }
+  });
+}
+
 // get by companyId
 function departmentByCompanyId(req, res) {
   return new Promise(async (resolve) => {
     try {
       let companyId = req.params.company_id;
       const data = await db.query(
-        `SELECT department_id, department_name FROM department WHERE company_id = $1 ORDER BY department_id ASC`,
+        // `SELECT department_id, department_name FROM department WHERE company_id = $1 ORDER BY department_id ASC`,
+        `SELECT company_id, department_name FROM department WHERE company_id = $1 ORDER BY department_id ASC`,
         [companyId]
       );
+      console.log("testdata", companyId);
       let results = data.rows;
       return resolve(results, results.length);
     } catch (error) {
@@ -55,6 +81,7 @@ function departmentBydepartmentId(req, res) {
         `SELECT department_id, department_name FROM department WHERE department_id = $1`,
         [department_id]
       );
+
       let results = data.rows;
       return resolve(results, results.length);
     } catch (error) {
@@ -82,9 +109,11 @@ function createDepartment(req, res) {
       const createdate = dateNow;
       const updatedate = dateNow;
       let companyId = req.params.company_id;
-  
-      const datCk = await db.query(`SELECT company_id FROM department WHERE company_id = $1`,
-      [companyId]);
+
+      const datCk = await db.query(
+        `SELECT company_id FROM department WHERE company_id = $1`,
+        [companyId]
+      );
       datareCk = datCk.rowCount != 0 ? datCk.rows[0] : false;
 
       const data = await db.query(
@@ -99,7 +128,7 @@ function createDepartment(req, res) {
           updatedate,
         ]
       );
-      
+
       let results = data.rows;
       return resolve(results);
     } catch (error) {
@@ -148,13 +177,12 @@ function updateDepartment(req, res) {
 //delete
 function deleteDepartment(req, res) {
   return new Promise(async (resolve) => {
-
     try {
       const result = await db.query(
         "DELETE FROM department WHERE department_id=$1",
         [req.params.department_id]
       );
- 
+
       let results = result.rows;
       // console.log("testresults", reeS.length);
       return resolve(results, results.length);
@@ -176,5 +204,6 @@ const department = {
   createDepartment: createDepartment,
   updateDepartment: updateDepartment,
   deleteDepartment: deleteDepartment,
+  ckcompanyId: companyList,
 };
 module.exports = department;
