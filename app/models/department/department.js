@@ -31,7 +31,7 @@ function companyList(req, res) {
       let companyId = req.params.company_id;
       const data = await db.query(
         // `SELECT department_id, department_name FROM department WHERE company_id = $1 ORDER BY department_id ASC`,
-        `SELECT company_id FROM department WHERE company_id = $1`,
+        `SELECT * FROM company WHERE company_id=$1`,
         [companyId]
       );
       console.log("testdata", companyId);
@@ -101,7 +101,7 @@ function createDepartment(req, res) {
     try {
       const dateNow = moment().format("YYYY-MM-DD HH:mm:ss");
       // const department_id = req.body.department_id;
-      // console.log("req", req)
+      console.log("req", req.user_id)
       const department_name = req.body.department_name;
       const company_id = req.params.company_id;
       const createby = req.user_id;
@@ -110,11 +110,11 @@ function createDepartment(req, res) {
       const updatedate = dateNow;
       let companyId = req.params.company_id;
 
-      const datCk = await db.query(
-        `SELECT company_id FROM department WHERE company_id = $1`,
-        [companyId]
-      );
-      datareCk = datCk.rowCount != 0 ? datCk.rows[0] : false;
+      // const datCk = await db.query(
+      //   `SELECT company_id FROM department WHERE company_id = $1`,
+      //   [companyId]
+      // // );
+      // datareCk = datCk.rowCount != 0 ? datCk.rows[0] : false;
 
       const data = await db.query(
         `INSERT INTO department(department_name, company_id, createby, updateby, createdate, updatedate)
@@ -130,6 +130,7 @@ function createDepartment(req, res) {
       );
 
       let results = data.rows;
+      console.log(results);
       return resolve(results);
     } catch (error) {
       console.error("### Error ", error);
