@@ -44,24 +44,27 @@ checkEmployeeExist = (req, res, next) => {
 };
 
 checkDuplicateEmployeeId = (req, res, next) => {
-  // Username
-  const query = "SELECT * FROM users WHERE employee_id=$1 AND active=$2 ORDER BY user_id DESC"
-  const dataquery = [req.body.employee_id, "T"];
-  db.query(query, dataquery).then((results) => {
-    console.log("dupemployee")
-    console.log(results.rows)
-    if(results.rows.length>0){
-        var ret = {"code":"WEEM002","description":"Employee_Id already in use"}
-        res.status(200).json(ret)
-    }else{
-      next();
-    }
-  }).catch(error => {
-    res.status(500).send({
-      code:"WEEM500",
-      description: error.message
+  if(req.body.employee_id){
+    const query = "SELECT * FROM users WHERE employee_id=$1 AND active=$2 ORDER BY user_id DESC"
+    const dataquery = [req.body.employee_id, "T"];
+    db.query(query, dataquery).then((results) => {
+      console.log("dupemployee")
+      console.log(results.rows)
+      if(results.rows.length>0){
+          var ret = {"code":"WEEM002","description":"Employee_Id already in use"}
+          res.status(200).json(ret)
+      }else{
+        next();
+      }
+    }).catch(error => {
+      res.status(500).send({
+        code:"WEEM500",
+        description: error.message
+      });
     });
-  });
+  }else{
+    next();
+  }
 };
 
 checkRolesExisted = (req, res, next) => {
@@ -228,7 +231,7 @@ function getEmployee(req, res){
     aDatetime = String(date).split("T")
     var dateNow = aDatetime[0] + " 00:00:00"
     let query = `SELECT username, employee_id, a.user_id, firstname, lastname, nickname, gender, a.createdate, a.updatedate, a.updateby, a.last_login,
-                        dob, job_start_date, working_status, a.position_id, mobileno, a.company_id, work_start_time + interval '15 minute' as late_work_start, d.department_id, d.department_name,
+                        dob, job_start_date, a.position_id, mobileno, a.company_id, work_start_time + interval '15 minute' as late_work_start, d.department_id, d.department_name,
                         work_end_time, work_hours, a.imageurl as profile_url, b.position_name, c.company_name, work_start_time
                     FROM users a
                     LEFT JOIN positions b on a.position_id=b.position_id
@@ -236,6 +239,8 @@ function getEmployee(req, res){
                     LEFT JOIN department d on d.department_id=a.department_id
                     WHERE a.active=$1 AND user_id=$2`
     let dataquery = ["T", req.params.user_id];
+    var queryWorkStatus = `UPDATE users SET working_status=$1 WHERE user_id=$2`;
+    var workStatusDataQuery = [];
     db.query(query, dataquery).then((results) => {
       let returnData = results.rows[0]
       if(results.rows[0]!==undefined){
@@ -252,18 +257,31 @@ function getEmployee(req, res){
             returnData['checkin_date'] = ''
             returnData['checkout_date'] = ''
           }
-          if(returnData['checkin_date']!=''){
+          if(returnData['checkin_date']!='' && returnData['checkout_date']==''){
             var checkinTime = returnData['checkin_date']
             console.log(checkinTime);
             checkinTime = String(checkinTime).split(" ")
             if(checkinTime[1] > returnData['late_work_start']){
-              returnData["attendance_status"] = "late"
+              workStatusDataQuery = ['notworking', req.params.user_id];
+              returnData["working_status"] = "late"
             }else{
-              returnData["attendance_status"] = "intime"
+              workStatusDataQuery = ['notworking', req.params.user_id];
+              returnData["working_status"] = "intime"
             }
+          }else if(returnData['checkin_date']!='' && returnData['checkout_date']!=''){
+            workStatusDataQuery = ['offwork', req.params.user_id];
+            returnData["working_status"] = "offwork"
           }else{
-            returnData["attendance_status"] = "notin"
+            workStatusDataQuery = ['notworking', req.params.user_id];
+            returnData["working_status"] = "notworking"
           }
+          db.query(queryWorkStatus, workStatusDataQuery).then(() => {
+          }).catch(error => {
+            res.status(500).send({
+              code:"WEEM500",
+              description: error.message
+            });
+          });
           resolve(returnData)
         })
         .catch(error => {

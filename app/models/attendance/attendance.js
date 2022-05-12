@@ -11,6 +11,7 @@ function checkHasCheckin (req, res){
         const dataquery = [req.params.user_id, "T", dateNow];
         db.query(query, dataquery).then((results) => {
             if(results.rows.length>0){
+              console.log(results.rows);
                 var ret = {"code":"WEAT004","description":"Already Checkin Today"}
                 res.status(200).json(ret)
             }else{

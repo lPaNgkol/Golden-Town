@@ -1,4 +1,6 @@
 const attendance = require("../../models/attendance/attendance");
+const employee = require("../../models/user/employee");
+
 
 // Get employee by companyId id
 exports.attendanceList = async (req, res) => {
@@ -14,7 +16,8 @@ exports.attendanceList = async (req, res) => {
 
 // Get employee by id
 exports.attendance = async (req, res) => {
-    var attendanceData = ""
+    var attendanceData = "";
+    var employeeData = "";
     if(!req.params.user_id){
         res.status(200).send({code:"WEAT002", description: "User Id cannot Be Null." });
     }
@@ -29,7 +32,9 @@ exports.attendance = async (req, res) => {
                 if (attendanceData.length==0) {
                     res.status(404).send({code:"WEAT404", description: "Checkin Not Complete." });
                 }else{
-                    res.status(200).send({code:"WEAT200", "attendance": attendanceData});
+                    employeeData = await employee.getEmployee(req, res)
+                    console.log(employeeData)
+                    res.status(200).send({code:"WEAT200", "attendance": attendanceData, "employee_data": employeeData});
                 }
             }
         }else{
@@ -45,7 +50,9 @@ exports.attendance = async (req, res) => {
                 if (attendanceData.length==0) {
                     res.status(404).send({code:"WEAT404", description: "Checkin Not Complete." });
                 }else{
-                    res.status(200).send({code:"WEAT200", "attendance": attendanceData});
+                    employeeData = await employee.getEmployee(req, res)
+                    console.log(employeeData)
+                    res.status(200).send({code:"WEAT200", "attendance": attendanceData, "employee_data": employeeData});
                 }
             }
         }

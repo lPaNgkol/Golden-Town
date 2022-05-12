@@ -148,6 +148,14 @@ function getRefreshToken(refresh_token){
               expiresIn: config.jwtExpiration,
             });
 
+            var time = moment();
+            var date = time.format('YYYY-MM-DD HH:mm:ss');
+            const queryLogin = "UPDATE users SET last_login=$1 WHERE user_id=$2"
+            const dataqueryLogin = [date, user_id];
+            db.query(queryLogin, dataqueryLogin).then(() => {
+              resolve(results.rows)
+            })
+
             let newRefresh = await createRefresh(user_id)
             resolve({
               accessToken: newAccessToken,
