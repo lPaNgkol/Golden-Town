@@ -147,16 +147,14 @@ function getRefreshToken(refresh_token){
             let newAccessToken = jwt.sign({ id: user_id }, config.secret, {
               expiresIn: config.jwtExpiration,
             });
-
+            console.log(newAccessToken)
             var time = moment();
             var date = time.format('YYYY-MM-DD HH:mm:ss');
             const queryLogin = "UPDATE users SET last_login=$1 WHERE user_id=$2"
             const dataqueryLogin = [date, user_id];
-            db.query(queryLogin, dataqueryLogin).then(() => {
-              resolve(results.rows)
-            })
-
+            db.query(queryLogin, dataqueryLogin).then(() => {})
             let newRefresh = await createRefresh(user_id)
+            console.log(newRefresh)
             resolve({
               accessToken: newAccessToken,
               refreshToken: newRefresh,

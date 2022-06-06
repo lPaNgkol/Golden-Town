@@ -1,18 +1,31 @@
 const attendance = require("../../models/attendance/attendance");
 const employee = require("../../models/user/employee");
 
-
 // Get employee by companyId id
 exports.attendanceList = async (req, res) => {
     var listAttendance = ""
-    listAttendance = await attendance.listAttendance(req, res)
+    listAttendance = await attendance.attendanceList(req, res)
     console.log(listAttendance)
     if (listAttendance.length==0) {
         res.status(200).send({code:"WEAT001", description: "Attendance Not found." });
     }else{
-        res.status(200).send({code:"WEAT200", "listAttendance": listAttendance, totalRow:listEmployee[0].total_row});
+        res.status(200).send({code:"WEAT200", "listAttendance": listAttendance, totalRow:listAttendance[0].total_row});
     }
-  };
+};
+
+exports.attendanceListByUser = async (req, res) => {
+    var listAttendance = ""
+    if(!req.params.user_id){
+        res.status(200).send({code:"WEAT002", description: "User Id cannot Be Null." });
+    }
+    listAttendance = await attendance.attendanceListByUser(req, res)
+    console.log(listAttendance)
+    if (listAttendance.length==0) {
+        res.status(200).send({code:"WEAT001", description: "Attendance Not found." });
+    }else{
+        res.status(200).send({code:"WEAT200", "listAttendance": listAttendance});
+    }
+};
 
 // Get employee by id
 exports.attendance = async (req, res) => {

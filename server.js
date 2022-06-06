@@ -4,7 +4,7 @@ const cors = require("cors");
 const app = express();
 
 var corsOptions = {
-  origin: "http://localhost:8081"
+  origin: "http://localhost:3000"
 };
 app.use(cors(corsOptions));
 // parse requests of content-type - application/json
@@ -24,10 +24,11 @@ require('./app/routes/user.routes')(app);
 require('./app/routes/employee.routes')(app);
 require('./app/routes/company.routes')(app);
 require('./app/routes/department.routes')(app);
-
+require('./app/routes/healthinfo.routes')(app);
+require('./app/routes/position.routes')(app);
 
 // set port, listen for requests
-const PORT = 3001;
+const PORT = 3000;
 app.listen(PORT, () => {
   console.log(`Server is running on port ${PORT}.`);
 });

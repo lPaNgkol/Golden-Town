@@ -13,6 +13,10 @@ module.exports = function(app) {
     [authJwt.verifyToken], 
     controller.attendanceList
   );
+  app.get("/attendance/:user_id",
+    [authJwt.verifyToken], 
+    controller.attendanceListByUser
+  );
   app.post("/attendance/:user_id",
     [authJwt.verifyToken], 
     controller.attendance

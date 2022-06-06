@@ -75,29 +75,129 @@ function checkHasCheckout(req, res){
     })
 };
 
-function attendanceList(req, res){
-    return new Promise(function(resolve){
-      let query = `SELECT *, count(*) OVER() AS total_row FROM attendance WHERE active=$1`
-      let dataquery = ["T"];
-      if(req.body.limit){
-        query = query + " LIMIT $2"
-        dataquery.push(req.body.limit)
+function attendanceListByUser(req, res){
+  return new Promise(function(resolve){
+    let query = `SELECT a.*, b.work_start_time + interval '15 minute' as late_work_start, b.work_start_time, b.user_id, b.firstname, b.lastname, c.position_name, b.employee_id FROM attendance a 
+                 INNER JOIN users b on a.user_id=b.user_id
+                 LEFT JOIN positions c on c.position_id=b.position_id 
+                 WHERE a.active=$1`
+    let dataquery = ["T"];
+    if(req.params.user_id){
+      query = query + " AND a.user_id=$2"
+      dataquery.push(req.params.user_id)
+    }
+    console.log(dataquery);
+    let roleArray = [];
+    db.query(query, dataquery).then((results) => {
+      roleArray = results.rows
+      for (var i = 0; i < roleArray.length; i++) {
+        var inTime = moment(roleArray[i]['checkin_date']);//now
+        var outTime = moment(roleArray[i]['checkout_date']);
+
+        roleArray[i]['work_duration'] = ""
+        if(roleArray[i]['checkin_date']!='' && roleArray[i]['checkout_date']==''){
+          var checkinTime = roleArray[i]['checkin_date']
+          console.log(checkinTime);
+          checkinTime = String(checkinTime).split(" ")
+          if(checkinTime[1] > roleArray[i]['late_work_start']){
+            workStatusDataQuery = ['notworking', req.params.user_id];
+            roleArray[i]["working_status"] = "late"
+          }else{
+            workStatusDataQuery = ['notworking', req.params.user_id];
+            roleArray[i]["working_status"] = "intime"
+          }
+        }else if(roleArray[i]['checkin_date']!='' && roleArray[i]['checkout_date']!=''){
+          const sec = parseInt(outTime.diff(inTime, 'seconds'), 10); // convert value to number if it's string
+          let hours   = Math.floor(sec / 3600); // get hours
+          let minutes = Math.floor((sec - (hours * 3600)) / 60); // get minutes
+          let seconds = sec - (hours * 3600) - (minutes * 60); //  get seconds
+          // add 0 if value < 10; Example: 2 => 02
+          if (hours   < 10) {hours   = "0"+hours;}
+          if (minutes < 10) {minutes = "0"+minutes;}
+          if (seconds < 10) {seconds = "0"+seconds;}
+          if(!isNaN(seconds) || !isNaN(minutes) || !isNaN(hours)) roleArray[i]['work_duration'] = hours + ":" + minutes + ":" + seconds
+
+          workStatusDataQuery = ['offwork', req.params.user_id];
+          roleArray[i]["working_status"] = "offwork"
+        }else{
+          workStatusDataQuery = ['notworking', req.params.user_id];
+          roleArray[i]["working_status"] = "notworking"
+        }
       }
-      if(req.body.offset){
-        query = query + " OFFSET $3"
-        dataquery.push(req.body.offset)
-      }
-      db.query(query, dataquery).then((results) => {
-        resolve(results.rows)
-      })
-      .catch(error => {
-        res.status(500).send({
-          code:"WEAT500",
-          description: error.message
-        });
-      });
+      resolve(roleArray)
     })
-  }
+    .catch(error => {
+      res.status(500).send({
+        code:"WEAT500",
+        description: error.message
+      });
+    });
+  })
+}
+
+function attendanceList(req, res){
+  return new Promise(function(resolve){
+    let query = `SELECT a.*, count(a.*) OVER() AS total_row, b.work_start_time + interval '15 minute' as late_work_start, b.work_start_time, b.user_id, b.firstname, b.lastname, c.position_name, b.employee_id 
+                 FROM attendance a 
+                 INNER JOIN users b on a.user_id=b.user_id
+                 LEFT JOIN positions c on c.position_id=b.position_id 
+                 WHERE a.active=$1`
+    let dataquery = ["T"];
+    if(req.body.limit){
+      query = query + " LIMIT $2"
+      dataquery.push(req.body.limit)
+    }
+    if(req.body.offset){
+      query = query + " OFFSET $3"
+      dataquery.push(req.body.offset)
+    }
+    let roleArray = [];
+    db.query(query, dataquery).then((results) => {
+      roleArray = results.rows
+      for (var i = 0; i < roleArray.length; i++) {
+        var inTime = moment(roleArray[i]['checkin_date']);//now
+        var outTime = moment(roleArray[i]['checkout_date']);
+
+        roleArray[i]['work_duration'] = ""
+        if(roleArray[i]['checkin_date']!='' && roleArray[i]['checkout_date']==''){
+          var checkinTime = roleArray[i]['checkin_date']
+          console.log(checkinTime);
+          checkinTime = String(checkinTime).split(" ")
+          if(checkinTime[1] > roleArray[i]['late_work_start']){
+            workStatusDataQuery = ['notworking', req.params.user_id];
+            roleArray[i]["working_status"] = "late"
+          }else{
+            workStatusDataQuery = ['notworking', req.params.user_id];
+            roleArray[i]["working_status"] = "intime"
+          }
+        }else if(roleArray[i]['checkin_date']!='' && roleArray[i]['checkout_date']!=''){
+          const sec = parseInt(outTime.diff(inTime, 'seconds'), 10); // convert value to number if it's string
+          let hours   = Math.floor(sec / 3600); // get hours
+          let minutes = Math.floor((sec - (hours * 3600)) / 60); // get minutes
+          let seconds = sec - (hours * 3600) - (minutes * 60); //  get seconds
+          // add 0 if value < 10; Example: 2 => 02
+          if (hours   < 10) {hours   = "0"+hours;}
+          if (minutes < 10) {minutes = "0"+minutes;}
+          if (seconds < 10) {seconds = "0"+seconds;}
+          if(!isNaN(seconds) || !isNaN(minutes) || !isNaN(hours)) roleArray[i]['work_duration'] = hours + ":" + minutes + ":" + seconds
+
+          workStatusDataQuery = ['offwork', req.params.user_id];
+          roleArray[i]["working_status"] = "offwork"
+        }else{
+          workStatusDataQuery = ['notworking', req.params.user_id];
+          roleArray[i]["working_status"] = "notworking"
+        }
+      }
+      resolve(roleArray)
+    })
+    .catch(error => {
+      res.status(500).send({
+        code:"WEAT500",
+        description: error.message
+      });
+    });
+  })
+}
 
 function checkin(req, res){
     var time = moment();
@@ -191,6 +291,7 @@ const attendance = {
     checkin:checkin,
     checkout:checkout,
     checkCanCheckOut:checkCanCheckOut,
-    checkHasCheckout:checkHasCheckout
+    checkHasCheckout:checkHasCheckout,
+    attendanceListByUser:attendanceListByUser
 };
 module.exports = attendance;
