@@ -34,6 +34,13 @@ exports.createProject = async (req, res) => {
             }
             console.log('Directory created successfully!');
         });
+    }else{
+        projectData = await project.createProject(req, res)
+        if (projectData.length==0) {
+            res.status(404).send({code:"WEPO404", description: "Company Id Not found." });
+        }else{
+            res.status(200).send({code:"WECO200", projectData});
+        }
     }
 };
 

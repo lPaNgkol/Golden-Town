@@ -29,6 +29,7 @@ require('./app/routes/department.routes')(app);
 require('./app/routes/healthinfo.routes')(app);
 require('./app/routes/position.routes')(app);
 require('./app/routes/project.routes')(app);
+require('./app/routes/image.routes')(app);
 
 // set port, listen for requests
 const PORT = 3000;

@@ -6,7 +6,7 @@ function checkHasCheckin (req, res){
         var time = moment();
         var date = time.format('YYYY-MM-DDTHH:mm:ss');
         aDatetime = String(date).split("T")
-        var dateNow = aDatetime[0] + " 00:00:00"
+        var dateNow = aDatetime[0] + " 05:00:00"
         const query = "SELECT * FROM attendance WHERE user_id=$1 AND active=$2 AND checkin_date>=$3 ORDER BY attendance_id DESC"
         const dataquery = [req.params.user_id, "T", dateNow];
         db.query(query, dataquery).then((results) => {
@@ -31,9 +31,15 @@ function checkCanCheckOut(req, res){
         var time = moment();
         var date = time.format('YYYY-MM-DDTHH:mm:ss');
         aDatetime = String(date).split("T")
-        var dateNow = aDatetime[0] + " 00:00:00"
-        const query = "SELECT * FROM attendance WHERE user_id=$1 AND active=$2 AND checkin_date>=$3 ORDER BY attendance_id DESC"
-        const dataquery = [req.params.user_id, "T", dateNow];
+        var dateNow = aDatetime[0] + " 05:00:00"
+
+        let tomorrow  = moment().add(1,'days');
+        var dateTmr = tomorrow.format('YYYY-MM-DDTHH:mm:ss');
+        var aDatetimeTmr = String(dateTmr).split("T")
+        var dateAttendanceTmr = aDatetimeTmr[0] + " 05:00:00"
+
+        const query = "SELECT * FROM attendance WHERE user_id=$1 AND active=$2 AND checkin_date>=$3 AND checkin_date<=$4 ORDER BY attendance_id DESC"
+        const dataquery = [req.params.user_id, "T", dateNow, dateAttendanceTmr];
         db.query(query, dataquery).then((results) => {
             console.log(results.rows)
             if(results.rows.length==0){
@@ -56,7 +62,7 @@ function checkHasCheckout(req, res){
         var time = moment();
         var date = time.format('YYYY-MM-DDTHH:mm:ss');
         aDatetime = String(date).split("T")
-        var dateNow = aDatetime[0] + " 00:00:00"
+        var dateNow = aDatetime[0] + " 05:00:00"
         const query = "SELECT * FROM attendance WHERE user_id=$1 AND active=$2 AND checkout_date>=$3 ORDER BY attendance_id DESC"
         const dataquery = [req.params.user_id, "T", dateNow];
         db.query(query, dataquery).then((results) => {

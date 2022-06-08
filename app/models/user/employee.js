@@ -4,9 +4,16 @@ var format = require('pg-format');
 var moment = require('moment');
 
 checkDuplicateUsername = (req, res, next) => {
+  let query = ""
+  let dataquery = ""
   // Username
-  const query = "SELECT * FROM users WHERE username=$1 AND active=$2 ORDER BY user_id DESC"
-  const dataquery = [req.body.username, "T"];
+  if(req.params.user_id){
+    query = "SELECT * FROM users WHERE username=$1 AND active=$2 AND user_id!=$3 ORDER BY user_id DESC"
+    dataquery = [req.body.username, "T", req.params.user_id];
+  }else{
+    query = "SELECT * FROM users WHERE username=$1 AND active=$2 ORDER BY user_id DESC"
+    dataquery = [req.body.username, "T"];
+  }
   db.query(query, dataquery).then((results) => {
     if(results.rows.length>0){
         var ret = {"code":"WEEM001","description":"Username already in use"}
@@ -45,8 +52,16 @@ checkEmployeeExist = (req, res, next) => {
 
 checkDuplicateEmployeeId = (req, res, next) => {
   if(req.body.employee_id){
-    const query = "SELECT * FROM users WHERE employee_id=$1 AND active=$2 ORDER BY user_id DESC"
-    const dataquery = [req.body.employee_id, "T"];
+    let query = ""
+    let dataquery = ""
+    // Username
+    if(req.params.user_id){
+      query = "SELECT * FROM users WHERE employee_id=$1 AND active=$2 AND user_id!=$3 ORDER BY user_id DESC"
+      dataquery = [req.body.employee_id, "T", req.params.user_id];
+    }else{
+      query = "SELECT * FROM users WHERE employee_id=$1 AND active=$2 ORDER BY user_id DESC"
+      dataquery = [req.body.employee_id, "T"];
+    }
     db.query(query, dataquery).then((results) => {
       console.log("dupemployee")
       console.log(results.rows)
@@ -69,6 +84,8 @@ checkDuplicateEmployeeId = (req, res, next) => {
 
 checkRolesExisted = (req, res, next) => {
   if (req.body.roles) {
+    req.body.roles = JSON.parse(req.body.roles)
+    console.log(req.body.roles);
     const query = "SELECT role_id FROM role WHERE active=$1"
     const dataquery = ["T"];
     db.query(query, dataquery).then((results) => {
@@ -130,7 +147,7 @@ function createAccount(req, res){
   const work_start_time = req.body.work_start_time
   const work_end_time = req.body.work_end_time
   const work_hours = req.body.work_hours
-  const imageurl = req.body.imageurl
+  const image_url = req.body.image_url
   const active = "T"
   const createby = req.body.createby
   const createdate = dateNow
@@ -139,7 +156,7 @@ function createAccount(req, res){
   return new Promise(function(resolve){
     const query = `INSERT INTO users(username, password, employee_id, firstname, lastname, nickname,
                                     gender, dob, job_start_date, working_status, position_id, mobileno, company_id, work_start_time,
-                                    work_end_time, work_hours, imageurl, active, createby, createdate, updateby, updatedate) 
+                                    work_end_time, work_hours, image_url, active, createby, createdate, updateby, updatedate) 
                    VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18, $19, $20, $21, $22)  RETURNING user_id;`
     const dataquery = [username, 
                        password, 
@@ -157,7 +174,7 @@ function createAccount(req, res){
                        work_start_time,
                        work_end_time,
                        work_hours,
-                       imageurl,
+                       image_url,
                        active,
                        createby,
                        createdate,
@@ -165,9 +182,9 @@ function createAccount(req, res){
                        updatedate];
     db.query(query, dataquery).then((results) => {
       const user_id = results.rows[0].user_id
-      console.log(results)
       let insertValue = []
       for (var i = 0; i < req.body.roles.length; i++) {
+        console.log(req.body.roles[i])
         insertValue.push([user_id, req.body.roles[i], createby, createdate, updateby, updatedate, "T"])
       }
       let queryRole = format("INSERT INTO user_role(user_id, role_id, createby, createdate, updateby, updatedate, active) VALUES %L", insertValue);
@@ -176,14 +193,15 @@ function createAccount(req, res){
       })
       .catch(error => {
         res.status(500).send({
-          code:"WEEM500",
+          code:"WEEM502",
           description: error.message
         });
       });
     })
     .catch(error => {
+      console.log(error)
       res.status(500).send({
-        code:"WEEM500",
+        code:"WEEM501",
         description: error.message
       });
     });
@@ -194,7 +212,7 @@ function listEmployee(req, res){
   return new Promise(function(resolve){
     let query = `SELECT username, employee_id, user_id, firstname, lastname, nickname, gender,a.depratment_id, a.depratment_name,
                       dob, job_start_date, working_status, a.position_id, mobileno, a.company_id, work_start_time,
-                      work_end_time, work_hours, imageurl, b.position_name, c.company_name, count(a.*) OVER() AS total_row
+                      work_end_time, work_hours, image_url, b.position_name, c.company_name, count(a.*) OVER() AS total_row
                   FROM users a
                   LEFT JOIN positions b on a.position_id=b.position_id
                   LEFT JOIN company c on c.company_id=a.company_id
@@ -232,7 +250,7 @@ function getEmployee(req, res){
     var dateNow = aDatetime[0] + " 00:00:00"
     let query = `SELECT username, employee_id, a.user_id, firstname, lastname, nickname, gender, a.createdate, a.updatedate, a.updateby, a.last_login,
                         dob, job_start_date, a.position_id, mobileno, a.company_id, work_start_time + interval '15 minute' as late_work_start, d.department_id, d.department_name,
-                        work_end_time, work_hours, a.imageurl as profile_url, b.position_name, c.company_name, work_start_time
+                        work_end_time, work_hours, a.image_url as profile_url, b.position_name, c.company_name, work_start_time
                     FROM users a
                     LEFT JOIN positions b on a.position_id=b.position_id
                     LEFT JOIN company c on c.company_id=a.company_id
@@ -244,11 +262,18 @@ function getEmployee(req, res){
     db.query(query, dataquery).then((results) => {
       let returnData = results.rows[0]
       if(results.rows[0]!==undefined){
+
+        var dateAttendance = aDatetime[0] + " 05:00:00"
+
+        let tomorrow  = moment().add(1,'days');
+        var dateTmr = tomorrow.format('YYYY-MM-DDTHH:mm:ss');
+        var aDatetimeTmr = String(dateTmr).split("T")
+        var dateAttendanceTmr = aDatetimeTmr[0] + " 05:00:00"
         let queryAttendance = `SELECT checkin_date, checkout_date
                                 FROM attendance
-                                WHERE active=$1 AND user_id=$2 AND checkin_date>=$3
+                                WHERE active=$1 AND user_id=$2 AND checkin_date>=$3 AND checkin_date<=$4
                                 ORDER BY attendance_id DESC`
-        let attendanceDataQuery = ["T", req.params.user_id, dateNow];
+        let attendanceDataQuery = ["T", req.params.user_id, dateAttendance, dateAttendanceTmr];
         db.query(queryAttendance, attendanceDataQuery).then((results) => {
           if(results.rows.length>0){
             returnData['checkin_date'] = results.rows[0]['checkin_date']==undefined ? '' : results.rows[0]['checkin_date']
@@ -321,7 +346,7 @@ function updateEmployee(req, res){
   const work_start_time = req.body.work_start_time
   const work_end_time = req.body.work_end_time
   const work_hours = req.body.work_hours
-  const imageurl = req.body.imageurl
+  const image_url = req.body.image_url
   const active = req.body.active
   const updateby = req.body.updateby
   const updatedate = dateNow
@@ -343,7 +368,7 @@ function updateEmployee(req, res){
                        work_start_time=$11,
                        work_end_time=$12, 
                        work_hours=$13, 
-                       imageurl=$14, 
+                       image_url=$14, 
                        active=$15, 
                        updateby=$16, 
                        updatedate=$17,
@@ -363,7 +388,7 @@ function updateEmployee(req, res){
                        work_start_time, 
                        work_end_time, 
                        work_hours,
-                       imageurl,
+                       image_url,
                        active,
                        updateby,
                        updatedate,

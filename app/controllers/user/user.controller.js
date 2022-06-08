@@ -3,17 +3,43 @@ const config = require("../../config/auth.config");
 const authJwt = require("../../models/user/authentication");
 const employee = require("../../models/user/employee");
 var jwt = require("jsonwebtoken");
+let fs = require('fs');
 
 exports.signup = async (req, res) => {
   // Save User to Database
-  user = await employee.createAccount(req, res)
-  if (!user) {
-      res.status(500).send({code:"WEUS500", description: "Internal error." });
-  }else{
-    res.status(200).send({
-      code:"WEUS200",
-      description: "Register complete."
+  if (req.files) {
+    const file = req.files.image_url
+    const fileName = file.name
+    let dir = __dirname.split("/app")[0]
+    fs.mkdir(`./upload/user/${req.body.employee_id}`, {recursive: true}, (err) => {
+        if (err) {
+            console.error(err);
+        }else{
+            file.mv(`./upload/user/${req.body.employee_id}/${fileName}`, async (err) => {
+                req.body.image_url = `${dir}/upload/user/${req.body.employee_id}/${fileName}`
+                user = await employee.createAccount(req, res)
+                if (!user) {
+                    res.status(500).send({code:"WEUS500", description: "Internal error." });
+                }else{
+                  res.status(200).send({
+                    code:"WEUS200",
+                    description: "Register complete."
+                  });
+                }
+            })
+        }
+        console.log('Directory created successfully!');
     });
+  }else{
+    user = await employee.createAccount(req, res)
+    if (!user) {
+        res.status(500).send({code:"WEUS500", description: "Internal error." });
+    }else{
+      res.status(200).send({
+        code:"WEUS200",
+        description: "Register complete."
+      });
+    }
   }
 };
 
