@@ -28,4 +28,9 @@ module.exports = function(app) {
     [authJwt.verifyToken, project.checkProjectExist], 
     controller.deleteProject
   );
+  app.get(
+    "/project/:company_id",
+    [authJwt.verifyToken],
+    controller.listProject
+  );
 };

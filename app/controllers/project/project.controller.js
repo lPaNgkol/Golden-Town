@@ -28,7 +28,7 @@ exports.createProject = async (req, res) => {
                     if (projectData.length==0) {
                         res.status(404).send({code:"WEPO404", description: "Company Id Not found." });
                     }else{
-                        res.status(200).send({code:"WECO200", projectData});
+                        res.status(200).send({code:"WEPO200", projectData});
                     }
                 })
             }
@@ -39,7 +39,7 @@ exports.createProject = async (req, res) => {
         if (projectData.length==0) {
             res.status(404).send({code:"WEPO404", description: "Company Id Not found." });
         }else{
-            res.status(200).send({code:"WECO200", projectData});
+            res.status(200).send({code:"WEPO200", projectData});
         }
     }
 };
@@ -86,7 +86,7 @@ exports.updateProject = async (req, res) => {
                     if (projectData.length==0) {
                         res.status(404).send({code:"WEPO404", description: "Company Id Not found." });
                     }else{
-                        res.status(200).send({code:"WECO200", projectData});
+                        res.status(200).send({code:"WEPO200", projectData});
                     }
                 })
             }
@@ -97,7 +97,21 @@ exports.updateProject = async (req, res) => {
         if (projectData.length==0) {
             res.status(404).send({code:"WEPO404", description: "Company Id Not found." });
         }else{
-            res.status(200).send({code:"WECO200", projectData});
+            res.status(200).send({code:"WEPO200", projectData});
         }
+    }
+};
+
+exports.listProject = async (req, res) => {
+    var projectData = ""
+
+    if(!req.params.company_id){
+        res.status(200).send({code:"WEPO400", description: "Company id cannot be Null." });
+    }
+    projectData = await project.listProject(req, res)
+    if (projectData.length==0) {
+        res.status(404).send({code:"WEPO404", description: "Project Not found." });
+    }else{
+        res.status(200).send({code:"WEPO200", projectData});
     }
 };
