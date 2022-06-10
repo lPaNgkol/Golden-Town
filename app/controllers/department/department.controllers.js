@@ -1,3 +1,4 @@
+const { response } = require("express");
 const department = require("../../models/department/department");
 const authJwt = require("../../models/user/authentication");
 
@@ -5,7 +6,7 @@ const authJwt = require("../../models/user/authentication");
 exports.departmentList = async (req, res) => {
   var listDepartment = "";
   listDepartment = await department.departmentList(req, res);
-  console.log(listDepartment);
+  // console.log(listDepartment);
   if (listDepartment.length == 0) {
     res
       .status(200)
@@ -27,7 +28,7 @@ exports.departmentList = async (req, res) => {
 exports.ckcompanyId = async (req, res, next) => {
   var listDepartment = "";
   listDepartment = await department.ckcompanyId(req, res);
-  console.log(listDepartment);
+  // console.log(listDepartment);
   if (listDepartment.length == 0) {
     res
       .status(200)
@@ -46,7 +47,7 @@ exports.ckcompanyId = async (req, res, next) => {
 exports.departmentById = async (req, res) => {
   var DepartmentId = "";
   DepartmentId = await department.departmentByCompanyId(req, res);
-  console.log(DepartmentId.length, DepartmentId);
+  // console.log(DepartmentId.length, DepartmentId);
   if (DepartmentId.length == 0) {
     res
       .status(200)
@@ -66,8 +67,12 @@ exports.departmentById = async (req, res) => {
 // get by department_id
 exports.departmentBydId = async (req, res) => {
   var DepartmentId = "";
-  DepartmentId = await department.departmentBydepartmentId(req, res);
-  console.log(DepartmentId.length);
+  var Dnnn = null;
+  DepartmentId = await department.departmentInfo(req, res);
+  Dnnn = await department.dName(req, res);
+
+  console.log("pos1", Dnnn);
+  // console.log(DepartmentId.length);
   if (DepartmentId.length == 0) {
     res
       .status(200)
@@ -78,9 +83,38 @@ exports.departmentBydId = async (req, res) => {
       .status(200)
       .send({ code: "WEDP401", description: "Access Token Expired" });
   } else {
+    res.status(200).send({
+      total: DepartmentId.length,
+      department_name: Dnnn,
+      department_user: DepartmentId,
+    });
+  }
+};
+
+// get by department_id
+exports.departmentBycId = async (req, res) => {
+  var DepartmentId = "";
+  var Dnnn = null;
+  DepartmentId = await department.companyInfo(req, res);
+  // Dnnn = await department.dName(req, res);
+
+  Dnnn = await department.fName(req, res);
+  console.log("te", Dnnn);
+  if (DepartmentId.length == 0) {
     res
       .status(200)
-      .send({ total: DepartmentId.length, department: DepartmentId });
+      .send({ code: "WEDP404", description: "Department Not found." });
+  }
+  if (!authJwt) {
+    res
+      .status(200)
+      .send({ code: "WEDP401", description: "Access Token Expired" });
+  } else {
+    res.status(200).send({
+      total: DepartmentId.length,
+      department_name1: Dnnn,
+      department_user: DepartmentId,
+    });
   }
 };
 
@@ -90,9 +124,7 @@ exports.createDepartment = async (req, res) => {
     let departmentData = "";
     let companyCk = "";
     companyCk = await department.ckcompanyId(req, res);
-    // departmentCk = await department.departmentByCompanyId(req, res);
-    console.log("compa", companyCk, "comlength", companyCk.length);
-    // console.log("depart",departmentCk);
+
     if (companyCk.length == 0) {
       res
         .status(200)
@@ -174,7 +206,7 @@ exports.updateDepartment = async (req, res) => {
 delete department;
 exports.deleteDepartment = async (req, res) => {
   try {
-    let departmentData = "";
+    let departmentCk = "";
     departmentCk = await department.departmentBydepartmentId(req, res);
     if (!authJwt) {
       res
@@ -199,3 +231,6 @@ exports.deleteDepartment = async (req, res) => {
     return error;
   }
 };
+
+
+

@@ -210,7 +210,7 @@ function createAccount(req, res){
 
 function listEmployee(req, res){
   return new Promise(function(resolve){
-    let query = `SELECT username, employee_id, user_id, firstname, lastname, nickname, gender,a.depratment_id, a.depratment_name,
+    let query = `SELECT username, employee_id, user_id, firstname, lastname, nickname, gender,a.department_id, a.department_id,
                       dob, job_start_date, working_status, a.position_id, mobileno, a.company_id, work_start_time,
                       work_end_time, work_hours, image_url, b.position_name, c.company_name, count(a.*) OVER() AS total_row
                   FROM users a
@@ -263,17 +263,30 @@ function getEmployee(req, res){
       let returnData = results.rows[0]
       if(results.rows[0]!==undefined){
 
+        
+        var timeNow = aDatetime[1].split(":")
         var dateAttendance = aDatetime[0] + " 05:00:00"
+        //กรณีจะเชคเอ้าหลังเที่ยงคืนเช็คว่ามีเช็คอินหลังตีห้าเมื่อวานไหม
+        var queryAttendance = ""
+        var attendanceDataQuery = []
+        if(timeNow[0]- -0 >=5){
+          queryAttendance = `SELECT checkin_date, checkout_date
+                                  FROM attendance
+                                  WHERE active=$1 AND user_id=$2 AND checkin_date>=$3
+                                  ORDER BY attendance_id DESC`
+          attendanceDataQuery = ["T", req.params.user_id, dateAttendance];
+        }else{
+          let yesterday  = moment().add(-1,'days');
+          var dateYesterday = yesterday.format('YYYY-MM-DDTHH:mm:ss');
+          var aDatetimeYesterday = String(dateYesterday).split("T")
+          var dateAttendanceYesterday = aDatetimeYesterday[0] + " 05:00:00"
 
-        let tomorrow  = moment().add(1,'days');
-        var dateTmr = tomorrow.format('YYYY-MM-DDTHH:mm:ss');
-        var aDatetimeTmr = String(dateTmr).split("T")
-        var dateAttendanceTmr = aDatetimeTmr[0] + " 05:00:00"
-        let queryAttendance = `SELECT checkin_date, checkout_date
-                                FROM attendance
-                                WHERE active=$1 AND user_id=$2 AND checkin_date>=$3 AND checkin_date<=$4
-                                ORDER BY attendance_id DESC`
-        let attendanceDataQuery = ["T", req.params.user_id, dateAttendance, dateAttendanceTmr];
+          queryAttendance = `SELECT checkin_date, checkout_date
+                                  FROM attendance
+                                  WHERE active=$1 AND user_id=$2 AND checkin_date>=$3
+                                  ORDER BY attendance_id DESC`
+          attendanceDataQuery = ["T", req.params.user_id, dateAttendanceYesterday];
+        }
         db.query(queryAttendance, attendanceDataQuery).then((results) => {
           if(results.rows.length>0){
             returnData['checkin_date'] = results.rows[0]['checkin_date']==undefined ? '' : results.rows[0]['checkin_date']

@@ -6,23 +6,31 @@ function checkHasCheckin (req, res){
         var time = moment();
         var date = time.format('YYYY-MM-DDTHH:mm:ss');
         aDatetime = String(date).split("T")
-        var dateNow = aDatetime[0] + " 05:00:00"
-        const query = "SELECT * FROM attendance WHERE user_id=$1 AND active=$2 AND checkin_date>=$3 ORDER BY attendance_id DESC"
-        const dataquery = [req.params.user_id, "T", dateNow];
-        db.query(query, dataquery).then((results) => {
-            if(results.rows.length>0){
-              console.log(results.rows);
-                var ret = {"code":"WEAT004","description":"Already Checkin Today"}
-                res.status(200).json(ret)
-            }else{
-                resolve(true)
-            }
-            }).catch(error => {
-            res.status(500).send({
-                code:"WEAT500",
-                description: error.message
-            });
-        });
+        var timeNow = aDatetime[1].split(":")
+        //กรณีจะเชคอินหลังเที่ยงคืน ห้ามเช็คอินต้องรอหลังตีห้า
+        if(timeNow[0]- -0 <5){
+          var ret = {"code":"WEAT007","description":"Not in Checkin Period!"}
+          res.status(200).json(ret)
+        }else{
+          var dateNow = aDatetime[0] + " 05:00:00"
+          const query = "SELECT * FROM attendance WHERE user_id=$1 AND active=$2 AND checkin_date>=$3 ORDER BY attendance_id DESC"
+          const dataquery = [req.params.user_id, "T", dateNow];
+          db.query(query, dataquery).then((results) => {
+              if(results.rows.length>0){
+                console.log(results.rows);
+                  var ret = {"code":"WEAT004","description":"Already Checkin Today"}
+                  res.status(200).json(ret)
+              }else{
+                  resolve(true)
+              }
+              }).catch(error => {
+              res.status(500).send({
+                  code:"WEAT500",
+                  description: error.message
+              });
+          });
+
+        }
     })
 };
 
@@ -31,15 +39,23 @@ function checkCanCheckOut(req, res){
         var time = moment();
         var date = time.format('YYYY-MM-DDTHH:mm:ss');
         aDatetime = String(date).split("T")
+        var timeNow = aDatetime[1].split(":")
         var dateNow = aDatetime[0] + " 05:00:00"
+        //กรณีจะเชคเอ้าหลังเที่ยงคืนเช็คว่ามีเช็คอินหลังตีห้าเมื่อวานไหม
+        var query = ""
+        var dataquery = []
+        if(timeNow[0]- -0 >=5){
+          query = "SELECT * FROM attendance WHERE user_id=$1 AND active=$2 AND checkin_date>=$3 ORDER BY attendance_id DESC"
+          dataquery = [req.params.user_id, "T", dateNow];
+        }else{
+          let yesterday  = moment().add(-1,'days');
+          var dateYesterday = yesterday.format('YYYY-MM-DDTHH:mm:ss');
+          var aDatetimeYesterday = String(dateYesterday).split("T")
+          var dateAttendanceYesterday = aDatetimeYesterday[0] + " 05:00:00"
 
-        let tomorrow  = moment().add(1,'days');
-        var dateTmr = tomorrow.format('YYYY-MM-DDTHH:mm:ss');
-        var aDatetimeTmr = String(dateTmr).split("T")
-        var dateAttendanceTmr = aDatetimeTmr[0] + " 05:00:00"
-
-        const query = "SELECT * FROM attendance WHERE user_id=$1 AND active=$2 AND checkin_date>=$3 AND checkin_date<=$4 ORDER BY attendance_id DESC"
-        const dataquery = [req.params.user_id, "T", dateNow, dateAttendanceTmr];
+          query = "SELECT * FROM attendance WHERE user_id=$1 AND active=$2 AND checkin_date>=$3 ORDER BY attendance_id DESC"
+          dataquery = [req.params.user_id, "T", dateAttendanceYesterday];
+        }
         db.query(query, dataquery).then((results) => {
             console.log(results.rows)
             if(results.rows.length==0){
@@ -62,9 +78,23 @@ function checkHasCheckout(req, res){
         var time = moment();
         var date = time.format('YYYY-MM-DDTHH:mm:ss');
         aDatetime = String(date).split("T")
+        var timeNow = aDatetime[1].split(":")
         var dateNow = aDatetime[0] + " 05:00:00"
-        const query = "SELECT * FROM attendance WHERE user_id=$1 AND active=$2 AND checkout_date>=$3 ORDER BY attendance_id DESC"
-        const dataquery = [req.params.user_id, "T", dateNow];
+        //กรณีจะเชคเอ้าหลังเที่ยงคืนเช็คว่ามีเช็คเอ้าหลังตีห้าเมื่อวานไหม
+        var query = ""
+        var dataquery = []
+        if(timeNow[0]- -0 >=5){
+          query = "SELECT * FROM attendance WHERE user_id=$1 AND active=$2 AND checkout_date>=$3 ORDER BY attendance_id DESC"
+          dataquery = [req.params.user_id, "T", dateNow];
+        }else{
+          let yesterday  = moment().add(-1,'days');
+          var dateYesterday = yesterday.format('YYYY-MM-DDTHH:mm:ss');
+          var aDatetimeYesterday = String(dateYesterday).split("T")
+          var dateAttendanceYesterday = aDatetimeYesterday[0] + " 05:00:00"
+
+          query = "SELECT * FROM attendance WHERE user_id=$1 AND active=$2 AND checkout_date>=$3 ORDER BY attendance_id DESC"
+          dataquery = [req.params.user_id, "T", dateAttendanceYesterday];
+        }
         db.query(query, dataquery).then((results) => {
             if(results.rows.length>0){
                 var ret = {"code":"WEAT006","description":"Already Checkout Today"}
@@ -97,6 +127,8 @@ function attendanceListByUser(req, res){
     db.query(query, dataquery).then((results) => {
       roleArray = results.rows
       for (var i = 0; i < roleArray.length; i++) {
+        if(roleArray[i]['checkin_date']==null) roleArray[i]['checkin_date'] = ''
+        if(roleArray[i]['checkout_date']==null) roleArray[i]['checkout_date'] = ''
         var inTime = moment(roleArray[i]['checkin_date']);//now
         var outTime = moment(roleArray[i]['checkout_date']);
 
@@ -161,6 +193,8 @@ function attendanceList(req, res){
     db.query(query, dataquery).then((results) => {
       roleArray = results.rows
       for (var i = 0; i < roleArray.length; i++) {
+        if(roleArray[i]['checkin_date']==null) roleArray[i]['checkin_date'] = ''
+        if(roleArray[i]['checkout_date']==null) roleArray[i]['checkout_date'] = ''
         var inTime = moment(roleArray[i]['checkin_date']);//now
         var outTime = moment(roleArray[i]['checkout_date']);
 

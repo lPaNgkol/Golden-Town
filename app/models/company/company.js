@@ -78,9 +78,31 @@ function createCompany(req, res){
     })
   }
 
+checkCompanyExist = (req, res, next) => {
+    // Username
+  let company_id = req.params.company_id ? req.params.company_id : req.body.company_id
+  const query = "SELECT * FROM coompany WHERE company_id=$1 AND active=$2 ORDER BY company_id DESC"
+  const dataquery = [company_id, "T"];
+  db.query(query, dataquery).then((results) => {
+    console.log(results.rows)
+    if(results.rows.length<=0){
+        var ret = {"code":"WECO404","description":"Employee Not found."}
+        res.status(200).json(ret)
+    }else{
+      next();
+    }
+  }).catch(error => {
+    res.status(500).send({
+      code:"WECO500",
+      description: error.message
+    });
+  });
+};
+
 const company = {
     companyList: companyList,
     createCompany: createCompany,
-    checkDuplicateCompanyName:checkDuplicateCompanyName
+    checkDuplicateCompanyName:checkDuplicateCompanyName,
+    checkCompanyExist: checkCompanyExist
 };
 module.exports = company;

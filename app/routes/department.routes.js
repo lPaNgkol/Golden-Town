@@ -20,8 +20,22 @@ module.exports = function(app) {
     controller.departmentById
   );
 
-  app.post("/department/:company_id",
+  app.get(
+    "/departmentinfo/:department_id",
     [authJwt.verifyToken],
+    controller.departmentBydId
+  );
+
+  app.get(
+    "/companyinfo/:company_id",
+    [authJwt.verifyToken],
+    controller.departmentBycId
+  );
+
+
+
+  app.post("/department/:company_id",[authJwt.verifyToken],
+    controller.ckcompanyId,
     controller.createDepartment
   );
   app.put("/department/:department_id",

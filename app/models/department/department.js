@@ -58,9 +58,13 @@ function departmentByCompanyId(req, res) {
         `SELECT company_id, department_name FROM department WHERE company_id = $1 ORDER BY department_id ASC`,
         [companyId]
       );
+
       console.log("testdata", companyId);
+      // let jdata = joindata.rows;
       let results = data.rows;
+
       return resolve(results, results.length);
+      // return resolve(position, position.length);
     } catch (error) {
       console.error("### Error ", error);
       // return resolve(false);
@@ -72,18 +76,98 @@ function departmentByCompanyId(req, res) {
   });
 }
 
-//gat by department_id
-function departmentBydepartmentId(req, res) {
+function departmentName(req, res) {
   return new Promise(async (resolve) => {
     try {
-      let department_id = req.params.department_id;
-      const data = await db.query(
-        `SELECT department_id, department_name FROM department WHERE department_id = $1`,
-        [department_id]
+      let departmentId = req.params.department_id;
+      const poSer = await db.query(
+        `SELECT department.department_name from department INNER JOIN user ON department.department_id = $1`,
+        [departmentId]
       );
+      let pos1 = poSer.rows[0].department_name;
+      // let puSers = poSer.rows;
+      console.log("tes", pos1);
+      // console.log("pos1", puSers.rows);
+      return resolve(pos1);
+    } catch (error) {
+      console.error("### Error ", error);
+      // return resolve(false);
+      return res.status(500).send({
+        code: "WEDP500",
+        description: error.message,
+      });
+    }
+  });
+}
 
-      let results = data.rows;
-      return resolve(results, results.length);
+function departmentfName(req, res) {
+  return new Promise(async (resolve) => {
+    try {
+      let departmentId = req.params.company_id;
+      const poSer = await db.query(
+        `SELECT company.company_name from company INNER JOIN user ON company.company_id = $1`,
+        [departmentId]
+      );
+      let pos1 = poSer.rows[0].company_name;
+      let puSers = poSer.rows;
+      console.log("fname", pos1);
+      console.log("pos1", puSers.rows);
+      return resolve(pos1);
+    } catch (error) {
+      console.error("### Error ", error);
+      // return resolve(false);
+      return res.status(500).send({
+        code: "WEDP500",
+        description: error.message,
+      });
+    }
+  });
+}
+// get companyInfo
+function companyInfo(req, res) {
+  return new Promise(async (resolve) => {
+    try {
+      let companyId = req.params.company_id;
+
+      const join207 = await db.query(
+        `SELECT department.department_name, users.employee_id,users.user_id, users.firstname, users.lastname, users.nickname,users.imageurl, positions.position_id, positions.position_name
+        FROM
+        (department LEFT JOIN users ON users.department_id = department.department_id)
+        LEFT JOIN positions ON users.position_id = positions.position_id WHERE EXISTS (SELECT users.company_id FROM users WHERE users.company_id = department.company_id AND users.company_id = $1) ORDER BY department.department_name;`,
+        [companyId]
+      );
+      let position = join207.rows;
+      let position1 = join207.rows[0].department_name;
+      return resolve(position, position1);
+    } catch (error) {
+      console.error("### Error ", error);
+      // return resolve(false);
+      return res.status(500).send({
+        code: "WEDP500",
+        description: error.message,
+      });
+    }
+  });
+}
+
+// get departmentinfo
+function departmentInfo(req, res) {
+  return new Promise(async (resolve) => {
+    try {
+      let departmentId = req.params.department_id;
+      const jointreedata = await db.query(
+        `SELECT users.employee_id,users.user_id, users.firstname, users.lastname, users.nickname, positions.position_id, users.imageurl, positions.position_name
+FROM
+(department LEFT JOIN users ON users.department_id = $1)
+INNER JOIN user ON department.department_id = users.department_id
+LEFT JOIN positions ON users.position_id = positions.position_id ORDER BY users.employee_id ASC`,
+        [departmentId]
+      );
+      let position = jointreedata.rows;
+      // let puSers = poSer.rows;
+      console.log("testjipo", position.results);
+
+      return resolve(position, position.length);
     } catch (error) {
       console.error("### Error ", error);
       // return resolve(false);
@@ -101,7 +185,7 @@ function createDepartment(req, res) {
     try {
       const dateNow = moment().format("YYYY-MM-DD HH:mm:ss");
       // const department_id = req.body.department_id;
-      console.log("req", req.user_id)
+      console.log("req", req.user_id);
       const department_name = req.body.department_name;
       const company_id = req.params.company_id;
       const createby = req.user_id;
@@ -109,12 +193,6 @@ function createDepartment(req, res) {
       const createdate = dateNow;
       const updatedate = dateNow;
       let companyId = req.params.company_id;
-
-      // const datCk = await db.query(
-      //   `SELECT company_id FROM department WHERE company_id = $1`,
-      //   [companyId]
-      // // );
-      // datareCk = datCk.rowCount != 0 ? datCk.rows[0] : false;
 
       const data = await db.query(
         `INSERT INTO department(department_name, company_id, createby, updateby, createdate, updatedate)
@@ -197,14 +275,58 @@ function deleteDepartment(req, res) {
     }
   });
 }
+function departmentBydepartmentId(req, res) {
+  return new Promise(async (resolve) => {
+    try {
+      let department_id = req.params.department_id;
+      const data = await db.query(
+        `SELECT department_id, department_name FROM department WHERE department_id = $1`,
+        [department_id]
+      );
+
+      let results = data.rows;
+      return resolve(results, results.length);
+    } catch (error) {
+      console.error("### Error ", error);
+      // return resolve(false);
+      return res.status(500).send({
+        code: "WEDP500",
+        description: error.message,
+      });
+    }
+  });
+}
+
+
+
+// get positionbydepartmentid
+// function ;
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 const department = {
   departmentList: departmentList,
   departmentByCompanyId: departmentByCompanyId,
-  departmentBydepartmentId: departmentBydepartmentId,
+  departmentBydepartmentId:departmentBydepartmentId,
+  departmentInfo: departmentInfo,
   createDepartment: createDepartment,
   updateDepartment: updateDepartment,
   deleteDepartment: deleteDepartment,
   ckcompanyId: companyList,
+  dName: departmentName,
+  companyInfo: companyInfo,
+  fName:departmentfName,
 };
 module.exports = department;

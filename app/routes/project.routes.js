@@ -1,6 +1,7 @@
 const authJwt = require("../models/user/authentication");
 const controller = require("../controllers/project/project.controller");
 const project = require("../models/project/project");
+const company = require("../models/company/company");
 
 module.exports = function(app) {
   app.use(function(req, res, next) {
@@ -13,13 +14,13 @@ module.exports = function(app) {
   
   app.post(
     "/project/:company_id",
-    [authJwt.verifyToken, project.checkDuplicateProjectCode], 
+    [authJwt.verifyToken, company.checkCompanyExist, project.checkDuplicateProjectCode], 
     controller.createProject
   );
   
   app.post(
     "/project/update/:project_id",
-    [authJwt.verifyToken, project.checkProjectExist, project.checkDuplicateProjectCode], 
+    [authJwt.verifyToken, company.checkCompanyExist, project.checkProjectExist, project.checkDuplicateProjectCode], 
     controller.updateProject
   );
   
@@ -30,7 +31,7 @@ module.exports = function(app) {
   );
   app.get(
     "/project/:company_id",
-    [authJwt.verifyToken],
+    [authJwt.verifyToken, company.checkCompanyExist],
     controller.listProject
   );
 };
