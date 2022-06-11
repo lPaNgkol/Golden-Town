@@ -22,15 +22,12 @@ function ProjectTeambyCompany(req, res) {
       );
       let paramsIs = projectTeamId;
       let projectName = getProjectteam.rows;
-      // for (row of projectName) {
-      //   row.isActive === "T" ? row.isActive = "True" : row.isActive = "False";
-      // }
+
 
       console.log("test get", paramsIs);
       return resolve(projectName, paramsIs);
     } catch (error) {
       console.error("### Error ", error);
-      // return resolve(false);
       return res.status(500).send({
         code: "WEPT500",
         description: error.message,
@@ -41,7 +38,6 @@ function ProjectTeambyCompany(req, res) {
 
 function listProjectTeamAll(req, res) {
   let projectTeam = req.params.project_team_id;
-
   return new Promise(async (resolve) => {
     try {
       const getProjectteam = await db.query(
@@ -54,19 +50,15 @@ function listProjectTeamAll(req, res) {
       FROM
       project_team LEFT JOIN users ON users.user_id = project_team.user_id
       INNER JOIN project_on_hand ON project_team.project_on_hand_id = project_on_hand.project_on_hand_id 
-`
-      );
-
+` );
       let projectName = getProjectteam.rows;
-      // for (row of projectName) {
-      //   row.isActive === "T" ? row.isActive = "True" : row.isActive = "False";
-      // }
 
-      console.log("test get", getProjectteam);
+
+  
       return resolve(projectName);
     } catch (error) {
       console.error("### Error ", error);
-      // return resolve(false);
+
       return res.status(500).send({
         code: "WEPT500",
         description: error.message,
@@ -98,15 +90,13 @@ function listProjectTeam(req, res) {
       );
 
       let projectName = getProjectteam.rows;
-      // for (row of projectName) {
-      //   row.isActive === "T" ? row.isActive = "True" : row.isActive = "False";
-      // }
+      
 
-      console.log("test get", getProjectteam);
+      
       return resolve(projectName);
     } catch (error) {
       console.error("### Error ", error);
-      // return resolve(false);
+     
       return res.status(500).send({
         code: "WEPT500",
         description: error.message,
@@ -146,7 +136,6 @@ function createProjectTeam(req, res) {
           owner,
         ]
       );
-      console.log(query.rows);
       let results = query.rows;
       return resolve(results);
     } catch (error) {
@@ -189,12 +178,10 @@ function updateProjectteam(req, res) {
         ]
       );
 
-      console.log("data", data);
       let results = data.rowCount != 0 ? data.rows[0] : false;
       return resolve(results);
     } catch (error) {
       console.error("### Error ", error);
-      // return resolve(false);
       return res.status(500).send({
         code: "WEPT500",
         description: error.message,
@@ -212,11 +199,9 @@ function deleteProjectteam(req, res) {
         [req.params.project_team_id]
       );
       let results = result.rows;
-      // console.log("testresults", reeS.length);
       return resolve(results, results.length);
     } catch (error) {
       console.error("### Error ", error);
-      // return resolve(false);
       return res.status(500).send({
         code: "WEDP500",
         description: error.message,
@@ -234,12 +219,10 @@ function projectteamByprojectId(req, res) {
         `SELECT project_team_id FROM project_team WHERE project_team_id = $1`,
         [project_team_id]
       );
-
       let results = data.rows;
       return resolve(results, results.length);
     } catch (error) {
       console.error("### Error ", error);
-      // return resolve(false);
       return res.status(500).send({
         code: "WEDP500",
         description: error.message,
@@ -284,7 +267,6 @@ function checkidByonhandId(req, res, next) {
         [userid]
       );
       let results = data.rows;
-      console.log("project_on_hand_id", results, results.length);
       if (results.length == 0) {
         var ret = { code: "WEPO404", description: "Project not exist" };
         res.status(200).json(ret);
@@ -293,7 +275,6 @@ function checkidByonhandId(req, res, next) {
       }
     } catch (error) {
       console.error("### Error ", error);
-      // return resolve(false);
       return res.status(500).send({
         code: "WEDP500",
         description: error.message,
@@ -322,7 +303,6 @@ function projectIdcreatesuccess(req, res) {
       return resolve(results);
     } catch (error) {
       console.error("### Error ", error);
-      // return resolve(false);
       return res.status(500).send({
         code: "WEDP500",
         description: error.message,
