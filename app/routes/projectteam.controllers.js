@@ -1,11 +1,10 @@
 const authJwt = require("../../models/user/authentication");
-const projectteam = require("../../models/projectteam/projectteam");
+const projectteam = require("../../models/project/projectteam");
 
 //  1get projectteambycompanyid;
 exports.getProjectbyCompany = async (req, res) => {
   let getProject = "";
   getProject = await projectteam.ProjectTeambyCompany(req, res);
-  console.log("vt", getProject);
   if (!authJwt) {
     res
       .status(200)
@@ -24,30 +23,6 @@ exports.getProjectbyCompany = async (req, res) => {
   }
 };
 
-//   try {
-//     let getProjectCom = "";
-//     getProjectCom = await projectteam.ProjectTeambyCompany(req, res);
-//     if (getProjectCom.length == 0) {
-//       res
-//         .status(200)
-//         .send({ code: "WEPT404", description: "Company Not found." });
-//     }
-//     if (!authJwt) {
-//       res
-//         .status(200)
-//         .send({ code: "WEPT401", description: "Access Token Expired" });
-//     } else {
-//       res.status(200).send({
-
-//         total: getProjectCom.length,
-//         projectTeam: getProjectCom,
-//       });
-//     }
-//   } catch (error) {
-//     console.error("### Error ", error);
-//     return error;
-//   }
-// };
 
 //get projectteam;
 exports.listProjectTeamAll = async (req, res) => {
