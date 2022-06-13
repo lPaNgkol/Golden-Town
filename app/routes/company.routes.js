@@ -16,10 +16,10 @@ module.exports = function(app) {
     controller.companyList
   );
   //get company by id
-//   app.get('/company/:company_id',
-//     [authJwt.verifyToken],
-//     controller.employee 
-//   );
+  app.get('/company/:company_id',
+    [authJwt.verifyToken, companyModel.checkCompanyExist],
+    controller.getCompanyById 
+  );
   //add new company
   app.post("/company",
     [authJwt.verifyToken,companyModel.checkDuplicateCompanyName], 

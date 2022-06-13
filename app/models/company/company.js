@@ -81,12 +81,12 @@ function createCompany(req, res){
 checkCompanyExist = (req, res, next) => {
     // Username
   let company_id = req.params.company_id ? req.params.company_id : req.body.company_id
-  const query = "SELECT * FROM coompany WHERE company_id=$1 AND active=$2 ORDER BY company_id DESC"
+  const query = "SELECT * FROM company WHERE company_id=$1 AND active=$2 ORDER BY company_id DESC"
   const dataquery = [company_id, "T"];
   db.query(query, dataquery).then((results) => {
     console.log(results.rows)
     if(results.rows.length<=0){
-        var ret = {"code":"WECO404","description":"Employee Not found."}
+        var ret = {"code":"WECO404","description":"Company Not found."}
         res.status(200).json(ret)
     }else{
       next();
@@ -99,10 +99,75 @@ checkCompanyExist = (req, res, next) => {
   });
 };
 
+
+function getCompanyById(req, res){
+  return new Promise(function(resolve){
+    let query = `SELECT a.active, a.company_name, a.address as company_address, a.company_id FROM company a WHERE a.active=$1 AND a.company_id=$2`
+    let dataquery = ["T", req.params.company_id];
+    db.query(query, dataquery).then((results) => {
+      var dataReturn = {}
+      if(results.rows.length>0){
+        dataReturn["company_id"] = results.rows[0].company_id
+        dataReturn["company_name"] = results.rows[0].company_name
+        dataReturn["company_address"] = results.rows[0].company_address
+
+        let queryDepartment = `SELECT a.department_name, a.department_id FROM department a WHERE a.company_id=$1`
+        let dataqueryDepartment = [req.params.company_id];
+        db.query(queryDepartment, dataqueryDepartment).then((resultsDept) => {
+          if(resultsDept.rows.length>0){
+            dataReturn["total_department"] = resultsDept.rows.length
+            dataReturn["department"] = resultsDept.rows
+          }else{
+            dataReturn["total_department"] = 0
+            dataReturn["department"] = []
+          }
+        })
+        .catch(error => {
+          res.status(500).send({
+            code:"WECO500",
+            description: error.message
+          });
+        });
+
+        let queryUser = `SELECT a.user_id, a.firstname, a.lastname, b.position_name, c.department_name
+                        FROM users a LEFT JOIN positions b on b.position_id=a.position_id
+                        LEFT JOIN department c on c.department_id=a.department_id
+                        WHERE a.active=$1 AND a.company_id=$2`
+        let dataqueryUser = ["T", req.params.company_id];
+        db.query(queryUser, dataqueryUser).then((resultsUser) => {
+          if(resultsUser.rows.length>0){
+            dataReturn["total_users"] = resultsUser.rows.length
+            dataReturn["users"] = resultsUser.rows
+          }else{
+            dataReturn["total_users"] = 0
+            dataReturn["users"] = []
+          }
+          resolve(dataReturn)
+        })
+        .catch(error => {
+          res.status(500).send({
+            code:"WECO500",
+            description: error.message
+          });
+        });
+      }else{
+        resolve(results.rows)
+      }
+    })
+    .catch(error => {
+      res.status(500).send({
+        code:"WECO500",
+        description: error.message
+      });
+    });
+  })
+}
+
 const company = {
     companyList: companyList,
     createCompany: createCompany,
     checkDuplicateCompanyName:checkDuplicateCompanyName,
-    checkCompanyExist: checkCompanyExist
+    checkCompanyExist: checkCompanyExist,
+    getCompanyById: getCompanyById
 };
 module.exports = company;
