@@ -27,4 +27,11 @@ module.exports = function(app) {
     ], 
     controller.employeeUpdate
   );
+  app.delete("/employee/:user_id",
+    [
+      authJwt.verifyToken,
+      employee.checkEmployeeExist,
+    ], 
+    controller.deleteEmployee
+  );
 };

@@ -22,7 +22,11 @@ checkDuplicateCompanyName = (req, res, next) => {
 
 function companyList(req, res){
     return new Promise(function(resolve){
-      let query = `SELECT * FROM company WHERE active=$1`
+      let query = `SELECT a.*, count(b.*) AS total_employee 
+                   FROM company a 
+                   LEFT JOIN users b on b.company_id=a.company_id
+                   WHERE a.active=$1
+                   GROUP BY a.company_id`
       let dataquery = ["T"];
       if(req.body.limit){
         query = query + " LIMIT $2"
@@ -163,11 +167,31 @@ function getCompanyById(req, res){
   })
 }
 
+function deleteCompany(req, res) {
+  return new Promise(async (resolve) => {
+      try {
+          const result = await db.query(
+              "DELETE FROM company WHERE company_id=$1",
+              [req.params.company_id]
+          );
+          return resolve("complete");
+      } catch (error) {
+          console.error("### Error ", error);
+          // return resolve(false);
+          return res.status(500).send({
+              code: "WECO500",
+              description: error.message,
+          });
+      }
+  });
+}
+
 const company = {
     companyList: companyList,
     createCompany: createCompany,
     checkDuplicateCompanyName:checkDuplicateCompanyName,
     checkCompanyExist: checkCompanyExist,
-    getCompanyById: getCompanyById
+    getCompanyById: getCompanyById,
+    deleteCompany: deleteCompany
 };
 module.exports = company;

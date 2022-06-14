@@ -420,6 +420,25 @@ function updateEmployee(req, res){
   })
 }
 
+function deleteEmployee(req, res) {
+  return new Promise(async (resolve) => {
+      try {
+          const result = await db.query(
+              "DELETE FROM users WHERE user_id=$1",
+              [req.params.company_id]
+          );
+          return resolve("complete");
+      } catch (error) {
+          console.error("### Error ", error);
+          // return resolve(false);
+          return res.status(500).send({
+              code: "WEEM500",
+              description: error.message,
+          });
+      }
+  });
+}
+
 const employee = {
     checkDuplicateUsername: checkDuplicateUsername,
     createAccount: createAccount,
@@ -428,6 +447,7 @@ const employee = {
     getEmployee: getEmployee,
     updateEmployee: updateEmployee,
     checkDuplicateEmployeeId: checkDuplicateEmployeeId,
-    checkEmployeeExist: checkEmployeeExist
+    checkEmployeeExist: checkEmployeeExist,
+    deleteEmployee: deleteEmployee
 };
 module.exports = employee;

@@ -40,16 +40,16 @@ exports.getCompanyById = async (req, res) => {
     }
 };
 
-// update employee by id
-// exports.companyUpdate = async (req, res) => {
-//     var employeeData = ""
-//     if(!req.params.employee_id){
-//         res.status(400).send({ message: "Employee Id cannot Be Null." });
-//     }
-//     employeeData = await employee.updateEmployee(req, res)
-//     if (employeeData.length==0) {
-//         res.status(404).send({ message: "Employee Not found." });
-//     }else{
-//         res.status(200).send({message: "Employee Update Complete"});
-//     }
-// };
+exports.deleteCompany = async (req, res) => {
+    var companyData = ""
+    if(!req.params.company_id){
+        res.status(200).send({code:"WECO400", description: "Company id cannot be Null." });
+    }
+    companyData = await project.deleteCompany(req, res)
+    console.log(companyData);
+    if (companyData!="complete") {
+        res.status(404).send({code:"WECO404", description: "Company Id Not found." });
+    }else{
+        res.status(200).send({code:"WECO200", description: "Delete Complete!"});
+    }
+};

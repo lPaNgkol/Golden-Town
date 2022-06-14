@@ -25,9 +25,9 @@ module.exports = function(app) {
     [authJwt.verifyToken,companyModel.checkDuplicateCompanyName], 
     controller.createCompany
   );
-  //edit company
-//   app.post("/company/:company_id",
-//     [authJwt.verifyToken], 
-//     controller.employeeUpdate
-//   );
+
+  app.delete('/company/:company_id',
+    [authJwt.verifyToken, companyModel.checkCompanyExist],
+    controller.deleteCompany 
+  );
 };
