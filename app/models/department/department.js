@@ -7,12 +7,63 @@ function departmentList(req, res) {
   return new Promise(async (resolve) => {
     try {
       const data = await db.query(
-        `SELECT * FROM department ORDER BY department_id ASC`
+        `SELECT a.*, b.employee_id, b.firstname, b.lastname, b.nickname, b.image_url, b.user_id, b.position_id, c.position_name 
+         FROM department a
+         LEFT JOIN users b on a.department_id=b.department_id
+         LEFT JOIN positions c on c.position_id=b.position_id 
+         ORDER BY a.department_id ASC`
       );
-      console.log(data);
+      var dataReturn = []
+      var dataDepartment = {}
+      var dataUser = {}
+      var dataDepartmentUser = []
       let results = data.rows;
+      var userCount = 0
+      var oldDept = 0
+      var oldDeptName = ''
+      var oldCompany = 0
+      results.forEach(row =>{
+        if(oldDept==0){
+          oldDept = row.department_id
+          oldDeptName = row.department_name
+          oldCompany = row.company_id
+        }
+        if(oldDept!=0 && oldDept!=row.department_id){
+          dataDepartment["department_id"] = oldDept
+          dataDepartment["department_name"] = oldDeptName
+          dataDepartment["company_id"] = oldCompany
+          dataDepartment["total_department_user"] = userCount
+          dataDepartment["department_user"] = dataDepartmentUser
+          dataReturn.push(dataDepartment)
+          userCount = 0
+          dataDepartment = {}
+          dataDepartmentUser = []
+          oldDept = row.department_id
+          oldDeptName = row.department_name
+          oldCompany = row.company_id
+        }
+        console.log(dataDepartment);
+        dataUser = {}
+        dataUser["employee_id"] = row["employee_id"]
+        dataUser["firstname"] = row["firstname"]
+        dataUser["lastname"] = row["lastname"]
+        dataUser["nickname"] = row["nickname"]
+        dataUser["image_url"] = row["image_url"]
+        dataUser["user_id"] = row["user_id"]
+        dataUser["position_id"] = row["position_id"]
+        dataUser["position_name"] = row["position_name"]
+        dataDepartmentUser.push(dataUser)
+        userCount++
+      })
+      //last loop add last company to array
+      dataDepartment["department_id"] = oldDept
+      dataDepartment["department_name"] = oldDeptName
+      dataDepartment["company_id"] = oldCompany
+      dataDepartment["total_department_user"] = userCount
+      dataDepartment["department_user"] = dataDepartmentUser
+      dataReturn.push(dataDepartment)
 
-      return resolve(results);
+      return resolve(dataReturn);
     } catch (error) {
       console.error("### Error ", error);
       // return resolve(false);
