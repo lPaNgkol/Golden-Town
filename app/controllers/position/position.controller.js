@@ -34,7 +34,7 @@ exports.positioncompanyList = async (req, res) => {
   if (listPosition.length == 0) {
     res
       .status(200)
-      .send({ code: "WEPT404", description: "Company Not found." });
+      .send({ code: "WEPT404", description: "No Employee in Company." });
   } else {
     res.status(200).send({
       total: listPosition.length,
@@ -157,6 +157,23 @@ exports.positioncompanyCheck = async (req, res, next) => {
       res
         .status(200)
         .send({ code: "WEDP401", description: "Access Token Expired" });
+    }
+    if (nameCheck > 0) {
+      next();
+    }
+  } catch (error) {
+    console.error("### Error ", error);
+    return error;
+  }
+};
+
+exports.departmentCheck = async (req, res, next) => {
+  try {
+    let nameCheck = null;
+    nameCheck = await position.departmentidCheck(req, res);
+    console.log("departmentidCheck", nameCheck);
+    if (nameCheck == 0) {
+      res.status(400).send({ message: "Department not found" });
     }
     if (nameCheck > 0) {
       next();
