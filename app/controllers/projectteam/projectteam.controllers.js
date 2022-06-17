@@ -1,11 +1,11 @@
 const authJwt = require("../../models/user/authentication");
-const projectteam = require("../../models/projectteam/projectteam");
+const projectteam = require("../../models/project/projectteam");
 
 //  1get projectteambycompanyid;
 exports.getProjectbyCompany = async (req, res) => {
   let getProject = "";
   getProject = await projectteam.ProjectTeambyCompany(req, res);
-  console.log("vt", getProject);
+  // console.log("vt", getProject);
   if (!authJwt) {
     res
       .status(200)
@@ -14,7 +14,7 @@ exports.getProjectbyCompany = async (req, res) => {
   if (getProject.length == 0) {
     res
       .status(200)
-      .send({ code: "WEPT404", description: "Company Not found." });
+      .send({ code: "WEPT404", description: "No Employee in Company." });
   } else {
     res.status(200).send({
       companyId: getProject.rows,
@@ -23,31 +23,6 @@ exports.getProjectbyCompany = async (req, res) => {
     });
   }
 };
-
-//   try {
-//     let getProjectCom = "";
-//     getProjectCom = await projectteam.ProjectTeambyCompany(req, res);
-//     if (getProjectCom.length == 0) {
-//       res
-//         .status(200)
-//         .send({ code: "WEPT404", description: "Company Not found." });
-//     }
-//     if (!authJwt) {
-//       res
-//         .status(200)
-//         .send({ code: "WEPT401", description: "Access Token Expired" });
-//     } else {
-//       res.status(200).send({
-
-//         total: getProjectCom.length,
-//         projectTeam: getProjectCom,
-//       });
-//     }
-//   } catch (error) {
-//     console.error("### Error ", error);
-//     return error;
-//   }
-// };
 
 //get projectteam;
 exports.listProjectTeamAll = async (req, res) => {
@@ -93,37 +68,34 @@ exports.listProjectteam = async (req, res) => {
 // create projectteam
 exports.createProjectTeam = async (req, res, next) => {
   let createProject = "";
-
   checkProject = await projectteam.checkuserByuserId(req, res);
-  if (checkProject.length == 0) {
-    res.status(200).send({ code: "WEPT404", description: "User Not found." });
-  }
-  onhandId = await projectteam.checkidByonhandId(req, res);
-  if (onhandId.length == 0) {
+  // console.log("checkproject",checkProject);
+  if (!checkProject == 0) {
     res
       .status(200)
-      .send({ code: "WEPT404", description: "Project_onhand Not found." });
+      .send({ code: "WEPT404", description: "User Already in Project." });
+
   }
-  createProject = await projectteam.createProjectTeam(req, res);
+  if (checkProject == 0) {
+    res
+      .status(200)
+      .send({ code: "WEPT404", description: "User_ID not found." });
+next();
+  }
   if (!authJwt) {
     res
       .status(200)
       .send({ code: "WEPT401", description: "Access Token Expired" });
   }
-  if (createProject.length == 0) {
-    res
-      .status(200)
-      .send({ code: "WEPT404", description: "Project ID Not found." });
-  }
-  if (createProject.length > 0) {
-    getProjectteam = await projectteam.projectIdcreatesuccess(req, res);
+  else {
+    createProject = await projectteam.createProjectTeam(req, res);
     res.status(200).send({
-      projectTeam: getProjectteam,
+      projectTeam: createProject,
     });
   }
 };
 
-// update project team
+// update projectteam;
 exports.updateProjectteam = async (req, res) => {
   try {
     let updateProjectteam = null;
@@ -138,9 +110,8 @@ exports.updateProjectteam = async (req, res) => {
         .status(200)
         .send({ code: "WEPT404", description: "Project ID Not found." });
     } else {
-      getProjectteam = await projectteam.listProjectTeam(req, res);
       res.status(200).send({
-        projectTeam: getProjectteam,
+        projectTeam: updateProjectteam,
       });
     }
   } catch (error) {
@@ -149,31 +120,37 @@ exports.updateProjectteam = async (req, res) => {
   }
 };
 
-delete projectteam;
+// delete projectteam;
 exports.deleteProjectteam = async (req, res) => {
   try {
     let projectteamCk = "";
-    projectteamCk = await projectteam.projectteamByprojectId(req, res);
+    let projectteamUser = ""; 
+    projectteamCk = await projectteam.checkbeforedeleteandupdate(req, res);
     if (!authJwt) {
       res
         .status(200)
         .send({ code: "WEPT401", description: "Access Token Expired" });
     }
-    // console.log("ss test", departmentCk.length);
     if (projectteamCk.length == 0) {
       res
         .status(200)
-        .send({ code: "WEPT404", description: "Project not Found." });
+        .send({ code: "WEPT403", description: "Project_onhand_id not Found." });
     }
-    if (!projectteamCk.length == 0) {
+    projectteamUser  = await projectteam.checkuserByuserId(req, res);
+    if (projectteamUser.length == 0) {
+      res
+        .status(200)
+        .send({ code: "WEPT404", description: "User_id not Found." });
+    }
+    else {
       projectteamData = await projectteam.deleteProjectteam(req, res);
       res
         .status(200)
-        .send({ code: "WEPT404", description: "Project not Found." });
+        .send({ code: "WEPT200", description: "Project not Found." });
     }
     // console.log("ss testss", departmentData.length);
   } catch (error) {
-    console.error("### Error ", error);
+    console.error("## ControlError ", error);
     return error;
   }
 };
