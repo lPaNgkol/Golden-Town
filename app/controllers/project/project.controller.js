@@ -5,14 +5,11 @@ exports.createProject = async (req, res) => {
     var projectData = ""
     if(!req.params.company_id){
         res.status(200).send({code:"WEPO400", description: "Company id cannot be Null." });
-    }
-    if(!req.body.project_name){
+    }else if(!req.body.project_name){
         res.status(200).send({code:"WEPO400", description: "Project name cannot be Null." });
-    }
-    if(!req.body.project_code){
+    }else if(!req.body.project_code){
         res.status(200).send({code:"WEPO400", description: "Project code cannot be Null." });
-    }
-    if (req.files) {
+    }else if (req.files) {
         const file = req.files.project_image
         const fileName = file.name
         let dir = __dirname.split("/app")[0]
@@ -48,13 +45,14 @@ exports.deleteProject = async (req, res) => {
     var projectData = ""
     if(!req.params.project_id){
         res.status(200).send({code:"WEPO400", description: "Project id cannot be Null." });
-    }
-    projectData = await project.deleteProject(req, res)
-    console.log(projectData);
-    if (projectData!="complete") {
-        res.status(404).send({code:"WEPO404", description: "Project Id Not found." });
     }else{
-        res.status(200).send({code:"WEPO200", description: "Delete Complete!"});
+        projectData = await project.deleteProject(req, res)
+        console.log(projectData);
+        if (projectData!="complete") {
+            res.status(404).send({code:"WEPO404", description: "Project Id Not found." });
+        }else{
+            res.status(200).send({code:"WEPO200", description: "Delete Complete!"});
+        }
     }
 };
 
@@ -107,11 +105,12 @@ exports.listProject = async (req, res) => {
 
     if(!req.params.company_id){
         res.status(200).send({code:"WEPO400", description: "Company id cannot be Null." });
-    }
-    projectData = await project.listProject(req, res)
-    if (projectData.length==0) {
-        res.status(404).send({code:"WEPO404", description: "Project Not found." });
     }else{
-        res.status(200).send({code:"WEPO200", projectData});
+        projectData = await project.listProject(req, res)
+        if (projectData.length==0) {
+            res.status(404).send({code:"WEPO404", description: "Project Not found." });
+        }else{
+            res.status(200).send({code:"WEPO200", projectData});
+        }
     }
 };

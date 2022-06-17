@@ -113,7 +113,7 @@ function checkHasCheckout(req, res){
 
 function attendanceListByUser(req, res){
   return new Promise(function(resolve){
-    let query = `SELECT a.*, b.work_start_time + interval '15 minute' as late_work_start, b.work_start_time, b.user_id, b.firstname, b.lastname, c.position_name, b.employee_id FROM attendance a 
+    let query = `SELECT a.*, b.work_start_time + interval '15 minute' as late_work_start, b.work_start_time, b.user_id, b.firstname, b.lastname, c.position_name, b.employee_id, b.image_url FROM attendance a 
                  INNER JOIN users b on a.user_id=b.user_id
                  LEFT JOIN positions c on c.position_id=b.position_id 
                  WHERE a.active=$1`
@@ -175,7 +175,7 @@ function attendanceListByUser(req, res){
 
 function attendanceList(req, res){
   return new Promise(function(resolve){
-    let query = `SELECT a.*, count(a.*) OVER() AS total_row, b.work_start_time + interval '15 minute' as late_work_start, b.work_start_time, b.user_id, b.firstname, b.lastname, c.position_name, b.employee_id 
+    let query = `SELECT a.*, count(a.*) OVER() AS total_row, b.work_start_time + interval '15 minute' as late_work_start, b.work_start_time, b.user_id, b.firstname, b.lastname, c.position_name, b.employee_id, b.image_url 
                  FROM attendance a 
                  INNER JOIN users b on a.user_id=b.user_id
                  LEFT JOIN positions c on c.position_id=b.position_id 

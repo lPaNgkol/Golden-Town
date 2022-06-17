@@ -75,7 +75,7 @@ exports.deleteEmployee = async (req, res) => {
     if(!req.params.user_id){
         res.status(200).send({code:"WEEM400", description: "User id cannot be Null." });
     }
-    employeeData = await project.deleteEmployee(req, res)
+    employeeData = await employee.deleteEmployee(req, res)
     console.log(employeeData);
     if (employeeData!="complete") {
         res.status(404).send({code:"WEEM404", description: "Company Id Not found." });

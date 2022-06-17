@@ -49,36 +49,37 @@ exports.signin = async (req, res) => {
   user = user[0]
   if (!user) {
      return res.status(404).send({code:"WEUS404", description: "User Not found." });
-  }
-  var passwordIsValid = false
-  if(user.password==req.body.password){
-    passwordIsValid = true
-  }
-  if (!passwordIsValid) {
-    return res.status(401).send({
-      code:"WEUS401",
-      accessToken: null,
-      description: "Invalid Password!"
+  }else{
+    var passwordIsValid = false
+    if(user.password==req.body.password){
+      passwordIsValid = true
+    }
+    if (!passwordIsValid) {
+      return res.status(401).send({
+        code:"WEUS401",
+        accessToken: null,
+        description: "Invalid Password!"
+      });
+    }
+    const token = jwt.sign({ id: user.user_id }, config.secret, {
+      expiresIn: config.jwtExpiration
+    });
+    let refreshToken = await authJwt.createRefresh(user.user_id);
+    var authorities = [];
+    let roles = await authJwt.getRoles(user.user_id);
+    for (let i = 0; i < roles.length; i++) {
+      authorities.push("ROLE_" + roles[i].name.toUpperCase());
+    }
+    res.status(200).send({
+      code:"WEUS200",
+      user_id: user.user_id,
+      employee_id: user.employee_id,
+      username: user.username,
+      roles: authorities,
+      accessToken: token,
+      refreshToken: refreshToken
     });
   }
-  const token = jwt.sign({ id: user.user_id }, config.secret, {
-    expiresIn: config.jwtExpiration
-  });
-  let refreshToken = await authJwt.createRefresh(user.user_id);
-  var authorities = [];
-  let roles = await authJwt.getRoles(user.user_id);
-  for (let i = 0; i < roles.length; i++) {
-    authorities.push("ROLE_" + roles[i].name.toUpperCase());
-  }
-  res.status(200).send({
-    code:"WEUS200",
-    user_id: user.user_id,
-    employee_id: user.employee_id,
-    username: user.username,
-    roles: authorities,
-    accessToken: token,
-    refreshToken: refreshToken
-  });
 };
 
 exports.refreshToken = async (req, res) => {

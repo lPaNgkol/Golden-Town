@@ -17,13 +17,14 @@ exports.attendanceListByUser = async (req, res) => {
     var listAttendance = ""
     if(!req.params.user_id){
         res.status(200).send({code:"WEAT002", description: "User Id cannot Be Null." });
-    }
-    listAttendance = await attendance.attendanceListByUser(req, res)
-    console.log(listAttendance)
-    if (listAttendance.length==0) {
-        res.status(200).send({code:"WEAT001", description: "Attendance Not found." });
     }else{
-        res.status(200).send({code:"WEAT200", "listAttendance": listAttendance});
+        listAttendance = await attendance.attendanceListByUser(req, res)
+        console.log(listAttendance)
+        if (listAttendance.length==0) {
+            res.status(200).send({code:"WEAT001", description: "Attendance Not found." });
+        }else{
+            res.status(200).send({code:"WEAT200", "listAttendance": listAttendance});
+        }
     }
 };
 
@@ -33,8 +34,7 @@ exports.attendance = async (req, res) => {
     var employeeData = "";
     if(!req.params.user_id){
         res.status(200).send({code:"WEAT002", description: "User Id cannot Be Null." });
-    }
-    if(!req.body.attendance_type){
+    }else if(!req.body.attendance_type){
         res.status(200).send({code:"WEAT003", description: "Attendance type cannot Be Null." });
     }else{
         if(req.body.attendance_type=="in"){

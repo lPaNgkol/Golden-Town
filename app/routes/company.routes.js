@@ -9,25 +9,25 @@ module.exports = function(app) {
     );
     next();
   });
-  //list company
   app.get(
     "/company",
     [authJwt.verifyToken],
     controller.companyList
   );
-  //get company by id
   app.get('/company/:company_id',
     [authJwt.verifyToken, companyModel.checkCompanyExist],
     controller.getCompanyById 
   );
-  //add new company
   app.post("/company",
     [authJwt.verifyToken,companyModel.checkDuplicateCompanyName], 
     controller.createCompany
   );
-
   app.delete('/company/:company_id',
     [authJwt.verifyToken, companyModel.checkCompanyExist],
     controller.deleteCompany 
+  );
+  app.post("/company/:company_id",
+    [authJwt.verifyToken, companyModel.checkCompanyExist, companyModel.checkDuplicateCompanyName], 
+    controller.updateCompany
   );
 };

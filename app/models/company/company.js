@@ -3,8 +3,15 @@ var format = require('pg-format');
 var moment = require('moment');
 
 checkDuplicateCompanyName = (req, res, next) => {
-    const query = "SELECT * FROM company WHERE company_name=$1 AND active=$2 ORDER BY company_id DESC"
-    const dataquery = [req.body.company_name, "T"];
+  let query = ""
+  let dataquery = [];
+    if(req.params.company_id){
+      query = "SELECT * FROM company WHERE company_name=$1 AND active=$2 AND company_id!=$3 ORDER BY company_id DESC"
+      dataquery = [req.body.company_name, "T", req.params.company_id];
+    }else{
+      query = "SELECT * FROM company WHERE company_name=$1 AND active=$2 ORDER BY company_id DESC"
+      dataquery = [req.body.company_name, "T"];
+    }
     db.query(query, dataquery).then((results) => {
       if(results.rows.length>0){
           var ret = {"code":"WECO001", "description":"Company name already in use"}
@@ -133,7 +140,7 @@ function getCompanyById(req, res){
           });
         });
 
-        let queryUser = `SELECT a.user_id, a.firstname, a.lastname, b.position_name, c.department_name
+        let queryUser = `SELECT a.user_id, a.firstname, a.lastname, b.position_name, c.department_name, a.image_url
                         FROM users a LEFT JOIN positions b on b.position_id=a.position_id
                         LEFT JOIN department c on c.department_id=a.department_id
                         WHERE a.active=$1 AND a.company_id=$2`
@@ -186,12 +193,51 @@ function deleteCompany(req, res) {
   });
 }
 
+function updateCompany(req, res){
+    var time = moment();
+    var dateNow = time.format('YYYY-MM-DD HH:mm:ss');
+    const company_id = req.params.company_id
+    const company_name = req.body.company_name
+    const address = req.body.address
+    const active = req.body.is_active
+    const updateby = req.body.updateby
+    const updatedate = dateNow
+    
+    return new Promise(function(resolve){
+        const query = `UPDATE company
+                        SET company_name=$1, 
+                        address=$2, 
+                        active=$3 ,
+                        updateby=$4, 
+                        updatedate=$5
+                     WHERE company_id=$6
+                     RETURNING company_id, company_name, address;`
+        const dataquery = [company_name, 
+                          address, 
+                          active, 
+                          updateby, 
+                          updatedate,
+                          company_id 
+                        ];
+        db.query(query, dataquery).then((results) => {
+            resolve(results.rows[0])
+        })
+        .catch(error => {
+            res.status(500).send({
+                code:"WECO500",
+                description: error.message
+            });
+        });
+    })
+}
+
 const company = {
     companyList: companyList,
     createCompany: createCompany,
     checkDuplicateCompanyName:checkDuplicateCompanyName,
     checkCompanyExist: checkCompanyExist,
     getCompanyById: getCompanyById,
-    deleteCompany: deleteCompany
+    deleteCompany: deleteCompany,
+    updateCompany: updateCompany
 };
 module.exports = company;

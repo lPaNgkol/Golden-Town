@@ -425,7 +425,7 @@ function deleteEmployee(req, res) {
       try {
           const result = await db.query(
               "DELETE FROM users WHERE user_id=$1",
-              [req.params.company_id]
+              [req.params.user_id]
           );
           return resolve("complete");
       } catch (error) {

@@ -15,11 +15,12 @@ exports.createHealthinfo = async (req, res) => {
     var healthinfoData = ""
     if(!req.body.user_id){
         res.status(400).send({ message: "user_id cannot Be Null." });
-    }
-    healthinfoData = await healthinfo.createHealthinfo(req, res)
-    if (healthinfoData.length==0) {
-        res.status(404).send({ message: "healthinfo Id Not found." });
     }else{
-        res.status(200).send({healthinfoData});
+        healthinfoData = await healthinfo.createHealthinfo(req, res)
+        if (healthinfoData.length==0) {
+            res.status(404).send({ message: "healthinfo Id Not found." });
+        }else{
+            res.status(200).send({healthinfoData});
+        }
     }
 };
