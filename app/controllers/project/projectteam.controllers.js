@@ -72,12 +72,9 @@ exports.createProjectTeam = async (req, res, next) => {
     res
       .status(200)
       .send({ code: "WEPT401", description: "Access Token Expired" });
-  }
-  else {
+  } else {
     createProject = await projectteam.createProjectTeam(req, res);
-    res.status(200).send({ code: "WEPT200", description: "Success" 
-
-    });
+    res.status(200).send({ code: "WEPT200", description: "Success" });
   }
 };
 
@@ -97,7 +94,8 @@ exports.updateProjectteam = async (req, res) => {
         .send({ code: "WEPT404", description: "Project ID Not found." });
     } else {
       res.status(200).send({
-        code: "WEPT200", description: "Success" 
+        code: "WEPT200",
+        description: "Success",
       });
     }
   } catch (error) {
@@ -110,7 +108,7 @@ exports.updateProjectteam = async (req, res) => {
 exports.deleteProjectteam = async (req, res) => {
   try {
     let projectteamCk = "";
-    let projectteamUser = ""; 
+    let projectteamUser = "";
     projectteamCk = await projectteam.checkbeforedeleteandupdate(req, res);
     if (!authJwt) {
       res
@@ -121,8 +119,7 @@ exports.deleteProjectteam = async (req, res) => {
       res
         .status(200)
         .send({ code: "WEPT403", description: "Project_onhand_id not Found." });
-    }
-    else {
+    } else {
       projectteamData = await projectteam.deleteProjectteam(req, res);
       res
         .status(200)
@@ -134,18 +131,3 @@ exports.deleteProjectteam = async (req, res) => {
     return error;
   }
 };
-
-
-// checkProject = await projectteam.checkuserByuserId(req, res);
-// // console.log("checkproject",checkProject);
-// if (!checkProject == 0) {
-//   res
-//     .status(200)
-//     .send({ code: "WEPT404", description: "User Already in Project." });
-
-// }
-// if (checkProject == 0) {
-//   res
-//     .status(200)
-//     .send({ code: "WEPT404", description: "User_ID not found." });
-// next();
