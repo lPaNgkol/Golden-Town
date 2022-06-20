@@ -84,93 +84,46 @@ function listProjectTeam(req, res) {
   });
 }
 
-// // post project by projectId
-// function createProjectTeam(req, res) {
-//   return new Promise(async (resolve) => {
-//     try {
-//       const dateNow = moment().format("YYYY-MM-DD HH:mm:ss");
-//       const user_id = req.body.user_id;
-//       const project_on_hand_id = req.params.project_on_hand_id;
-//       const active = req.body.active;
-//       const createby = req.user_id;
-//       const updateby = req.user_id;
-//       const createdate = dateNow;
-//       const updatedate = dateNow;
-//       const team_position = req.body.team_position;
-//       const owner = req.body.owner;
-//       const query = await db.query(`INSERT INTO project_team(project_on_hand_id, user_id, active, createby,
-//         createdate, updateby, updatedate, team_position, owner)
-//       VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)
-//       RETURNING project_team_id`,
-//       [
-//         user_id,
-//         project_on_hand_id,
-//         active,
-//         createby,
-//         createdate,
-//         updateby,
-//         updatedate,
-//         team_position,
-//         owner,
-//       ]
-
-//       );
-//       let results = query.rows;
-//       console.log("test again", results);
-//       return resolve(results);
-//     } catch (error) {
-//       console.log("### error", error);
-//       return res
-//         .status(500)
-//         .send({ code: "WEPT500", description: error.message });
-//     }
-//   });
-// }
-
 // post project by projectId
 function createProjectTeam(req, res) {
   return new Promise(async (resolve) => {
-    const dateNow = moment().format("YYYY-MM-DD HH:mm:ss");
-    const user_id = req.body.user_id;
-    const project_on_hand_id = req.params.project_on_hand_id;
-    const active = req.body.active;
-    const createby = req.user_id;
-    const updateby = req.user_id;
-    const createdate = dateNow;
-    const updatedate = dateNow;
-    const team_position = req.body.team_position;
-    const owner = req.body.owner;
-    let insertValue = [];
-    for (var i = 0; i < req.body.user_id; i++) {
-      insertValue.push([
-        user_id[i],
+    try {
+      const dateNow = moment().format("YYYY-MM-DD HH:mm:ss");
+      const user_id = req.body.user_id;
+      const project_on_hand_id = req.params.project_on_hand_id;
+      const active = req.body.active;
+      const createby = req.user_id;
+      const updateby = req.user_id;
+      const createdate = dateNow;
+      const updatedate = dateNow;
+      const team_position = req.body.team_position;
+      const owner = req.body.owner;
+      const query = await db.query(`INSERT INTO project_team(project_on_hand_id, user_id, active, createby,
+        createdate, updateby, updatedate, team_position, owner)
+      VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)
+      RETURNING project_team_id`,
+      [
         project_on_hand_id,
-        "T",
+        user_id,
+        active,
         createby,
         createdate,
         updateby,
         updatedate,
         team_position,
         owner,
-      ]);
+      ]
+
+      );
+      let results = query.rows;
+      console.log("test again", results);
+      return resolve(results);
+    } catch (error) {
+      console.log("### error", error);
+      return res
+        .status(500)
+        .send({ code: "WEPT500", description: error.message });
     }
-    let queryRole = format(
-      "INSERT INTO user_role(user_id, project_on_hand_id,active, createby, createdate, updateby, updatedate,team_position, owner ) VALUES %L",
-      insertValue
-    );
-    
-    const data =await db.query(queryRole)
-      .then(() => {
-       
-        resolve(data);
-        console.log("test", data)
-      })
-      .catch((error) => {
-        res.status(500).send({
-          code: "WEPT500",
-          description: error.message,
-        });
-      });
   });
 }
 
@@ -274,7 +227,6 @@ function checkuserByuserId(req, res, next) {
       if (usercheck == 0) {
         console.log("data not found");
         return resolve((usercheck = 0));
-        
       } else {
         next();
       }
