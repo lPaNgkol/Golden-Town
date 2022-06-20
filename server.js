@@ -31,7 +31,7 @@ require('./app/routes/position.routes')(app);
 require('./app/routes/project.routes')(app);
 require('./app/routes/image.routes')(app);
 require('./app/routes/projectteam.routes')(app);
-
+require('./app/routes/vaccine.routes')(app);
 // set port, listen for requests
 const PORT = 3000;
 app.listen(PORT, () => {
