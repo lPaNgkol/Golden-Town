@@ -38,6 +38,7 @@ function positioncompanyList(req, res) {
     try {
       const active = "T";
       const company_id = req.params.company_id;
+      console.log("com", company_id);
       const query = await db.query(
         `SELECT a.position_id, a.position_name, a.department_id, b.department_name,
                   a.createby, a.updateby, a.updatedate, a.createdate
@@ -151,7 +152,7 @@ function deletePosition(req, res) {
 
       let results = result.rows;
       // console.log("testresults", reeS.length);
-      return resolve(results, results.length);
+      return resolve(results);
     } catch (error) {
       console.error("### Error ", error);
       // return resolve(false);
@@ -163,8 +164,9 @@ function deletePosition(req, res) {
   });
 }
 
+
 // check position
-function positionCheck(req, res) {
+function positionCheck(req, res, next) {
   return new Promise(async (resolve) => {
     try {
       let positioncheck = req.params.position_id;
@@ -172,13 +174,16 @@ function positionCheck(req, res) {
         `SELECT position_id from positions WHERE position_id = $1`,
         [positioncheck]
       );
-      // const poSer = await db.query(
-      //   `SELECT positions.company_id from positions INTERSECT SELECT company.company_id FROM company WHERE company_id = $1`,
-      //   [positioncheck]
-      // // );
-      let poscheck = poSer.rows;
-      console.log("positioncheck", poscheck);
-      return resolve(poscheck);
+      let poscheck = poSer.rowCount;
+      if (poscheck > 0) {
+        console.log("have data");
+        var ret = { code: "WEPT404", description: "God" };
+        res.status(200).json(ret);
+        return resolve((poscheck = 1));
+        
+      } else {
+       next(poscheck = 0);
+      }
     } catch (error) {
       console.error("### Error ", error);
       return res.status(500).send({
@@ -190,7 +195,7 @@ function positionCheck(req, res) {
 }
 
 // check positionbycompany
-function positioncompanyCheck(req, res) {
+function positioncompanyCheck(req, res, next) {
   return new Promise(async (resolve) => {
     try {
       let companycheck = req.params.company_id;
@@ -217,7 +222,7 @@ function positioncompanyCheck(req, res) {
 }
 
 // check position_name
-function positionnameCheck(req, res) {
+function positionnameCheck(req, res, next) {
   return new Promise(async (resolve) => {
     try {
       let positioncheck = req.body.position_name;
@@ -226,12 +231,15 @@ function positionnameCheck(req, res) {
         [positioncheck]
       );
       let poscheck = poSer.rowCount;
-      if (poscheck !== 0) {
+      if (poscheck > 0) {
         console.log("have data");
+        var ret = { code: "WEPT404", description: "Position Name Already in Project" };
+        res.status(200).json(ret);
         return resolve((poscheck = 1));
+        
       } else {
         console.log("data not found");
-        return resolve((poscheck = 0));
+        next (resolve(( poscheck  = 0)));
       }
     } catch (error) {
       console.error("### Error ", error);
@@ -242,6 +250,38 @@ function positionnameCheck(req, res) {
     }
   });
 }
+
+
+// check departmentid
+function departmentidCheck(req, res, next) {
+  return new Promise(async (resolve) => {
+    try {
+      let departmentcheck = req.body.department_id;
+      const poSer = await db.query(
+        `SELECT department_id FROM department WHERE department_id=$1`,
+        [departmentcheck]
+      );
+      var datacheck = poSer.rowCount;
+      if (datacheck !== 0) {
+        console.log("have data");
+        next (resolve((datacheck = 1)));
+      } else {
+        console.log("data not found");
+        var ret = { code: "WEPT404", description: "Department_id not found" };
+        res.status(200).json(ret);
+        return resolve((datacheck = 0));
+      }
+    } catch (error) {
+      console.error("### Error ", error);
+      return res.status(500).send({
+        code: "WEDP500",
+        description: error.message,
+      });
+    }
+  });
+}
+
+
 const position = {
   positionList: positionList,
   positioncompanyList: positioncompanyList,
@@ -251,5 +291,6 @@ const position = {
   positionCheck: positionCheck,
   positionnameCheck: positionnameCheck,
   positioncompanyCheck:positioncompanyCheck,
+  departmentidCheck:departmentidCheck
 };
 module.exports = position;
