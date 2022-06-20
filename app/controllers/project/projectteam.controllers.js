@@ -68,20 +68,6 @@ exports.listProjectteam = async (req, res) => {
 // create projectteam
 exports.createProjectTeam = async (req, res, next) => {
   let createProject = "";
-  checkProject = await projectteam.checkuserByuserId(req, res);
-  // console.log("checkproject",checkProject);
-  if (!checkProject == 0) {
-    res
-      .status(200)
-      .send({ code: "WEPT404", description: "User Already in Project." });
-
-  }
-  if (checkProject == 0) {
-    res
-      .status(200)
-      .send({ code: "WEPT404", description: "User_ID not found." });
-next();
-  }
   if (!authJwt) {
     res
       .status(200)
@@ -89,8 +75,8 @@ next();
   }
   else {
     createProject = await projectteam.createProjectTeam(req, res);
-    res.status(200).send({
-      projectTeam: createProject,
+    res.status(200).send({ code: "WEPT200", description: "Success" 
+
     });
   }
 };
@@ -111,7 +97,7 @@ exports.updateProjectteam = async (req, res) => {
         .send({ code: "WEPT404", description: "Project ID Not found." });
     } else {
       res.status(200).send({
-        projectTeam: updateProjectteam,
+        code: "WEPT200", description: "Success" 
       });
     }
   } catch (error) {
@@ -136,12 +122,6 @@ exports.deleteProjectteam = async (req, res) => {
         .status(200)
         .send({ code: "WEPT403", description: "Project_onhand_id not Found." });
     }
-    projectteamUser  = await projectteam.checkuserByuserId(req, res);
-    if (projectteamUser.length == 0) {
-      res
-        .status(200)
-        .send({ code: "WEPT404", description: "User_id not Found." });
-    }
     else {
       projectteamData = await projectteam.deleteProjectteam(req, res);
       res
@@ -154,3 +134,18 @@ exports.deleteProjectteam = async (req, res) => {
     return error;
   }
 };
+
+
+// checkProject = await projectteam.checkuserByuserId(req, res);
+// // console.log("checkproject",checkProject);
+// if (!checkProject == 0) {
+//   res
+//     .status(200)
+//     .send({ code: "WEPT404", description: "User Already in Project." });
+
+// }
+// if (checkProject == 0) {
+//   res
+//     .status(200)
+//     .send({ code: "WEPT404", description: "User_ID not found." });
+// next();
