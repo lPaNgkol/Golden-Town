@@ -49,21 +49,17 @@ exports.createPosition = async (req, res, next) => {
     res
       .status(200)
       .send({ code: "WEPT401", description: "Access Token Expired" });
-  }
-  else {
+  } else {
     createProject = await position.createPosition(req, res);
-    res.status(200).send({ code: "WEPT200", description: "Success" 
-
-    });
+    res.status(200).send({ code: "WEPT200", description: "Success" });
   }
 };
-
 
 // update department
 exports.updatePosition = async (req, res) => {
   try {
     var updateData = null;
-    
+
     if (!req.body.position_name) {
       res.status(200).send({
         code: "WEPT400",
@@ -81,7 +77,8 @@ exports.updatePosition = async (req, res) => {
         .status(200)
         .send({ code: "WEPT404", description: "Position not Found." });
     } else {
-    res.status(200).send({ code: "WEPT200", description: "Success" });}
+      res.status(200).send({ code: "WEPT200", description: "Success" });
+    }
     console.log("positionData", updateData);
   } catch (error) {
     console.error("### Error ", error);
@@ -91,25 +88,22 @@ exports.updatePosition = async (req, res) => {
 
 // delete Positio
 exports.deletePosition = async (req, res) => {
-  try {
-    let positionDl = "";
-    positionDl = await position.deletePosition(req, res);
-    if (!authJwt) {
-      res
-        .status(200)
-        .send({ code: "WEPT401", description: "Access Token Expired" });
-    }
-    if (positionDl.length == 0) {
-      res
-        .status(200)
-        .send({ code: "WEPT200", description: "Position not Found." });
-    }
-    // console.log("positionDl test", positionDl.length);
-  } catch (error) {
-    console.error("### Error ", error);
-    return error;
+  if (!req.params.position_id) {
+    res
+      .status(200)
+      .send({ code: "WEPS400", description: "Position id cannot be Null." });
+  }
+  let positionDl = await position.deletePosition(req, res);
+  // console.log("positionDl test", positionDl.rows, req.params.position_id);
+  if (positionDl != "complete") {
+    res
+      .status(404)
+      .send({ code: "WEPS404", description: "Position id Not found." });
+  } else {
+    res.status(200).send({ code: "WEPS200", description: "Delete Complete!" });
   }
 };
+
 
 
 exports.positioncompanyCheck = async (req, res, next) => {
