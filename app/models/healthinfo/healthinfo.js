@@ -6,7 +6,7 @@ function healthinfoList(req, res) {
   return new Promise(function (resolve) {
     let query = `SELECT a.healthinfo_id, a.note, a.user_id, a.createby, a.createdate,a.updateby, a.updatedate,
                           b.firstname, b.lastname, b.nickname, b.employee_id
-                          FROM health_info a JOIN users b ON a.user_id = b.user_id WHERE a.active = $1`;
+                          FROM health_info a JOIN users b ON a.user_id = b.user_id WHERE a.active = $1 ORDER BY a.user_id ASC`;
 
     let dataquery = ["T"];
     if (req.body.limit) {
@@ -36,7 +36,7 @@ function healthinfoByuserId(req, res) {
   return new Promise(function (resolve) {
     let query = `SELECT a.healthinfo_id, a.note, a.user_id, a.createby, a.createdate,a.updateby, a.updatedate,
                           b.firstname, b.lastname, b.nickname, b.employee_id
-                          FROM health_info a JOIN users b ON a.user_id = b.user_id WHERE a.user_id = $1 AND a.active = 'T';`;
+                          FROM health_info a JOIN users b ON a.user_id = b.user_id WHERE a.user_id = $1 AND a.active = 'T' ORDER BY a.user_id ASC`;
 
     let dataquery = [req.params.user_id];
     if (req.body.limit) {
@@ -130,8 +130,8 @@ function deleteHealthinfo(req, res) {
         "DELETE FROM health_info WHERE healthinfo_id=$1",
         [req.params.healthinfo_id]
       );
-      let results = result.rows;
-      return resolve(results, results.length);
+      console.log(result.rows);
+      return resolve("complete");
     } catch (error) {
       console.error("### Error ", error);
       // return resolve(false);
@@ -142,7 +142,6 @@ function deleteHealthinfo(req, res) {
     }
   });
 }
-
 
 // user_id check
 function useridCheck(req, res, next) {
@@ -171,7 +170,32 @@ function useridCheck(req, res, next) {
   });
 }
 
-
+// user_id check
+function userhealthidCheck(req, res, next) {
+  return new Promise(async (resolve) => {
+    try {
+      let userIdcheck = req.params.healthinfo_id;
+      const poSer = await db.query(
+        `SELECT healthinfo_id FROM healthinfo WHERE healthinfo_id=$1 `,
+        [userIdcheck]
+      );
+      let poscheck = poSer.rowCount;
+      if (poscheck > 0) {
+        next();
+      } else {
+        console.log("No data");
+        var ret = { code: "WEHI404", description: "Healthinfo_id not found" };
+        res.status(200).json(ret);
+      }
+    } catch (error) {
+      console.error("### Error ", error);
+      return res.status(500).send({
+        code: "WEDP500",
+        description: error.message,
+      });
+    }
+  });
+}
 
 const healthinfo = {
   healthinfoList: healthinfoList,
@@ -179,6 +203,7 @@ const healthinfo = {
   createHealthinfo: createHealthinfo,
   updateHealthinfo: updateHealthinfo,
   deleteHealthinfo: deleteHealthinfo,
-  useridCheck:useridCheck
+  useridCheck: useridCheck,
+  userhealthidCheck:userhealthidCheck
 };
 module.exports = healthinfo;
