@@ -1,6 +1,6 @@
 const authJwt = require("../models/user/authentication");
 const controller = require("../controllers/healthinfo/vaccine.controller");
-
+const vaccine = require("../models/healthinfo/vaccine")
 
 module.exports = function (app) {
   app.use(function (req, res, next) {
@@ -25,8 +25,7 @@ module.exports = function (app) {
   );
   app.post(
     "/vaccine/:user_id",
-    [authJwt.verifyToken],
-    controller.useridCheck,
+    [authJwt.verifyToken, vaccine.doseCheck,controller.useridCheck,],
     controller.createvaccine
   );
 
@@ -38,7 +37,7 @@ module.exports = function (app) {
 
   app.delete(
     "/vaccine/:user_id/:vaccine_info_id",
-    [authJwt.verifyToken],
+    [authJwt.verifyToken, vaccine.deleteCheck],
     controller.deletevaccine
   );
 };

@@ -61,7 +61,7 @@ exports.createvaccine = async (req, res) => {
       .status(200)
       .send({ code: "WEVC404", description: "vaccine Id Not found." });
   } else {
-    res.status(200).send({code: "WEVC200", message: "Success" });
+    res.status(200).send({ code: "WEVC200", message: "Success" });
   }
 };
 
@@ -90,7 +90,7 @@ exports.updatevaccine = async (req, res) => {
         .status(404)
         .send({ code: "WEVC404", description: "Health Info ID Not Found." });
     } else {
-      res.status(200).send({code: "WEVC200", message: "Success" });
+      res.status(200).send({ code: "WEVC200", message: "Success" });
     }
   } catch (error) {
     console.error("### Error ", error);
@@ -99,29 +99,22 @@ exports.updatevaccine = async (req, res) => {
 };
 
 exports.deletevaccine = async (req, res) => {
-  try {
-    var vaccineData = "";
-    if (!authJwt) {
-      res
-        .status(200)
-        .send({ code: "WEVC401", description: "Access Token Expired" });
-    }
-    vaccineData = await vaccine.deletevaccine(req, res);
-    if (vaccineData.length == 0) {
-      res
-        .status(200)
-        .send({ code: "WEVC404", description: "Vaccine Id Not found." });
-    }
-    if (!vaccineData.length == 0) {
-      res
-        .status(200)
-        .send({ code: "WEVC200", description: "Vaccine Id Not found." });
-    }
-  } catch (error) {
-    console.error("### Error ", error);
-    return error;
+  var projectData = ""
+  if(!req.params.vaccine_info_id){
+      res.status(200).send({code:"WEVC400", description: "Vaccine id cannot be Null." });
+  }
+  if(!req.params.user_id){
+    res.status(200).send({code:"WEVC400", description: "User id cannot be Null." });
+}
+  projectData = await vaccine.deletevaccine(req, res)
+  console.log(projectData);
+  if (projectData!="complete") {
+      res.status(404).send({code:"WEVC404", description: "Vaccine Id Not found." });
+  }else{
+      res.status(200).send({code:"WEVC200", description: "Delete Complete!"});
   }
 };
+
 
 exports.useridCheck = async (req, res, next) => {
   if (!authJwt) {
@@ -137,3 +130,24 @@ exports.useridCheck = async (req, res, next) => {
     next();
   }
 };
+
+
+exports.deleteCheck = async (req, res, next) => {
+  if (!req.params.user_id) {
+    res
+      .status(200)
+      .send({ code: "WEVC404", description: "User Id Not found." });
+  }
+  if (!req.params.vaccine_info_id) {
+    res
+      .status(200)
+      .send({ code: "WEVC404", description: "Vaccine Info Id Not found." });
+  }
+  let vcCheck = await vaccine.deleteCheck(req, res, next);
+  if (vcCheck == 0){
+    res.status(200).send({ code: "WEVC404", description: "Vaccine ID Not Found" });
+  }
+  else {
+    next();
+  }
+}

@@ -149,21 +149,18 @@ function deletePosition(req, res) {
         "DELETE FROM positions WHERE position_id=$1",
         [req.params.position_id]
       );
-
-      let results = result.rows;
-      // console.log("testresults", reeS.length);
-      return resolve(results);
+      console.log(result.rows);
+      return resolve("complete");
     } catch (error) {
       console.error("### Error ", error);
       // return resolve(false);
       return res.status(500).send({
-        code: "WEDP500",
+        code: "WEPS500",
         description: error.message,
       });
     }
   });
 }
-
 
 // check position
 function positionCheck(req, res, next) {
@@ -176,13 +173,11 @@ function positionCheck(req, res, next) {
       );
       let poscheck = poSer.rowCount;
       if (poscheck > 0) {
-        console.log("have data");
-        var ret = { code: "WEPT404", description: "God" };
-        res.status(200).json(ret);
-        return resolve((poscheck = 1));
-        
+        next();
       } else {
-       next(poscheck = 0);
+        console.log("No data");
+        var ret = { code: "WEPT404", description: "Position Id not found" };
+        res.status(200).json(ret);
       }
     } catch (error) {
       console.error("### Error ", error);
@@ -233,13 +228,15 @@ function positionnameCheck(req, res, next) {
       let poscheck = poSer.rowCount;
       if (poscheck > 0) {
         console.log("have data");
-        var ret = { code: "WEPT404", description: "Position Name Already in Project" };
+        var ret = {
+          code: "WEPT404",
+          description: "Position Name Already in Project",
+        };
         res.status(200).json(ret);
         return resolve((poscheck = 1));
-        
       } else {
         console.log("data not found");
-        next (resolve(( poscheck  = 0)));
+        next(resolve((poscheck = 0)));
       }
     } catch (error) {
       console.error("### Error ", error);
@@ -250,7 +247,6 @@ function positionnameCheck(req, res, next) {
     }
   });
 }
-
 
 // check departmentid
 function departmentidCheck(req, res, next) {
@@ -264,7 +260,7 @@ function departmentidCheck(req, res, next) {
       var datacheck = poSer.rowCount;
       if (datacheck !== 0) {
         console.log("have data");
-        next (resolve((datacheck = 1)));
+        next(resolve((datacheck = 1)));
       } else {
         console.log("data not found");
         var ret = { code: "WEPT404", description: "Department_id not found" };
@@ -281,7 +277,6 @@ function departmentidCheck(req, res, next) {
   });
 }
 
-
 const position = {
   positionList: positionList,
   positioncompanyList: positioncompanyList,
@@ -290,7 +285,7 @@ const position = {
   deletePosition: deletePosition,
   positionCheck: positionCheck,
   positionnameCheck: positionnameCheck,
-  positioncompanyCheck:positioncompanyCheck,
-  departmentidCheck:departmentidCheck
+  positioncompanyCheck: positioncompanyCheck,
+  departmentidCheck: departmentidCheck,
 };
 module.exports = position;
