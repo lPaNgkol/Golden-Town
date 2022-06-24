@@ -21,22 +21,23 @@ module.exports = function (app) {
 
   app.post(
     "/position/:company_id",
-    [authJwt.verifyToken],
-    position.departmentidCheck,
-    position.positionnameCheck,
+    [
+      authJwt.verifyToken,
+      position.departmentidCheck,
+      position.positionnameCheck,
+    ],
     controller.createPosition
   );
 
   app.post(
     "/position/id/:position_id",
-    [authJwt.verifyToken],
-    position.departmentidCheck,
+    [authJwt.verifyToken, position.departmentidCheck],
     controller.updatePosition
   );
 
   app.delete(
     "/position/id/:position_id",
-    [authJwt.verifyToken],
+    [authJwt.verifyToken, position.positionCheck],
     controller.deletePosition
   );
 };
