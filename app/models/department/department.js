@@ -187,7 +187,7 @@ function companyInfo(req, res) {
       let companyId = req.params.company_id;
 
       const join207 = await db.query(
-        `SELECT department.department_name, users.employee_id,users.user_id, users.firstname, users.lastname, users.nickname,users.imageurl, positions.position_id, positions.position_name
+        `SELECT department.department_name, users.employee_id,users.user_id, users.firstname, users.lastname, users.nickname,users.image_url, positions.position_id, positions.position_name
         FROM
         (department LEFT JOIN users ON users.department_id = department.department_id)
         LEFT JOIN positions ON users.position_id = positions.position_id WHERE EXISTS (SELECT users.company_id FROM users WHERE users.company_id = department.company_id AND users.company_id = $1) ORDER BY department.department_name;`,
@@ -213,11 +213,11 @@ function departmentInfo(req, res) {
     try {
       let departmentId = req.params.department_id;
       const jointreedata = await db.query(
-        `SELECT users.employee_id,users.user_id, users.firstname, users.lastname, users.nickname, positions.position_id, users.imageurl, positions.position_name
-FROM
-(department LEFT JOIN users ON users.department_id = $1)
-INNER JOIN user ON department.department_id = users.department_id
-LEFT JOIN positions ON users.position_id = positions.position_id ORDER BY users.employee_id ASC`,
+        `SELECT users.employee_id,users.user_id, users.firstname, users.lastname, users.nickname, positions.position_id, users.image_url, positions.position_name
+          FROM
+          (department LEFT JOIN users ON users.department_id = $1)
+          INNER JOIN user ON department.department_id = users.department_id
+          LEFT JOIN positions ON users.position_id = positions.position_id ORDER BY users.employee_id ASC`,
         [departmentId]
       );
       let position = jointreedata.rows;
