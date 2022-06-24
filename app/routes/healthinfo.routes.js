@@ -1,5 +1,8 @@
 const authJwt = require("../models/user/authentication");
 const controller = require("../controllers/healthinfo/healthinfo.controller");
+const healthinfo = require("../models/healthinfo/healthinfo");
+
+
 module.exports = function (app) {
   app.use(function (req, res, next) {
     res.header(
@@ -29,7 +32,7 @@ module.exports = function (app) {
 
   app.delete(
     "/health/:healthinfo_id",
-    [authJwt.verifyToken],
+    [authJwt.verifyToken, healthinfo.userhealthidCheck],
     controller.deleteHealthinfo
   );
 };
