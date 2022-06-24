@@ -110,7 +110,7 @@ exports.listProject = async (req, res) => {
         if (projectData.length==0) {
             res.status(404).send({code:"WEPO404", description: "Project Not found." });
         }else{
-            res.status(200).send({code:"WEPO200", projectData});
+            res.status(200).send(projectData);
         }
     }
 };

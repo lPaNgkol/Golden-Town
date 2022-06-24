@@ -5,8 +5,12 @@ const authJwt = require("../../models/user/authentication");
 // Get department
 exports.departmentList = async (req, res) => {
   var listDepartment = "";
+  if(!req.body.company_id){
+    res
+      .status(200)
+      .send({ code: "WEDP500", description: "Company Id cannot be null." });
+  }
   listDepartment = await department.departmentList(req, res);
-  // console.log(listDepartment);
   if (listDepartment.length == 0) {
     res
       .status(200)

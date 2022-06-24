@@ -3,6 +3,7 @@ const bodyParser = require("body-parser");
 const cors = require("cors");
 const app = express();
 const fileUpload = require("express-fileupload")
+const swaggerUi = require('swagger-ui-express')
 
 var corsOptions = {
   origin: "http://localhost:3000"
@@ -17,6 +18,14 @@ app.use(fileUpload())
 app.get("/", (req, res) => {
   res.json({ message: "Welcome to welink app." });
 });
+app.use('/doc/attendance', swaggerUi.serveFiles(require('./attendance_swagger_output.json'), {}), swaggerUi.setup(require('./attendance_swagger_output.json')))
+app.use('/doc/company', swaggerUi.serveFiles(require('./company_swagger_output.json'), {}), swaggerUi.setup(require('./company_swagger_output.json')))
+app.use('/doc/department', swaggerUi.serveFiles(require('./department_swagger_output.json'), {}), swaggerUi.setup(require('./department_swagger_output.json')))
+app.use('/doc/healthinfo', swaggerUi.serveFiles(require('./healthinfo_swagger_output.json'), {}), swaggerUi.setup(require('./healthinfo_swagger_output.json')))
+app.use('/doc/position', swaggerUi.serveFiles(require('./position_swagger_output.json'), {}), swaggerUi.setup(require('./position_swagger_output.json')))
+app.use('/doc/project', swaggerUi.serveFiles(require('./project_swagger_output.json'), {}), swaggerUi.setup(require('./project_swagger_output.json')))
+app.use('/doc/employee', swaggerUi.serveFiles(require('./employee_swagger_output.json'), {}), swaggerUi.setup(require('./employee_swagger_output.json')))
+app.use('/doc/vaccine', swaggerUi.serveFiles(require('./vaccine_swagger_output.json'), {}), swaggerUi.setup(require('./vaccine_swagger_output.json')))
 
 process.env.TZ = "Asia/Bangkok";
 console.log(new Date().toString());

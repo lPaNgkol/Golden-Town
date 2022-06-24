@@ -1,0 +1,183 @@
+{
+  "swagger": "2.0",
+  "info": {
+    "version": "1.0.0",
+    "title": "Attendance API",
+    "description": ""
+  },
+  "host": "we-links.defence-innovation.com:3000",
+  "basePath": "/",
+  "schemes": [
+    "http",
+    "https"
+  ],
+  "consumes": [
+    "application/json"
+  ],
+  "produces": [
+    "application/json"
+  ],
+  "paths": {
+    "/attendance/": {
+      "get": {
+        "description": "",
+        "parameters": [
+          {
+            "name": "x-access-token",
+            "in": "header",
+            "type": "string"
+          },
+          {
+            "name": "body",
+            "in": "body",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "limit": {
+                  "example": "10"
+                },
+
+                "offset": {
+                  "example": "1"
+                }
+              }
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          },
+          "403": {
+            "description": "Forbidden"
+          }
+        }
+      }
+    },
+    "/attendance/{user_id}": {
+      "get": {
+        "description": "",
+        "parameters": [
+          {
+            "name": "user_id",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "x-access-token",
+            "in": "header",
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          },
+          "WEAT001":{
+            "description": "Attendance Not found."
+          },
+          "WEAT200":{
+            "description": "Ok"
+          },
+          "WEAT002":{
+            "description": "User Id cannot Be Null."
+          },
+          "WEAT003":{
+            "description": "Attendance type cannot Be Null."
+          },
+          "WEAT404":{
+            "description": "Checkin not complete."
+          },
+          "WEAT007":{
+            "description": "Not in Checkin Period!"
+          },
+          "WEAT004":{
+            "description": "Already Checkin Today"
+          },
+          "WEAT005":{
+            "description": "Checkin not complete"
+          },
+          "WEAT006":{
+            "description": "Already Checkout Today"
+          },
+          "WEAT500":{
+            "description": "Internal error"
+          },
+          "403": {
+            "description": "Forbidden"
+          }
+        }
+      },
+      "post": {
+        "description": "",
+        "parameters": [
+          {
+            "name": "user_id",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "x-access-token",
+            "in": "header",
+            "type": "string"
+          },
+          {
+            "name": "body",
+            "in": "body",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "attendance_type": {
+                  "example": "any"
+                }
+              }
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          },
+          "WEAT001":{
+            "description": "Attendance Not found."
+          },
+          "WEAT200":{
+            "description": "Ok"
+          },
+          "WEAT002":{
+            "description": "User Id cannot Be Null."
+          },
+          "WEAT003":{
+            "description": "Attendance type cannot Be Null."
+          },
+          "WEAT404":{
+            "description": "Checkin not complete."
+          },
+          "WEAT007":{
+            "description": "Not in Checkin Period!"
+          },
+          "WEAT004":{
+            "description": "Already Checkin Today"
+          },
+          "WEAT005":{
+            "description": "Checkin not complete"
+          },
+          "WEAT006":{
+            "description": "Already Checkout Today"
+          },
+          "WEAT500":{
+            "description": "Internal error"
+          },
+          "403": {
+            "description": "Forbidden"
+          },
+          "404": {
+            "description": "Not Found"
+          }
+        }
+      }
+    }
+  }
+}

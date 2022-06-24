@@ -179,7 +179,7 @@ function listProject(req, res) {
         let dataquery = ["T", req.params.company_id];
         db.query(query, dataquery).then((results) => {
             if(results.rows.length>0){
-
+                dataReturn["code"] = "WEPO200"
                 dataReturn["company_id"] = req.params.company_id
                 dataReturn["total_row"] = results.rows[0]['total_row']
                 dataReturn["on_going"] = results.rows[0]['on_going']

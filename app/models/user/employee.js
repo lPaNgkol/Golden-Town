@@ -84,45 +84,57 @@ checkDuplicateEmployeeId = (req, res, next) => {
 
 checkRolesExisted = (req, res, next) => {
   if (req.body.roles) {
-    req.body.roles = JSON.parse(req.body.roles)
-    console.log(req.body.roles);
-    const query = "SELECT role_id FROM role WHERE active=$1"
-    const dataquery = ["T"];
-    db.query(query, dataquery).then((results) => {
-      if(results.rows.length>0){
-        let roleArray = [];
-        for (var i = 0; i < results.rows.length; i++) {
-          roleArray.push(results.rows[i].role_id)
-        }
-        let findError = false;
-        for (var i = 0; i < req.body.roles.length; i++) {
-          console.log(roleArray);
-          console.log(req.body.roles[i]);
-          var indexOfRole = roleArray.indexOf(req.body.roles[i])
-          console.log(indexOfRole);
-          if(indexOfRole<0){
-            var ret = {"code":"WEEM001", "description":"Failed! Role does not exist"}
-            res.status(200).json(ret)
-            findError = true
-            break
+    let contentType = req.headers['content-type'].split(";")[0]
+    if(contentType=="multipart/form-data") req.body.roles = JSON.parse(req.body.roles)
+    console.log(req.body.roles.length);
+    if(req.body.roles.length<=0){
+      res.status(200).send({
+        code:"WEEM005",
+        description: "Roles cannot be null"
+      });
+    }else{
+      const query = "SELECT role_id FROM role WHERE active=$1"
+      const dataquery = ["T"];
+      db.query(query, dataquery).then((results) => {
+        if(results.rows.length>0){
+          let roleArray = [];
+          for (var i = 0; i < results.rows.length; i++) {
+            roleArray.push(results.rows[i].role_id)
           }
+          let findError = false;
+          for (var i = 0; i < req.body.roles.length; i++) {
+            console.log(roleArray);
+            console.log(req.body.roles[i]);
+            var indexOfRole = roleArray.indexOf(req.body.roles[i])
+            console.log(indexOfRole);
+            if(indexOfRole<0){
+              var ret = {"code":"WEEM001", "description":"Failed! Role does not exist"}
+              res.status(200).json(ret)
+              findError = true
+              break
+            }
+          }
+          if(!findError){
+            next()
+          }
+        }else{
+          res.status(500).send({
+            code:"WEEM500",
+            description: "Internal error"
+          });
         }
-        if(!findError){
-          next()
-        }
-      }else{
+      }).catch(error => {
         res.status(500).send({
           code:"WEEM500",
-          description: "Internal error"
+          description: error.message
         });
-      }
-    }).catch(error => {
-      res.status(500).send({
-        code:"WEEM500",
-        description: error.message
       });
+    }
+  }else{
+    res.status(200).send({
+      code:"WEEM005",
+      description: "Roles cannot be null"
     });
-    
   }
 };
 
@@ -144,6 +156,7 @@ function createAccount(req, res){
   const position_id = req.body.position_id
   const mobileno = req.body.mobileno
   const company_id = req.body.company_id
+  const department_id = req.body.department_id
   const work_start_time = req.body.work_start_time
   const work_end_time = req.body.work_end_time
   const work_hours = req.body.work_hours
@@ -156,8 +169,8 @@ function createAccount(req, res){
   return new Promise(function(resolve){
     const query = `INSERT INTO users(username, password, employee_id, firstname, lastname, nickname,
                                     gender, dob, job_start_date, working_status, position_id, mobileno, company_id, work_start_time,
-                                    work_end_time, work_hours, image_url, active, createby, createdate, updateby, updatedate) 
-                   VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18, $19, $20, $21, $22)  RETURNING user_id;`
+                                    work_end_time, work_hours, image_url, active, createby, createdate, updateby, updatedate, department_id) 
+                   VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18, $19, $20, $21, $22, $23)  RETURNING user_id;`
     const dataquery = [username, 
                        password, 
                        employee_id, 
@@ -179,15 +192,18 @@ function createAccount(req, res){
                        createby,
                        createdate,
                        updateby,
-                       updatedate];
+                       updatedate,
+                       department_id];
     db.query(query, dataquery).then((results) => {
       const user_id = results.rows[0].user_id
       let insertValue = []
+      console.log(req.body.roles);
       for (var i = 0; i < req.body.roles.length; i++) {
         console.log(req.body.roles[i])
         insertValue.push([user_id, req.body.roles[i], createby, createdate, updateby, updatedate, "T"])
       }
       let queryRole = format("INSERT INTO user_role(user_id, role_id, createby, createdate, updateby, updatedate, active) VALUES %L", insertValue);
+      console.log(queryRole);
       db.query(queryRole).then(() => {
         resolve(user_id)
       })
@@ -217,7 +233,7 @@ function listEmployee(req, res){
                   LEFT JOIN positions b on a.position_id=b.position_id
                   LEFT JOIN company c on c.company_id=a.company_id
                   LEFT JOIN department d on d.department_id=a.department_id
-                  WHERE a.active=$1 AND c.company_id=$2`
+                  WHERE a.active=$1 AND a.company_id=$2`
     let dataquery = ["T", req.body.company_id];
     if(req.body.limit){
       query = query + " LIMIT $3"
@@ -249,8 +265,9 @@ function getEmployee(req, res){
     aDatetime = String(date).split("T")
     var dateNow = aDatetime[0] + " 00:00:00"
     let query = `SELECT username, employee_id, a.user_id, firstname, lastname, nickname, gender, a.createdate, a.updatedate, a.updateby, a.last_login,
-                        dob, job_start_date, a.position_id, mobileno, a.company_id, work_start_time + interval '15 minute' as late_work_start, d.department_id, d.department_name,
-                        work_end_time, work_hours, a.image_url as profile_url, b.position_name, c.company_name, work_start_time
+                        work_end_time, work_hours, a.image_url as profile_url, b.position_name, c.company_name, work_start_time,
+                        a.department_id, a.position_id, a.company_id, d.department_name, a.dob, a.job_start_date, a.working_status, a.mobileno,
+                        a.work_start_time + interval '15 minute' as late_work_start 
                     FROM users a
                     LEFT JOIN positions b on a.position_id=b.position_id
                     LEFT JOIN company c on c.company_id=a.company_id
@@ -364,6 +381,7 @@ function updateEmployee(req, res){
   const updateby = req.body.updateby
   const updatedate = dateNow
   const employee_id = req.body.employee_id
+  const department_id = req.body.department_id
   const user_id = req.params.user_id
   
   return new Promise(function(resolve){
@@ -385,7 +403,8 @@ function updateEmployee(req, res){
                        active=$15, 
                        updateby=$16, 
                        updatedate=$17,
-                       employee_id=$18
+                       employee_id=$18,
+                       department_id=$20
                    WHERE user_id = $19
                    RETURNING user_id;`
     const dataquery = [firstname, 
@@ -406,7 +425,8 @@ function updateEmployee(req, res){
                        updateby,
                        updatedate,
                        employee_id,
-                       user_id];
+                       user_id,
+                       department_id];
     db.query(query, dataquery).then((results) => {
       console.log(results.rows)
       resolve(results.rows[0])

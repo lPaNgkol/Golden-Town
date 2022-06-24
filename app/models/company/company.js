@@ -92,8 +92,8 @@ function createCompany(req, res){
 checkCompanyExist = (req, res, next) => {
     // Username
   let company_id = req.params.company_id ? req.params.company_id : req.body.company_id
-  const query = "SELECT * FROM company WHERE company_id=$1 AND active=$2 ORDER BY company_id DESC"
-  const dataquery = [company_id, "T"];
+  const query = "SELECT * FROM company WHERE company_id=$1 ORDER BY company_id DESC"
+  const dataquery = [company_id];
   db.query(query, dataquery).then((results) => {
     console.log(results.rows)
     if(results.rows.length<=0){
@@ -140,7 +140,7 @@ function getCompanyById(req, res){
           });
         });
 
-        let queryUser = `SELECT a.user_id, a.firstname, a.lastname, b.position_name, c.department_name, a.image_url
+        let queryUser = `SELECT a.user_id, a.firstname, a.lastname, b.position_name, c.department_name, a.image_url, a.gender
                         FROM users a LEFT JOIN positions b on b.position_id=a.position_id
                         LEFT JOIN department c on c.department_id=a.department_id
                         WHERE a.active=$1 AND a.company_id=$2`
