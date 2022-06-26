@@ -176,7 +176,7 @@ function positionCheck(req, res, next) {
         next();
       } else {
         console.log("No data");
-        var ret = { code: "WEPT404", description: "Position Id not found" };
+        var ret = { code: "WEPT200"};
         res.status(200).json(ret);
       }
     } catch (error) {
@@ -263,7 +263,7 @@ function departmentidCheck(req, res, next) {
         next(resolve((datacheck = 1)));
       } else {
         console.log("data not found");
-        var ret = { code: "WEPT404", description: "Department_id not found" };
+        var ret = { code: "WEPT200", description: "Department_id not found" };
         res.status(200).json(ret);
         return resolve((datacheck = 0));
       }
