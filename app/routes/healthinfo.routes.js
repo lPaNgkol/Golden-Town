@@ -24,7 +24,7 @@ module.exports = function (app) {
     controller.createHealthinfo
   );
 
-  app.put(
+  app.post(
     "/health/:healthinfo_id/:user_id",
     [authJwt.verifyToken],
     controller.updateHealthinfo
