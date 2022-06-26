@@ -42,7 +42,7 @@ function vaccinelistbyuserId(req, res) {
     try {
       const query = await db.query(
         `SELECT vaccine_info_id, user_id, dose_no, vaccine_name, vaccine_site, inject_date, active, createby, createdate, updateby, updatedate
-              FROM vaccine_info WHERE user_id = $1 ORDER BY b.user_id ASC`,
+              FROM vaccine_info WHERE user_id = $1 ORDER BY user_id ASC`,
         [req.params.user_id]
       );
       let info = query.rows;
