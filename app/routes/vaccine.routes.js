@@ -25,11 +25,11 @@ module.exports = function (app) {
   );
   app.post(
     "/vaccine/:user_id",
-    [authJwt.verifyToken, vaccine.doseCheck,controller.useridCheck,],
+    [authJwt.verifyToken, vaccine.doseCheck],
     controller.createvaccine
   );
 
-  app.put(
+  app.post(
     "/vaccine/:user_id/:vaccine_info_id",
     [authJwt.verifyToken],
     controller.updatevaccine
