@@ -214,17 +214,26 @@ function departmentInfo(req, res) {
       let departmentId = req.params.department_id;
       const jointreedata = await db.query(
         `SELECT users.employee_id,users.user_id, users.firstname, users.lastname, users.nickname, positions.position_id, users.image_url, positions.position_name
-          FROM
-          (department LEFT JOIN users ON users.department_id = $1)
-          INNER JOIN user ON department.department_id = users.department_id
-          LEFT JOIN positions ON users.position_id = positions.position_id ORDER BY users.employee_id ASC`,
+FROM
+department 
+LEFT JOIN users ON department.department_id = users.department_id 
+LEFT JOIN positions ON users.position_id = positions.position_id WHERE department.department_id = $1  ORDER BY users.user_id ASC;`,
         [departmentId]
       );
       let position = jointreedata.rows;
       // let puSers = poSer.rows;
-      console.log("testjipo", position.results);
+      console.log("testjipos", jointreedata.rowCount);
+      // console.log("jointreedata.rows.department_name", jointreedata.rows[0].user_id);
 
-      return resolve(position, position.length);
+      console.log("testjipo", position);
+      if (position == []) {
+        return resolve(0);
+      }
+      if (jointreedata.rowCount == 0) {
+        return resolve([]);
+      } else {
+        return resolve(position, position.rowCount);
+      }
     } catch (error) {
       console.error("### Error ", error);
       // return resolve(false);
