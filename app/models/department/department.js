@@ -133,19 +133,33 @@ function departmentByCompanyId(req, res) {
   });
 }
 
-function departmentName(req, res) {
+function departmentName(req, res, next) {
   return new Promise(async (resolve) => {
     try {
       let departmentId = req.params.department_id;
       const poSer = await db.query(
-        `SELECT department.department_name from department INNER JOIN user ON department.department_id = $1`,
+        `SELECT department_name from department WHERE department_id = $1`,
         [departmentId]
       );
-      let pos1 = poSer.rows[0].department_name;
-      // let puSers = poSer.rows;
-      console.log("tes", pos1);
-      // console.log("pos1", puSers.rows);
-      return resolve(pos1);
+      const departmentid = await db.query(
+        `SELECT department_id FROM users WHERE department_id = $1`,
+        [departmentId]
+      );
+      let pos1 = poSer.rowCount;
+      let pos3 = departmentid.rowCount;
+      console.log("tes1", pos1);
+      console.log("tes3", pos3);
+
+      if (pos1 === 0) {
+        var ret = { code: "WEDP404", description: "Department Id Not Found" };
+        res.status(200).json(ret);
+      }
+      if (pos1 > 0) {
+        let pos2 = poSer.rows[0].department_name;
+        console.log("tes2", pos2);
+
+        return resolve(pos2);
+      }
     } catch (error) {
       console.error("### Error ", error);
       // return resolve(false);
