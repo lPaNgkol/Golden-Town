@@ -100,7 +100,7 @@ exports.deletePosition = async (req, res) => {
       .status(404)
       .send({ code: "WEPS404", description: "Position id Not found." });
   } else {
-    res.status(200).send({ code: "WEPS200", description: "Delete Complete!" });
+    res.status(200).send({description: "Position id Not found." });
   }
 };
 
