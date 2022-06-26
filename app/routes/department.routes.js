@@ -1,5 +1,9 @@
 const authJwt = require("../models/user/authentication");
 const controller = require("../controllers/department/department.controllers");
+const department = require("../models/department/department");
+
+
+
 module.exports = function(app) {
   app.use(function(req, res, next) {
     res.header(
@@ -38,7 +42,7 @@ module.exports = function(app) {
     controller.ckcompanyId,
     controller.createDepartment
   );
-  app.put("/department/:department_id",
+  app.post("/department/id/:department_id",
     [authJwt.verifyToken],
     controller.updateDepartment
   );
