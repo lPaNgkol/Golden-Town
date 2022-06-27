@@ -39,8 +39,8 @@ exports.listProjectteam = async (req, res) => {
 // create projectteam
 exports.createProjectTeam = async (req, res) => {
   let createProject = null;
-    createProject = await projectteam.createProjectTeam(req, res);
-    res.status(200).send({ code: "WEPT200", description: "Success" });
+  createProject = await projectteam.createProjectTeam(req, res);
+  res.status(200).send({ code: "WEPT200", description: "Success" });
   
 };
 

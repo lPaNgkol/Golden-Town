@@ -12,19 +12,19 @@ module.exports = function (app) {
   });
 
   app.get(
-    "/project/team/:company_id",
+    "/projectteam/team/:company_id",
     [authJwt.verifyToken],
     controller.getProjectbyCompany
   );
 
   app.get(
-    "/project/team/id/:project_on_hand_id",
+    "/projectteam/team/id/:project_on_hand_id",
     [authJwt.verifyToken],
     controller.listProjectteam
   );
 
   app.post(
-    "/project/team",
+    "/projectteam/team",
     [
       authJwt.verifyToken,
     ],
@@ -32,13 +32,13 @@ module.exports = function (app) {
   );
 
   app.post(
-    "/project/team/:project_on_hand_id",
+    "/projectteam/team/:project_on_hand_id",
     [authJwt.verifyToken],
     controller.updateProjectteam
   );
 
   app.delete(
-    "/project/team/:project_on_hand_id",
+    "/projectteam/team/:project_on_hand_id",
     [authJwt.verifyToken],
     controller.deleteProjectteam
   );
