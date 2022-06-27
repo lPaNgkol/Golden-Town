@@ -17,12 +17,6 @@ module.exports = function (app) {
     controller.getProjectbyCompany
   );
 
-  // app.get(
-  //   "/project/team/",
-  //   [authJwt.verifyToken],
-  //   controller.listProjectTeamAll
-  // );
-
   app.get(
     "/project/team/id/:project_on_hand_id",
     [authJwt.verifyToken],
@@ -30,21 +24,21 @@ module.exports = function (app) {
   );
 
   app.post(
-    "/project/team/:project_on_hand_id",
-    [authJwt.verifyToken],
-    projectteam.checkuserByuserId,
+    "/project/team",
+    [
+      authJwt.verifyToken,
+    ],
     controller.createProjectTeam
   );
 
-  app.put(
-    "/project/team/:project_on_hand_id/:user_id",
+  app.post(
+    "/project/team/:project_on_hand_id",
     [authJwt.verifyToken],
-    projectteam.checkuserByuserId,
     controller.updateProjectteam
   );
 
   app.delete(
-    "/project/team/:project_on_hand_id/:user_id",
+    "/project/team/:project_on_hand_id",
     [authJwt.verifyToken],
     controller.deleteProjectteam
   );
