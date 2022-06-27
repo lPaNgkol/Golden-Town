@@ -176,7 +176,7 @@ function userhealthidCheck(req, res, next) {
     try {
       let userIdcheck = req.params.healthinfo_id;
       const poSer = await db.query(
-        `SELECT healthinfo_id FROM healthinfo WHERE healthinfo_id=$1 `,
+        `SELECT healthinfo_id FROM health_info WHERE healthinfo_id=$1 `,
         [userIdcheck]
       );
       let poscheck = poSer.rowCount;
