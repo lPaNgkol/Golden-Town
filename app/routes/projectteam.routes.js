@@ -10,7 +10,6 @@ module.exports = function (app) {
     );
     next();
   });
-
   app.get(
     "/projectteam/team/:company_id",
     [authJwt.verifyToken],
@@ -27,19 +26,22 @@ module.exports = function (app) {
     "/projectteam/team",
     [
       authJwt.verifyToken,
+      projectteam.checkuserId,
+      projectteam.checkonhandId,
+      projectteam.checkduplicateId,
     ],
     controller.createProjectTeam
   );
 
   app.post(
     "/projectteam/team/:project_on_hand_id",
-    [authJwt.verifyToken],
+    [authJwt.verifyToken, projectteam.checkduplicateId],
     controller.updateProjectteam
   );
 
   app.delete(
     "/projectteam/team/:project_on_hand_id",
-    [authJwt.verifyToken],
+    [authJwt.verifyToken, projectteam.ckdeleteProjectTeam],
     controller.deleteProjectteam
   );
 };
