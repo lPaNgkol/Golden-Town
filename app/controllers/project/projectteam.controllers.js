@@ -36,20 +36,27 @@ exports.listProjectteam = async (req, res) => {
   }
 };
 
+exports.testgetProjectTeam = async (req, res) => {
+  let getProject = "";
+  getProject = await projectteam.testgetProjectTeam(req, res);
+
+  if (getProject.length == 0) {
+    res
+      .status(200)
+      .send({ code: "WEPT404", description: "Project ID Not found." });
+  } else {
+    res.status(200).send({
+      total: getProject.length,
+      projectTeam: getProject,
+    });
+  }
+};
+
 // create projectteam
 exports.createProjectTeam = async (req, res) => {
-<<<<<<< HEAD
-  console.log("hererererer");
   let createProject = null;
-  console.log("hererererer");
   createProject = await projectteam.createProjectTeam(req, res);
   res.status(200).send({ code: "WEPT200", description: "Success" });
-=======
-  let createProject = null;
-    createProject = await projectteam.createProjectTeam(req, res);
-    res.status(200).send({ code: "WEPT200", description: "Success" });
->>>>>>> 1356fb60df76e064d536ffd2aaf56bb65329d2b6
-  
 };
 
 // update projectteam;
@@ -77,71 +84,16 @@ exports.updateProjectteam = async (req, res) => {
 // delete projectteam;
 exports.deleteProjectteam = async (req, res) => {
   try {
-    if (!req.params.project_on_hand_id) {
-      res
-        .status(200)
-        .send({
-          code: "WEPS400",
-          description: "Project onhand Id cannot be Null.",
-        });
-    }
     let projectteamCk = await projectteam.deleteProjectteam(req, res);
     if (projectteamCk != "complete") {
       res
         .status(404)
-        .send({ code: "WEPS404", description: "User id Not found." });
+        .send({ code: "WEPT404", description: "User id Not found." });
     } else {
       res.status(200).send({ code: "WEPT200", description: "Complete!" });
     }
-    // console.log("ss testss", departmentData.length);
   } catch (error) {
     console.error("## ControlError ", error);
     return error;
-  }
-};
-
-exports.testpostProjectTeam = async (req, res, next) => {
-  let getProject = await projectteam.testpostProjectTeam(req, res);
-  console.log("sss", getProject);
-  if (getProject.rowCount > 0) {
-    res.status(200).send({
-      description: "User Not Found",
-      rowCount: getProject.rowCount,
-      testpostProjectTeam: getProject
-    });
-  } else {
-    next();
-  }
-};
-
-// testgetProjectTeam
-
-exports.testgetProjectTeam = async (req, res, next) => {
-  let getProject = await projectteam.testgetProjectTeam(req, res);
-  console.log("ss", getProject.length, getProject.rows);
-  if (getProject.length == 0) {
-    next();
-  } else {
-    res.status(404).send({
-      description: "User Already in Project",
-      testgetProjectTeam: getProject,
-    });
-  }
-};
-
-exports.ckdelProjectTeam = async (req, res, next) => {
-  let getProject = await projectteam.ckdeleteProjectTeam(req, res);
-  console.log("ss", getProject);
-  if (getProject.length !== 0) {
-    next();
-  } else {
-    res
-      .status(404)
-      .send({
-        code: "WEPT404",
-        description: "User id Not Found",
-        total: getProject.length,
-        testgetProjectTeam: getProject,
-      });
   }
 };
