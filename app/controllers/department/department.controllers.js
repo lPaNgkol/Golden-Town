@@ -80,18 +80,29 @@ exports.departmentBydId = async (req, res) => {
 // get by department_id
 exports.departmentBycId = async (req, res) => {
   var DepartmentId = "";
-  var Dnnn = null;
-  DepartmentId = await department.companyInfo(req, res);
+  
   // Dnnn = await department.dName(req, res);
   Dnnn = await department.fName(req, res);
   console.log("te", Dnnn);
-  if (DepartmentId.length == 0) {
-    res.status(200).send({
-      department_name: Dnnn,
+  DepartmentId = await department.companyInfo(req, res);
+  console.log("tesr", DepartmentId);
+  if (Dnnn == 0 && DepartmentId == 0) {
+    res.status(404).send({
+      code: "WEDP404",
+      description: "Company Id not Found",
     });
-  } else {
+  }
+  if (DepartmentId == 0 && Dnnn != 0) {
     res.status(200).send({
-      total: DepartmentId.length,
+      code: "WEDP200",
+      total: 0,
+      department_name: Dnnn,
+      department_user: [],
+    });
+  } if (DepartmentId != 0 && Dnnn != 0) {
+    res.status(200).send({
+      code: "WEDP200",
+      total: DepartmentId,
       department_name: Dnnn,
       department_user: DepartmentId,
     });
