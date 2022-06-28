@@ -23,6 +23,7 @@ module.exports = function (app) {
     "/position/:company_id",
     [
       authJwt.verifyToken,
+      controller.positioncompanyCheck,
       position.departmentidCheck,
       position.positionnameCheck,
     ],
