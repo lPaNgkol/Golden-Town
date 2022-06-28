@@ -4,14 +4,16 @@ const authJwt = require("../../models/user/authentication");
 exports.vaccinelist = async (req, res) => {
   var listvaccine = "";
   listvaccine = await vaccine.vaccinelist(req, res);
+  // console.log("listvaccine",  listvaccine.length)
   if (listvaccine.length == 0) {
     res
-      .status(200)
-      .send({ code: "WEVC401", description: "Vaccine Id Not found." });
+      .status(404)
+      .send({ code: "WEVA404", description: "Vaccine Id Not found." });
   } else {
     res.status(200).send({
+      code: "WEVA200",
+      total: listvaccine.length,
       listvaccine: listvaccine,
-      totalRow: listvaccine[0].total_row,
     });
   }
 };
@@ -23,10 +25,10 @@ exports.vaccinelistbycompanyId = async (req, res) => {
   if (listvaccine.length == 0) {
     res
       .status(200)
-      .send({ code: "WEVC401", description: "vaccine Id Not found." });
+      .send({ code: "WEVA401", description: "No Employee in Company." });
   } else {
     res.status(200).send({
-      totalRow: listvaccine[0].total_row,
+      totalRow: listvaccine.length,
       vaccineInfoList: listvaccine,
     });
   }
@@ -38,11 +40,12 @@ exports.vaccinelistbyuserId = async (req, res) => {
   console.log(listvaccine);
   if (listvaccine.length == 0) {
     res
-      .status(200)
-      .send({ code: "WEVC401", description: "vaccine Id Not found." });
+      .status(404)
+      .send({ code: "WEVA404", description: "User Id Not found." });
   } else {
     res.status(200).send({
-      totalRow: listvaccine[0].total_row,
+      code: "WEVA200",
+      total: listvaccine.length,
       vaccineInfoList: listvaccine,
     });
   }
@@ -50,18 +53,22 @@ exports.vaccinelistbyuserId = async (req, res) => {
 
 exports.createvaccine = async (req, res) => {
   var vaccineData = "";
-  if (!authJwt) {
+
+  vaccineData = await vaccine.createvaccine(req, res);
+
+  if (!req.params.user_id) {
     res
       .status(200)
-      .send({ code: "WEVC401", description: "Access Token Expired" });
+      .send({ code: "WEVA400", description: "User id cannot be Null." });
   }
-  vaccineData = await vaccine.createvaccine(req, res);
+  console.log("vaccineData", vaccineData);
+
   if (vaccineData.length == 0) {
     res
-      .status(200)
-      .send({ code: "WEVC404", description: "vaccine Id Not found." });
+      .status(404)
+      .send({ code: "WEVA404", description: "Vaccine Id Not found." });
   } else {
-    res.status(200).send({ code: "WEVC200", message: "Success" });
+    res.status(200).send({ code: "WEVA200", message: "Success", vaccineData });
   }
 };
 
@@ -72,25 +79,25 @@ exports.updatevaccine = async (req, res) => {
     if (!authJwt) {
       res
         .status(200)
-        .send({ code: "WEVC401", description: "Access Token Expired" });
+        .send({ code: "WEVA401", description: "Access Token Expired" });
     }
     if (!req.params.user_id) {
       res
         .status(200)
-        .send({ code: "WEVC404", description: "User ID Not found." });
+        .send({ code: "WEVA400", description: "User ID Cannot be null" });
     }
     if (!req.params.vaccine_info_id) {
       res
         .status(200)
-        .send({ code: "WEVC404", description: "Vaccine ID Not Found" });
+        .send({ code: "WEVA400", description: "Vaccine ID Cannot be null" });
     }
     vaccineData = await vaccine.updatevaccine(req, res);
     if (vaccineData == false) {
       res
         .status(404)
-        .send({ code: "WEVC404", description: "Health Info ID Not Found." });
+        .send({ code: "WEVA404", description: "Vaccine ID Not Found." });
     } else {
-      res.status(200).send({ code: "WEVC200", message: "Success" });
+      res.status(200).send({ code: "WEVA200", message: "Success" });
     }
   } catch (error) {
     console.error("### Error ", error);
@@ -99,55 +106,47 @@ exports.updatevaccine = async (req, res) => {
 };
 
 exports.deletevaccine = async (req, res) => {
-  var projectData = ""
-  if(!req.params.vaccine_info_id){
-      res.status(200).send({code:"WEVC400", description: "Vaccine id cannot be Null." });
-  }
-  if(!req.params.user_id){
-    res.status(200).send({code:"WEVC400", description: "User id cannot be Null." });
-}
-  projectData = await vaccine.deletevaccine(req, res)
-  console.log(projectData);
-  if (projectData!="complete") {
-      res.status(404).send({code:"WEVC404", description: "Vaccine Id Not found." });
-  }else{
-      res.status(200).send({code:"WEVC200", description: "Delete Complete!"});
-  }
-};
-
-
-exports.useridCheck = async (req, res, next) => {
-  if (!authJwt) {
+  var projectData = "";
+  if (!req.params.vaccine_info_id) {
     res
       .status(200)
-      .send({ code: "WEVC401", description: "Access Token Expired" });
+      .send({ code: "WEVA400", description: "Vaccine id cannot be Null." });
   }
-  useridCheck = await vaccine.useridCheck(req, res, next);
-  if (useridCheck == 0) {
-    res.status(200).send({ code: "WEVC404", description: "User ID Not Found" });
+  if (!req.params.user_id) {
+    res
+      .status(200)
+      .send({ code: "WEVA400", description: "User id cannot be Null." });
   }
-  if (useridCheck == 1) {
-    next();
+  projectData = await vaccine.deletevaccine(req, res);
+  console.log(projectData);
+  if (projectData != "complete") {
+    res
+      .status(404)
+      .send({ code: "WEVA404", description: "Vaccine Id Not found." });
+  } else {
+    res.status(200).send({ code: "WEVA200", description: "Delete Complete!" });
   }
 };
 
 
 exports.deleteCheck = async (req, res, next) => {
+  let vcCheck = await vaccine.deleteCheck(req, res, next);
+  // console.log("VC",vcCheck);
   if (!req.params.user_id) {
     res
       .status(200)
-      .send({ code: "WEVC404", description: "User Id Not found." });
+      .send({ code: "WEVA400", description: "User Id Cannot be null" });
   }
   if (!req.params.vaccine_info_id) {
     res
       .status(200)
-      .send({ code: "WEVC404", description: "Vaccine Info Id Not found." });
+      .send({ code: "WEVA400", description: "Vaccine ID Cannot be null" });
   }
-  let vcCheck = await vaccine.deleteCheck(req, res, next);
-  if (vcCheck == 0){
-    res.status(200).send({ code: "WEVC404", description: "Vaccine ID Not Found" });
-  }
-  else {
+  if (vcCheck == 0) {
+    res
+      .status(404)
+      .send({ code: "WEVA404", description: "Vaccine ID Not Found" });
+  } else {
     next();
   }
-}
+};
