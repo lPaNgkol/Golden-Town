@@ -6,16 +6,17 @@ exports.positionList = async (req, res) => {
   if (!authJwt) {
     res
       .status(200)
-      .send({ code: "WEPT401", description: "Access Token Expired" });
+      .send({ code: "WEPS401", description: "Access Token Expired" });
   }
   listPosition = await position.positionList(req, res);
   console.log(listPosition);
   if (listPosition.length == 0) {
     res
-      .status(200)
-      .send({ code: "WEPT404", description: "Position Id Not found." });
+      .status(404)
+      .send({ code: "WEPS404", description: "Position Id Not found." });
   } else {
     res.status(200).send({
+      code: "WEPS200",
       total: listPosition.length,
       ListPosition: listPosition,
     });
@@ -27,16 +28,17 @@ exports.positioncompanyList = async (req, res) => {
   if (!authJwt) {
     res
       .status(200)
-      .send({ code: "WEPT401", description: "Access Token Expired" });
+      .send({ code: "WEPS401", description: "Access Token Expired" });
   }
   listPosition = await position.positioncompanyList(req, res);
   console.log(listPosition);
   if (listPosition.length == 0) {
     res
       .status(200)
-      .send({ code: "WEPT404", description: "No Employee in Company." });
+      .send({ code: "WEPS404", description: "No Employee in Company." });
   } else {
     res.status(200).send({
+      code: "WEPS200",
       total: listPosition.length,
       ListPosition: listPosition,
     });
@@ -48,10 +50,10 @@ exports.createPosition = async (req, res, next) => {
   if (!authJwt) {
     res
       .status(200)
-      .send({ code: "WEPT401", description: "Access Token Expired" });
+      .send({ code: "WEPS401", description: "Access Token Expired" });
   } else {
     createProject = await position.createPosition(req, res);
-    res.status(200).send({ code: "WEPT200", description: "Success" });
+    res.status(200).send({ code: "WEPS200", description: "Success", createProject });
   }
 };
 
@@ -69,15 +71,15 @@ exports.updatePosition = async (req, res) => {
     if (!authJwt) {
       res
         .status(200)
-        .send({ code: "WEPT401", description: "Access Token Expired" });
+        .send({ code: "WEPS401", description: "Access Token Expired" });
     }
     updateData = await position.updatePosition(req, res);
     if (updateData == 0) {
       res
-        .status(200)
-        .send({ code: "WEPT404", description: "Position not Found." });
+        .status(404)
+        .send({ code: "WEPS404", description: "Position not Found." });
     } else {
-      res.status(200).send({ code: "WEPT200", description: "Success" });
+      res.status(200).send({ code: "WEPS200", description: "Success" });
     }
     console.log("positionData", updateData);
   } catch (error) {
@@ -100,7 +102,7 @@ exports.deletePosition = async (req, res) => {
       .status(404)
       .send({ code: "WEPS404", description: "Position id Not found." });
   } else {
-    res.status(200).send({description: "Position id Not found." });
+    res.status(200).send({code: "WEPS200", description: "Success" });
   }
 };
 
@@ -112,7 +114,7 @@ exports.positioncompanyCheck = async (req, res, next) => {
     nameCheck = await position.positioncompanyCheck(req, res);
     console.log("positionnameCheck", nameCheck);
     if (nameCheck == 0) {
-      res.status(400).send({ message: "Company not found" });
+      res.status(404).send({code: "WEPS404", message: "Company not found" });
     }
     if (!authJwt) {
       res
@@ -134,7 +136,7 @@ exports.departmentCheck = async (req, res, next) => {
     nameCheck = await position.departmentidCheck(req, res);
     console.log("departmentidCheck", nameCheck);
     if (nameCheck == 0) {
-      res.status(400).send({ message: "Department not found" });
+      res.status(404).send({code: "WEPS404", message: "Department not found" });
     }
     if (nameCheck > 0) {
       next();
@@ -144,3 +146,5 @@ exports.departmentCheck = async (req, res, next) => {
     return error;
   }
 };
+
+
