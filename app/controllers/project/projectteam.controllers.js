@@ -25,32 +25,15 @@ exports.listProjectteam = async (req, res) => {
   getProject = await projectteam.listProjectTeam(req, res);
 
   if (getProject.length == 0) {
-    res
-      .status(200)
-      .send({ code: "WEPT404", description: "Project ID Not found." });
+    res.status(200).send({code: "WEPT200", total: getProject.length, projectTeam: getProject });
   } else {
-    res.status(200).send({
+    res.status(200).send({code: "WEPT200",
       total: getProject.length,
       projectTeam: getProject,
     });
   }
 };
 
-exports.testgetProjectTeam = async (req, res) => {
-  let getProject = "";
-  getProject = await projectteam.testgetProjectTeam(req, res);
-
-  if (getProject.length == 0) {
-    res
-      .status(200)
-      .send({ code: "WEPT404", description: "Project ID Not found." });
-  } else {
-    res.status(200).send({
-      total: getProject.length,
-      projectTeam: getProject,
-    });
-  }
-};
 
 // create projectteam
 exports.createProjectTeam = async (req, res) => {
@@ -90,8 +73,9 @@ exports.deleteProjectteam = async (req, res) => {
         .status(404)
         .send({ code: "WEPT404", description: "User id Not found." });
     } else {
-      res.status(200).send({ code: "WEPT200", description: "Complete!" });
+      res.status(200).send({ code: "WEPT200", description: "Success" });
     }
+    // console.log("ss testss", departmentData.length);
   } catch (error) {
     console.error("## ControlError ", error);
     return error;
