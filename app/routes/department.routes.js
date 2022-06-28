@@ -12,6 +12,8 @@ module.exports = function(app) {
     );
     next();
   });
+
+  // getDepartmentByCompanyId
   app.get(
     "/department",
     [authJwt.verifyToken],
@@ -24,12 +26,14 @@ module.exports = function(app) {
     controller.departmentById
   );
 
+
+  // getDepartmentInfo
   app.get(
     "/departmentinfo/:department_id",
     [authJwt.verifyToken],
     controller.departmentBydId
   );
-
+ // getCompanyInfo
   app.get(
     "/companyinfo/:company_id",
     [authJwt.verifyToken],
@@ -47,7 +51,7 @@ module.exports = function(app) {
     controller.updateDepartment
   );
   app.delete("/department/:department_id",
-    [authJwt.verifyToken],
+    [authJwt.verifyToken, controller.deleteCheck],
     controller.deleteDepartment
   )
 };
