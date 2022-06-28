@@ -1,7 +1,6 @@
 const db = require("../dbconnection");
 var format = require("pg-format");
 var moment = require("moment");
-
 // get all
 function departmentList(req, res) {
   return new Promise(async (resolve) => {
@@ -112,7 +111,7 @@ function departmentByCompanyId(req, res) {
       let companyId = req.params.company_id;
       const data = await db.query(
         // `SELECT department_id, department_name FROM department WHERE company_id = $1 ORDER BY department_id ASC`,
-        `SELECT company_id, department_name FROM department WHERE company_id = $1 ORDER BY department_id ASC`,
+        `SELECT company_id, department_name, department_id, updatedate FROM department WHERE company_id = $1 ORDER BY department_id ASC`,
         [companyId]
       );
 
@@ -190,19 +189,18 @@ function departmentfName(req, res) {
         `SELECT company.company_name from company INNER JOIN user ON company.company_id = $1`,
         [departmentId]
       );
-      console.log("pos1", poSer.rowCount, poSer.rows);
+      console.log("case 0", poSer.rowCount);
 
-      let puSers = poSer.rows;
+      let puSers = poSer.rowCount;
       let pos1 = poSer.rowCount;
-
-      if (puSers > 0) {
-        let pos2 = poSer.rows[0].company_name;
-        console.log("fname", pos1);
-        return resolve(pos2);
+      if (puSers == 0) {
+        console.log("if");
+        return resolve(0);
       }
-      if (poSer == 0) {
-        console.log("fname", pos1);
-        return resolve(pos1);
+      if (puSers > 0) {
+      console.log(" else");
+        let pos2 = poSer.rows[0].company_name;
+        return resolve(pos2);
       }
       // }if (puSers = ) {
       //   return resolve("Department Name Not Found");}
@@ -230,9 +228,18 @@ function companyInfo(req, res) {
         [companyId]
       );
       let position = join207.rows;
+      let poCount = join207.rowCount;
       // let position1 = join207.rows[0].department_name;
 
-      return resolve(position);
+      if (position == 0) {
+        // console.log("poCount1", poCount);
+
+        return resolve(poCount);
+      }
+      else {
+        // console.log("poCount2", position);
+        return resolve(position);
+      }
     } catch (error) {
       console.error("### Error ", error);
       // return resolve(false);
