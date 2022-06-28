@@ -147,17 +147,28 @@ function departmentName(req, res, next) {
       );
       let pos1 = poSer.rowCount;
       let pos3 = departmentid.rowCount;
-      console.log("tes1", pos1);
-      console.log("tes3", pos3);
+      console.log("poS1", pos1);
+      console.log("pos3", pos3);
+      console.log("poSer.rows", poSer.rows);
+      // console.log("departmentid.rows", departmentid.rows);
 
-      if (pos1 === 0) {
-        var ret = { code: "WEDP404", description: "Department Id Not Found" };
+      if (pos1 == 0 && pos3 == 0) {
+        var ret = { code: "WEPT404", description: "Department Id Not Found" };
         res.status(200).json(ret);
       }
-      if (pos1 > 0) {
+      if (pos1 != 0 && pos3 == 0) {
         let pos2 = poSer.rows[0].department_name;
-        console.log("tes2", pos2);
-
+        console.log(" case 1", pos2);
+        return resolve(pos2);
+      }
+      if (pos1 != 0 && pos3 != 0) {
+        let pos2 = poSer.rows[0].department_name;
+        console.log("case 2", pos2);
+        return resolve(pos2);
+      }
+      if ((pos1 = 0 && pos3 != 0)) {
+        let pos2 = poSer.rows[0].department_name;
+        console.log(" case 3", pos2);
         return resolve(pos2);
       }
     } catch (error) {
@@ -179,11 +190,22 @@ function departmentfName(req, res) {
         `SELECT company.company_name from company INNER JOIN user ON company.company_id = $1`,
         [departmentId]
       );
-      let pos1 = poSer.rows[0].company_name;
+      console.log("pos1", poSer.rowCount, poSer.rows);
+
       let puSers = poSer.rows;
-      console.log("fname", pos1);
-      console.log("pos1", puSers.rows);
-      return resolve(pos1);
+      let pos1 = poSer.rowCount;
+
+      if (puSers > 0) {
+        let pos2 = poSer.rows[0].company_name;
+        console.log("fname", pos1);
+        return resolve(pos2);
+      }
+      if (poSer == 0) {
+        console.log("fname", pos1);
+        return resolve(pos1);
+      }
+      // }if (puSers = ) {
+      //   return resolve("Department Name Not Found");}
     } catch (error) {
       console.error("### Error ", error);
       // return resolve(false);
@@ -204,12 +226,13 @@ function companyInfo(req, res) {
         `SELECT department.department_name, users.employee_id,users.user_id, users.firstname, users.lastname, users.nickname,users.image_url, positions.position_id, positions.position_name
         FROM
         (department LEFT JOIN users ON users.department_id = department.department_id)
-        LEFT JOIN positions ON users.position_id = positions.position_id WHERE EXISTS (SELECT users.company_id FROM users WHERE users.company_id = department.company_id AND users.company_id = $1) ORDER BY department.department_name;`,
+        LEFT JOIN positions ON users.position_id = positions.position_id WHERE EXISTS (SELECT users.company_id FROM users WHERE users.company_id = department.company_id AND users.company_id = $1) ORDER BY department.department_name ASC;`,
         [companyId]
       );
       let position = join207.rows;
-      let position1 = join207.rows[0].department_name;
-      return resolve(position, position1);
+      // let position1 = join207.rows[0].department_name;
+
+      return resolve(position);
     } catch (error) {
       console.error("### Error ", error);
       // return resolve(false);
@@ -231,22 +254,27 @@ function departmentInfo(req, res) {
 FROM
 department 
 LEFT JOIN users ON department.department_id = users.department_id 
-LEFT JOIN positions ON users.position_id = positions.position_id WHERE department.department_id = $1  ORDER BY users.user_id ASC;`,
+LEFT JOIN positions ON users.position_id = positions.position_id WHERE department.department_id = $1  AND users.active = 'T' ORDER BY users.user_id ASC;`,
         [departmentId]
       );
       let position = jointreedata.rows;
-      // let puSers = poSer.rows;
-      console.log("testjipos", jointreedata.rowCount);
-      // console.log("jointreedata.rows.department_name", jointreedata.rows[0].user_id);
+      let poCount = jointreedata.rowCount;
 
-      console.log("testjipo", position);
-      if (position == []) {
-        return resolve(0);
+      let result = jointreedata.rows;
+      // let puSers = poSer.rows;
+      // console.log("testjipos", poCount);
+      // console.log("departmentId", departmentId);
+
+      // console.log("jointreedata.rows.department_name", jointreedata.rows[0].user_id);
+      // console.log("testjipo", position);
+      if (position == 0) {
+        // console.log("poCount1", poCount);
+
+        return resolve(poCount);
       }
-      if (jointreedata.rowCount == 0) {
-        return resolve([]);
-      } else {
-        return resolve(position, position.rowCount);
+      else {
+        // console.log("poCount2", position);
+        return resolve(position);
       }
     } catch (error) {
       console.error("### Error ", error);
@@ -343,8 +371,8 @@ function deleteDepartment(req, res) {
       );
 
       let results = result.rows;
-      // console.log("testresults", reeS.length);
-      return resolve(results, results.length);
+      console.log("results deleteDepartment", results);
+      return resolve("complete");
     } catch (error) {
       console.error("### Error ", error);
       // return resolve(false);
@@ -355,6 +383,7 @@ function deleteDepartment(req, res) {
     }
   });
 }
+
 function departmentBydepartmentId(req, res) {
   return new Promise(async (resolve) => {
     try {
@@ -364,8 +393,15 @@ function departmentBydepartmentId(req, res) {
         [department_id]
       );
 
-      let results = data.rows;
-      return resolve(results, results.length);
+      let results = data.rows.length;
+      console.log(" results",  results);
+      if (results == 0) {
+      console.log("No data",  results);
+        return resolve(results = 0);
+      } else {
+        console.log(" data");
+        return resolve(results = 1);
+      }
     } catch (error) {
       console.error("### Error ", error);
       // return resolve(false);
@@ -377,29 +413,13 @@ function departmentBydepartmentId(req, res) {
   });
 }
 
-
-
 // get positionbydepartmentid
 // function ;
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 const department = {
   departmentList: departmentList,
   departmentByCompanyId: departmentByCompanyId,
-  departmentBydepartmentId:departmentBydepartmentId,
+  departmentBydepartmentId: departmentBydepartmentId,
   departmentInfo: departmentInfo,
   createDepartment: createDepartment,
   updateDepartment: updateDepartment,
@@ -407,6 +427,6 @@ const department = {
   ckcompanyId: companyList,
   dName: departmentName,
   companyInfo: companyInfo,
-  fName:departmentfName,
+  fName: departmentfName,
 };
 module.exports = department;
