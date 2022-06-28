@@ -10,6 +10,7 @@ module.exports = function (app) {
     );
     next();
   });
+
   app.get(
     "/projectteam/team/:company_id",
     [authJwt.verifyToken],
@@ -35,13 +36,18 @@ module.exports = function (app) {
 
   app.post(
     "/projectteam/team/:project_on_hand_id",
-    [authJwt.verifyToken, projectteam.checkduplicateId],
+    [
+      authJwt.verifyToken,
+      projectteam.checkduplicateId,
+      projectteam.updateuserId,
+    ],
     controller.updateProjectteam
   );
 
   app.delete(
     "/projectteam/team/:project_on_hand_id",
-    [authJwt.verifyToken, projectteam.ckdeleteProjectTeam],
+    [authJwt.verifyToken],
+    projectteam.ckdeleteProjectTeam,
     controller.deleteProjectteam
   );
 };
