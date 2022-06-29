@@ -112,7 +112,7 @@ function departmentByCompanyId(req, res) {
       let companyId = req.params.company_id;
       const data = await db.query(
         // `SELECT department_id, department_name FROM department WHERE company_id = $1 ORDER BY department_id ASC`,
-        `SELECT company_id, department_name FROM department WHERE company_id = $1 ORDER BY department_id ASC`,
+        `SELECT company_id, department_name, department_id, updatedate FROM department WHERE company_id = $1 ORDER BY department_id ASC`,
         [companyId]
       );
 

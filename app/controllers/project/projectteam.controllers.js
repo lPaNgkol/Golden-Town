@@ -55,14 +55,8 @@ exports.testgetProjectTeam = async (req, res) => {
 // create projectteam
 exports.createProjectTeam = async (req, res) => {
   let createProject = null;
-<<<<<<< HEAD
-    createProject = await projectteam.createProjectTeam(req, res);
-    res.status(200).send({ code: "WEPT200", description: "Success" });
-  
-=======
   createProject = await projectteam.createProjectTeam(req, res);
   res.status(200).send({ code: "WEPT200", description: "Success" });
->>>>>>> 19938a516139a1c369b050ac7ce79308a98d1b98
 };
 
 // update projectteam;
