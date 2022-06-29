@@ -5,27 +5,26 @@ var moment = require("moment");
 function positionList(req, res) {
   return new Promise(function (resolve) {
     let query = `SELECT a.position_id, a.position_name, a.department_id, b.department_name,
-                  a.createby, a.updateby, a.updatedate, a.createdate
-                  FROM positions a LEFT JOIN department b ON a.department_id = b.department_id WHERE a.active = $1`;
-
-    let dataquery = ["T"];
+    a.createby, a.updateby, a.updatedate, a.createdate
+    FROM positions a LEFT JOIN department b ON a.department_id = b.department_id WHERE a.active = 'T'`;
     if (req.body.limit) {
       query = query + " LIMIT $2";
-      dataquery.push(req.body.limit);
+      // dataquery.push(req.body.limit);
     }
     if (req.body.offset) {
       query = query + " OFFSET $3";
-      dataquery.push(req.body.offset);
+      // dataquery.push(req.body.offset);
     }
-    console.log(dataquery);
+    // console.log(dataquery);
 
-    db.query(query, dataquery)
+    db.query(query)
       .then((results) => {
         console.log(query);
         resolve(results.rows);
       })
       .catch((error) => {
         res.status(500).send({
+          code: "WEPS500",
           message: error.message,
         });
       });
@@ -42,8 +41,8 @@ function positioncompanyList(req, res) {
       const query = await db.query(
         `SELECT a.position_id, a.position_name, a.department_id, b.department_name,
                   a.createby, a.updateby, a.updatedate, a.createdate
-                  FROM positions a LEFT JOIN department b ON a.department_id = b.department_id WHERE a.active = $1 and a.company_id = $2`,
-        [active, company_id]
+                  FROM positions a LEFT JOIN department b ON a.department_id = b.department_id WHERE a.active = 'T' and a.company_id = $1`,
+        [company_id]
       );
 
       let dataquery = query.rows;
@@ -54,7 +53,7 @@ function positioncompanyList(req, res) {
       console.error("### Error ", error);
       // return resolve(false);
       return res.status(500).send({
-        code: "WEDP500",
+        code: "WEPS500",
         description: error.message,
       });
     }
@@ -93,7 +92,7 @@ function createPosition(req, res) {
     } catch (error) {
       console.error("### Error ", error);
       return res.status(500).send({
-        code: "WEDP500",
+        code: "WEPS500",
         description: error.message,
       });
     }
@@ -134,7 +133,7 @@ WHERE position_id=$1`,
       console.error("### Error ", error);
       // return resolve(false);
       return res.status(500).send({
-        code: "WEDP500",
+        code: "WEPS500",
         description: error.message,
       });
     }
@@ -176,13 +175,13 @@ function positionCheck(req, res, next) {
         next();
       } else {
         console.log("No data");
-        var ret = { code: "WEPT200"};
-        res.status(200).json(ret);
+        var ret = { code: "WEPT404", description: "Position id not found" };
+        res.status(404).json(ret);
       }
     } catch (error) {
       console.error("### Error ", error);
       return res.status(500).send({
-        code: "WEDP500",
+        code: "WEPS500",
         description: error.message,
       });
     }
@@ -209,7 +208,7 @@ function positioncompanyCheck(req, res, next) {
     } catch (error) {
       console.error("### Error ", error);
       return res.status(500).send({
-        code: "WEDP500",
+        code: "WEPS500",
         description: error.message,
       });
     }
@@ -229,7 +228,7 @@ function positionnameCheck(req, res, next) {
       if (poscheck > 0) {
         console.log("have data");
         var ret = {
-          code: "WEPT404",
+          code: "WEPS404",
           description: "Position Name Already in Project",
         };
         res.status(200).json(ret);
@@ -241,7 +240,7 @@ function positionnameCheck(req, res, next) {
     } catch (error) {
       console.error("### Error ", error);
       return res.status(500).send({
-        code: "WEDP500",
+        code: "WEPS500",
         description: error.message,
       });
     }
@@ -263,8 +262,8 @@ function departmentidCheck(req, res, next) {
         next(resolve((datacheck = 1)));
       } else {
         console.log("data not found");
-        var ret = { code: "WEPT200", description: "Department_id not found" };
-        res.status(200).json(ret);
+        var ret = { code: "WEPS404", description: "Department_id not found" };
+        res.status(404).json(ret);
         return resolve((datacheck = 0));
       }
     } catch (error) {

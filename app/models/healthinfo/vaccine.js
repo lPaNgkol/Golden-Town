@@ -7,12 +7,15 @@ function vaccinelist(req, res) {
     try {
       const query =
         await db.query(`SELECT vaccine_info_id, user_id, dose_no, vaccine_name, vaccine_site, inject_date, active, createby, createdate, updateby, updatedate
-            FROM vaccine_info ORDER BY user_id ASC`);
+            FROM vaccine_info WHERE active = 'T' ORDER BY user_id ASC`);
+      // console.log("vaccinelist", query.rows.length);
+
       let info = query.rows;
-      console.log("vaccinelist", info);
-      return resolve(info);
+      let infoLength = query.rows.length;
+      // console.log("vaccinelist", infoLength);
+      return resolve(info, info.length);
     } catch (error) {
-      console.error("###error", error);
+      console.error("###model", error);
     }
   });
 }
@@ -32,7 +35,9 @@ function vaccinelistbycompanyId(req, res) {
     } catch (error) {
       console.error("###error", error);
     }
-    return res.status(500).send({ code: "WEVC500", description: error.message });
+    return res
+      .status(500)
+      .send({ code: "WEVA500", description: error.message });
   });
 }
 
@@ -50,7 +55,9 @@ function vaccinelistbyuserId(req, res) {
     } catch (error) {
       console.error("###error", error);
     }
-    return res.status(500).send({ code: "WEVC500", description: error.message });
+    return res
+      .status(500)
+      .send({ code: "WEVA500", description: error.message });
   });
 }
 
@@ -92,7 +99,7 @@ function createvaccine(req, res) {
       console.error("###error", error);
       return res
         .status(500)
-        .send({ code: "WEVC500", description: error.message });
+        .send({ code: "WEVA500", description: error.message });
     }
   });
 }
@@ -139,7 +146,7 @@ function updatevaccine(req, res) {
       console.error("### Error ", error);
       // return resolve(false);
       return res.status(500).send({
-        code: "WEVC500",
+        code: "WEVA500",
         description: error.message,
       });
     }
@@ -160,7 +167,7 @@ function deletevaccine(req, res) {
       console.error("### Error ", error);
       // return resolve(false);
       return res.status(500).send({
-        code: "WEVC500",
+        code: "WEVA500",
         description: error.message,
       });
     }
@@ -178,18 +185,15 @@ function deleteCheck(req, res, next) {
       let poscheck = poSer.rowCount;
       console.log("No data", poscheck);
       if (poscheck == 0) {
-        console.log("No data");
-        var ret = { code: "WEVC404", description: "Vaccine Id not found" };
-        res.status(200).json(ret);
-        return resolve(poscheck == 1);
+        return resolve(poscheck = 0);
       } else {
         console.log(" data");
-        next(resolve(poscheck == 1));
+        return resolve(poscheck = 1);
       }
     } catch (error) {
       console.error("### Error ", error);
       return res.status(500).send({
-        code: "WEDP500",
+        code: "WEVA500",
         description: error.message,
       });
     }
@@ -206,9 +210,9 @@ function useridCheck(req, res, next) {
         [userIdcheck]
       );
       let poscheck = poSer.rowCount;
-      if (poscheck !== 0) {
+      if (poscheck != 0) {
         var ret = {
-          code: "WEPT404",
+          code: "WEVA404",
           description: "User Already in Project",
         };
         res.status(200).json(ret);
@@ -219,7 +223,66 @@ function useridCheck(req, res, next) {
     } catch (error) {
       console.error("### Error ", error);
       return res.status(500).send({
-        code: "WEVC500",
+        code: "WEVA500",
+        description: error.message,
+      });
+    }
+  });
+}
+
+function userCheck(req, res, next) {
+  return new Promise(async (resolve) => {
+    try {
+      let userIdcheck = req.params.user_id;
+      const poSer = await db.query(
+        `SELECT user_id FROM users WHERE user_id=$1 `,
+        [userIdcheck]
+      );
+      let poscheck = poSer.rowCount;
+      console.log("usercheck", poscheck);
+      if (poscheck > 0) {
+        next();
+      } else {
+        var ret = {
+          code: "WEVC404",
+          description: "User Id Not Found",
+        };
+        res.status(404).json(ret);
+      }
+    } catch (error) {
+      console.error("### Error ", error);
+      return res.status(500).send({
+        code: "WEVA500",
+        description: error.message,
+      });
+    }
+  });
+}
+
+// check userid
+function useridVaccineCheck(req, res, next) {
+  return new Promise(async (resolve) => {
+    try {
+      let userIdcheck = req.params.user_id;
+      const poSer = await db.query(
+        `SELECT user_id FROM vaccine_info WHERE user_id=$1 `,
+        [userIdcheck]
+      );
+      let poscheck = poSer.rowCount;
+      if (poscheck != 0) {
+        var ret = {
+          code: "WEVA200",
+          description: "User Already in Project",
+        };
+        res.status(200).json(ret);
+      } else {
+        console.log("data not found", poSer.length);
+        return resolve((poscheck = 0));
+      }
+    } catch (error) {
+      console.error("### Error ", error);
+      return res.status(500).send({
+        code: "WEVA500",
         description: error.message,
       });
     }
@@ -241,26 +304,56 @@ function doseCheck(req, res, next) {
         [user_id, dose_no]
       );
       let poscheck = doseCheck.rowCount;
-      console.log("data", poscheck);
+      console.log("poscheck", poscheck);
 
       if (poscheck > 0) {
         var ret = {
-          code: "WEVC404",
+          code: "WEVA404",
           description: "Dose no Already in Project",
         };
-        res.status(200).json(ret);
+        res.status(404).json(ret);
       } else {
         next();
       }
     } catch (error) {
       console.error("### Error ", error);
       return res.status(500).send({
-        code: "WEVC500",
+        code: "WEVA500",
         description: error.message,
       });
     }
   });
 }
+
+function vaccineidCheck(req, res, next) {
+  return new Promise(async (resolve) => {
+    try {
+      let vaccineidCheck = req.params.vaccine_info_id;
+      const poSer = await db.query(
+        `SELECT vaccine_info_id FROM vaccine_info WHERE vaccine_info_id=$1 `,
+        [vaccineidCheck]
+      );
+      let poscheck = poSer.rowCount;
+      console.log("usercheck", poscheck);
+      if (poscheck > 0) {
+        next();
+      } else {
+        var ret = {
+          code: "WEVC404",
+          description: "Vaccine Id Not Found",
+        };
+        res.status(404).json(ret);
+      }
+    } catch (error) {
+      console.error("### Error ", error);
+      return res.status(500).send({
+        code: "WEVA500",
+        description: error.message,
+      });
+    }
+  });
+}
+
 
 const vaccine = {
   vaccinelist: vaccinelist,
@@ -272,5 +365,7 @@ const vaccine = {
   useridCheck: useridCheck,
   doseCheck: doseCheck,
   deleteCheck: deleteCheck,
+  userCheck: userCheck,
+  useridVaccineCheck: useridVaccineCheck,
 };
 module.exports = vaccine;

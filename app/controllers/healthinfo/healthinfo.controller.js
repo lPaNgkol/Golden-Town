@@ -7,11 +7,12 @@ exports.healthinfoList = async (req, res) => {
   console.log(listHealthinfo);
   if (listHealthinfo.length == 0) {
     res
-      .status(200)
-      .send({ code: "WEHI401", description: "Healthinfo Id Not found." });
+      .status(404)
+      .send({ code: "WEHI404", description: "Healthinfo Id Not found." });
   } else {
     res.status(200).send({
-      totalRow: listHealthinfo[0].total_row,
+      code: "WEHI200",
+      total: listHealthinfo.length,
       ListHealthinfo: listHealthinfo,
     });
   }
@@ -23,29 +24,29 @@ exports.healthinfoByuserId = async (req, res) => {
   console.log(listHealthinfo);
   if (listHealthinfo.length == 0) {
     res
-      .status(200)
-      .send({ code: "WEHI401", description: "Healthinfo Id Not found." });
+      .status(404)
+      .send({ code: "WEHI404", description: "Healthinfo Id Not found." });
   } else {
     res
       .status(200)
       .send({
-        totalRow: listHealthinfo[0].total_row,
+        code: "WEHI200",
+        total: listHealthinfo.length,
         ListHealthinfo: listHealthinfo,
       });
   }
 };
 
 exports.createHealthinfo = async (req, res) => {
-  var healthinfoData = "";
   if (!req.params.user_id) {
     res
       .status(200)
       .send({ code: "WEHI400", description: "user_id cannot Be Null." });
   }
-  healthinfoData = await healthinfo.createHealthinfo(req, res);
+  let healthinfoData = await healthinfo.createHealthinfo(req, res);
   if (healthinfoData.length == 0) {
     res
-      .status(200)
+      .status(404)
       .send({ code: "WEHI404", description: "healthinfo Id Not found." });
   } else {
     res.status(200).send({ code: "WEHI200", description: "Success" });
@@ -55,7 +56,6 @@ exports.createHealthinfo = async (req, res) => {
 // update project team
 exports.updateHealthinfo = async (req, res) => {
   try {
-    let healthinfoData = "";
     if (!authJwt) {
       res
         .status(200)
@@ -64,18 +64,19 @@ exports.updateHealthinfo = async (req, res) => {
 
     if (req.params.user_id == 0) {
       res
-        .status(200)
+        .status(404)
         .send({ code: "WEHI404", description: "Project ID Not found." });
     }
-    healthinfoData = await healthinfo.updateHealthinfo(req, res);
+    let healthinfoData = await healthinfo.updateHealthinfo(req, res);
     if (healthinfoData.length == 0) {
       res
-        .status(403)
-        .send({ code: "WEHI403", description: "Health Info ID Not Found." });
+        .status(404)
+        .send({ code: "WEHI404", description: "Health Info ID Not Found." });
     } else {
       res.status(200).send({
         code: "WEHI200",
         description: "Success",
+        healthinfoData: healthinfoData
       });
     }
   } catch (error) {
@@ -115,7 +116,7 @@ exports.useridCheck = async (req, res, next) => {
   }
   useridCheck = await healthinfo.useridCheck(req, res, next);
   if (useridCheck == 0) {
-    res.status(200).send({ code: "WEHI404", description: "User ID Not Found" });
+    res.status(404).send({ code: "WEHI404", description: "User ID Not Found" });
   }
   if (useridCheck == 1) {
     next();

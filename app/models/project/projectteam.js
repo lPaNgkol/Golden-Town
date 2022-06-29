@@ -35,7 +35,7 @@ function listProjectTeam(req, res) {
   return new Promise(async (resolve) => {
     try {
       const getProjectteam = await db.query(
-        `SELECT users.user_id,users.firstname ,users.lastname, users.username,users.image_url,project_team.team_position,project_team.active
+        `SELECT project_team.project_team_id,users.user_id,users.firstname ,users.lastname, users.username,users.image_url,project_team.team_position,project_team.active
 		FROM
 		project_team LEFT JOIN users ON users.user_id = project_team.user_id
     WHERE project_team.project_on_hand_id = $1 AND project_team.active = 'T' ORDER BY users.user_id ASC`,
@@ -92,7 +92,7 @@ function createProjectTeam(req, res) {
       let sqlQuery = `INSERT INTO project_team (user_id, project_on_hand_id, active, team_position, owner, createby, updateby, createdate, updatedate) VALUES ${requestInsertData
         .map(
           (request) =>
-            `(${request.user_id}, ${request.project_on_hand_id}, '${request.active}', ${request.team_position}, '${request.owner}', ${request.createby}, ${request.updateby}, '${request.createdate}', '${request.updatedate}')`
+            `(${request.user_id}, ${request.project_on_hand_id}, '${request.active}', '${request.team_position}', '${request.owner}', ${request.createby}, ${request.updateby}, '${request.createdate}', '${request.updatedate}')`
         )
         .join(",")};`;
       let query = await db.query(sqlQuery);
@@ -142,7 +142,7 @@ function updateProjectteam(req, res) {
       let sqlValues = requestInsertData
         .map(
           (request) =>
-            `(${request.project_team_id}, ${request.project_on_hand_id}, ${request.user_id}, '${request.active}', ${request.updateby},  NOW() , ${request.team_position}, '${request.owner}')`
+            `(${request.project_team_id}, ${request.project_on_hand_id}, ${request.user_id}, '${request.active}', ${request.updateby},  NOW() , '${request.team_position}', '${request.owner}')`
         )
         .join(",");
 
@@ -158,7 +158,7 @@ function updateProjectteam(req, res) {
     FROM (VALUES
     ${sqlValues}
     ) as c(project_team_id, project_on_hand_id, user_id, active, updateby, updatedate, team_position, owner)
-    WHERE c.project_team_id = pt.project_team_id `;
+    WHERE c.project_team_id = pt.project_team_id AND c.project_on_hand_id = pt.project_on_hand_id `;
       // console.log("sqlValues", sqlValues);
       // console.log("sqlQuery", sqlQuery);
       let query = await db.query(sqlQuery);
@@ -241,12 +241,11 @@ function ckdeleteProjectTeam(req, res, next) {
       console.log("results", results);
       if (results.length == 0) {
         res.status(200).send({
-          code: 404,
-          description: "User Not Found",
+          code: "WEPT404",
+          description: "User Id Not Found",
         });
       } else {
         next();
-
         return resolve(results);
       }
     });
@@ -264,26 +263,37 @@ function ckdeleteProjectTeam(req, res, next) {
 function checkonhandId(req, res, next) {
   try {
     return new Promise(async (resolve) => {
+      const unique = (value, index, self) => {
+        return self.indexOf(value) === index;
+      };
       let requestArrayBody = req.body;
       let projectonHandId = [];
+
       requestArrayBody.map((req) => {
         projectonHandId.push(req.project_on_hand_id);
       });
       console.log(projectonHandId);
+      const uniqueId = projectonHandId.filter(unique);
+      console.log("uniqueId", uniqueId);
       let query = await db.query(
         `SELECT project_on_hand_id FROM project_on_hand WHERE project_on_hand_id = ANY($1::int[])`,
-        [projectonHandId]
+        [uniqueId]
       );
+
       let results = query.rows;
-      console.log("results", results);
-      if (results.length == 0) {
-        res.status(200).send({
-          code: 404,
-          description: "Project Not Found",
+      let result = query.rowCount;
+
+      console.log("uniqueId.length", uniqueId.length);
+      console.log("results", results.length);
+      console.log("result", result);
+      if (results.length != uniqueId.length) {
+        res.status(404).send({
+          code: "WEPT404",
+          description: "Project Onhand Not Found",
         });
       } else {
+        console.log("checkonhandId pass");
         next();
-
         return resolve(results);
       }
     });
@@ -311,16 +321,17 @@ function checkuserId(req, res, next) {
         [userId]
       );
       let results = query.rows;
-      console.log("results", results);
-      if (results.length == 0) {
-        res.status(200).send({
-          code: 404,
+      console.log("results", results.length);
+      console.log("userId", userId.length);
+      if (results.length == userId.length) {
+        console.log("checkuserId pass");
+        next();
+        // return resolve(results);
+      } else {
+        res.status(404).send({
+          code: "WEPT404",
           description: "User Id Not Found",
         });
-      } else {
-        next();
-
-        return resolve(results);
       }
     });
   } catch (error) {
@@ -344,8 +355,8 @@ function checkduplicateId(req, res, next) {
         userId.push(req.user_id);
         projectOnHandId.push(req.project_on_hand_id);
       });
-      console.log(userId);
-      console.log(projectOnHandId);
+      console.log("userId", userId);
+      console.log("projectOnHandId", projectOnHandId);
       let query = await db.query(
         `SELECT user_id, project_on_hand_id FROM project_team WHERE user_id = ANY($1::int[]) AND project_on_hand_id = ANY($2::int[])`,
         [userId, projectOnHandId]
@@ -353,14 +364,54 @@ function checkduplicateId(req, res, next) {
       let results = query.rows;
       console.log("results", results);
       if (results.length > 0) {
-        res.status(200).send({
-          code: 404,
+        res.status(404).send({
+          code: "WEPT404",
           description: "User Id Already in Project",
+          // results:results
         });
+        return resolve(results);
       } else {
+        console.log(" checkduplicateId pass");
         next();
       }
       return resolve(results);
+    });
+  } catch (error) {
+    console.error("### Error ", error);
+    // return resolve(false);
+    return res.status(500).send({
+      code: "WEPT500",
+      description: error.message,
+    });
+  }
+}
+
+function updateuserId(req, res, next) {
+  try {
+    return new Promise(async (resolve) => {
+      let requestArrayBody = req.body;
+      let userId = [];
+      requestArrayBody.map((req) => {
+        userId.push(req.updateby);
+      });
+      console.log(userId);
+      let query = await db.query(
+        `SELECT user_id FROM users WHERE user_id = ANY($1::int[])`,
+        [userId]
+      );
+      let results = query.rows;
+      console.log("updateby", results.length);
+      console.log("userId", userId.length);
+      if (results.length == userId.length) {
+        console.log("checkuserId pass");
+        next();
+        return resolve(results);
+      } else {
+        res.status(404).send({
+          code: "WEPT404",
+          description: "Update Id Not Found",
+        });
+      }
     });
   } catch (error) {
     console.error("### Error ", error);
@@ -382,5 +433,6 @@ const projectteam = {
   checkduplicateId: checkduplicateId,
   checkuserId: checkuserId,
   checkonhandId: checkonhandId,
+  updateuserId: updateuserId,
 };
 module.exports = projectteam;

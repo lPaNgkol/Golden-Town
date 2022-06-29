@@ -136,7 +136,7 @@ function deleteHealthinfo(req, res) {
       console.error("### Error ", error);
       // return resolve(false);
       return res.status(500).send({
-        code: "WEHF500",
+        code: "WEHI500",
         description: error.message,
       });
     }
@@ -163,7 +163,7 @@ function useridCheck(req, res, next) {
     } catch (error) {
       console.error("### Error ", error);
       return res.status(500).send({
-        code: "WEDP500",
+        code: "WEHI500",
         description: error.message,
       });
     }
@@ -184,7 +184,7 @@ function userhealthidCheck(req, res, next) {
         next();
       } else {
         console.log("No data");
-        var ret = { code: "WEHI404", description: "Healthinfo_id not found" };
+        var ret = { code: "WEHI404", description: "Health Info Id not found" };
         res.status(200).json(ret);
       }
     } catch (error) {
