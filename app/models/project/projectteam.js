@@ -238,8 +238,9 @@ function ckdeleteProjectTeam(req, res, next) {
         [userId, projectOnHandId]
       );
       let results = query.rows;
+      console.log("projectOnHandId", projectOnHandId.length);
       console.log("results", results);
-      if (results.length == 0) {
+      if (results.length != projectOnHandId.length) {
         res.status(200).send({
           code: "WEPT404",
           description: "User Id Not Found",
