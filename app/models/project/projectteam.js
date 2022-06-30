@@ -276,7 +276,7 @@ function checkonhand(req, res, next) {
         [project_on_hand_id]
       );
       let results = query.rows;
-      // console.log("updateby", results.length);
+      console.log("updateby", results.length);
       // console.log("userId", userId.length);
       if (results.length > 0) {
         console.log("checkproject_on_hand_id pass");
@@ -299,6 +299,40 @@ function checkonhand(req, res, next) {
   }
 }
 
+function checkonhandfromonhand(req, res, next) {
+  try {
+    return new Promise(async (resolve) => {
+      console.log("**checkonhand");
+
+      const project_on_hand_id = req.params.project_on_hand_id;
+      // console.log(userId);
+      let query = await db.query(
+        `SELECT project_on_hand_id FROM  project_on_hand WHERE project_on_hand_id = $1`,
+        [project_on_hand_id]
+      );
+      let results = query.rows;
+      console.log("updateby", results.length);
+      // console.log("userId", userId.length);
+      if (results.length > 0) {
+        console.log("checkproject_on_hand_id pass");
+        next();
+        return resolve(results);
+      } else {
+        res.status(404).send({
+          code: "WEPT404",
+          description: "Project Onhand Id Not Found",
+        });
+      }
+    });
+  } catch (error) {
+    console.error("### Error ", error);
+    // return resolve(false);
+    return res.status(500).send({
+      code: "WEPT500",
+      description: error.message,
+    });
+  }
+}
 // check project on hand
 function checkonhandId(req, res, next) {
   try {
@@ -677,5 +711,6 @@ const projectteam = {
   isDup: isDup,
   checkId: checkId,
   updateduplicateId: updateduplicateId,
+  checkonhandfromonhand:checkonhandfromonhand
 };
 module.exports = projectteam;
