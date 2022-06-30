@@ -64,7 +64,7 @@ function createProjectTeam(req, res) {
     try {
       const dateNow = moment().format("YYYY-MM-DD HH:mm:ss");
       //const user_id = req.body.user_id;
-      // const project_on_hand_id = req.params.project_on_hand_id;
+      const project_on_hand_id = req.params.project_on_hand_id;
       //const active = req.body.active;
       const createby = req.user_id;
       const updateby = req.user_id;
@@ -79,7 +79,7 @@ function createProjectTeam(req, res) {
       for (let body of requestArrayBody) {
         requestInsertData.push({
           user_id: body.user_id,
-          project_on_hand_id: body.project_on_hand_id,
+          project_on_hand_id: project_on_hand_id,
           active: body.active,
           team_position: body.team_position,
           owner: body.owner,
@@ -222,10 +222,13 @@ function deleteProjectteam(req, res) {
 function ckdeleteProjectTeam(req, res, next) {
   try {
     return new Promise(async (resolve) => {
+      console.log("**ckdeleteProjectTeam");
+
       let requestArrayBody = req.body;
       let project_on_hand_id = req.params.project_on_hand_id;
       let userId = [];
       let projectOnHandId = [];
+      let active = req.active;
       requestArrayBody.map((req) => {
         userId.push(req.user_id);
         projectOnHandId.push(project_on_hand_id);
@@ -234,12 +237,13 @@ function ckdeleteProjectTeam(req, res, next) {
       console.log(userId);
       console.log(projectOnHandId);
       let query = await db.query(
-        `SELECT user_id, project_on_hand_id FROM project_team WHERE user_id = ANY($1::int[]) AND project_on_hand_id = ANY($2::int[])`,
+        `SELECT user_id, project_on_hand_id, active FROM project_team WHERE user_id = ANY($1::int[]) AND project_on_hand_id = ANY($2::int[]) AND active = 'T'`,
         [userId, projectOnHandId]
       );
       let results = query.rows;
       console.log("projectOnHandId", projectOnHandId.length);
-      console.log("results", results);
+      console.log("results", results.length);
+      // if (results[2] == 'F')
       if (results.length != projectOnHandId.length) {
         res.status(200).send({
           code: "WEPT404",
@@ -260,37 +264,66 @@ function ckdeleteProjectTeam(req, res, next) {
   }
 }
 
+function checkonhand(req, res, next) {
+  try {
+    return new Promise(async (resolve) => {
+      console.log("**checkonhand");
+
+      const project_on_hand_id = req.params.project_on_hand_id;
+      // console.log(userId);
+      let query = await db.query(
+        `SELECT project_on_hand_id FROM project_team WHERE project_on_hand_id = $1`,
+        [project_on_hand_id]
+      );
+      let results = query.rows;
+      // console.log("updateby", results.length);
+      // console.log("userId", userId.length);
+      if (results.length > 0) {
+        console.log("checkproject_on_hand_id pass");
+        next();
+        return resolve(results);
+      } else {
+        res.status(404).send({
+          code: "WEPT404",
+          description: "Project Onhand Id Not Found",
+        });
+      }
+    });
+  } catch (error) {
+    console.error("### Error ", error);
+    // return resolve(false);
+    return res.status(500).send({
+      code: "WEPT500",
+      description: error.message,
+    });
+  }
+}
+
 // check project on hand
 function checkonhandId(req, res, next) {
   try {
     return new Promise(async (resolve) => {
-      const unique = (value, index, self) => {
-        return self.indexOf(value) === index;
-      };
-      let requestArrayBody = req.body;
-      let projectonHandId = [];
-
-      requestArrayBody.map((req) => {
-        projectonHandId.push(req.project_on_hand_id);
-      });
+      // let requestArrayBody = req.body;
+      let projectonHandId = req.params.project_on_hand_id;
+      console.log("**checkonhandId");
       console.log(projectonHandId);
-      const uniqueId = projectonHandId.filter(unique);
-      console.log("uniqueId", uniqueId);
+      // const uniqueId = projectonHandId.filter(unique);
+      // console.log("uniqueId", uniqueId);
       let query = await db.query(
-        `SELECT project_on_hand_id FROM project_on_hand WHERE project_on_hand_id = ANY($1::int[])`,
-        [uniqueId]
+        `SELECT project_on_hand_id FROM project_on_hand WHERE project_on_hand_id = $1`,
+        [projectonHandId]
       );
 
       let results = query.rows;
       let result = query.rowCount;
 
-      console.log("uniqueId.length", uniqueId.length);
-      console.log("results", results.length);
+      // console.log("uniqueId.length", uniqueId.length);
+      console.log("results", results);
       console.log("result", result);
-      if (results.length != uniqueId.length) {
+      if (results.length == 0) {
         res.status(404).send({
           code: "WEPT404",
-          description: "Project Onhand Not Found",
+          description: "Project Onhand ID Not Found",
         });
       } else {
         console.log("checkonhandId pass");
@@ -311,6 +344,7 @@ function checkonhandId(req, res, next) {
 function checkuserId(req, res, next) {
   try {
     return new Promise(async (resolve) => {
+      console.log("**checkuserId");
       let requestArrayBody = req.body;
       let userId = [];
       requestArrayBody.map((req) => {
@@ -349,6 +383,7 @@ function checkuserId(req, res, next) {
 function checkduplicateId(req, res, next) {
   try {
     return new Promise(async (resolve) => {
+      console.log("**checkduplicateI");
       let requestArrayBody = req.body;
       let userId = [];
       let projectOnHandId = [];
@@ -387,15 +422,153 @@ function checkduplicateId(req, res, next) {
   }
 }
 
+function updateduplicateId(req, res, next) {
+  try {
+    return new Promise(async (resolve) => {
+      console.log("**updateduplicateId");
+      let requestArrayBody = req.body;
+      let projectId = [];
+      let projectOnHandId = req.params.project_on_hand_id;
+      const unique = (value, index, self) => {
+        return self.indexOf(value) === index;
+      };
+      requestArrayBody.map((req) => {
+        projectId.push(req.project_team_id);
+      });
+      console.log("userId", projectId);
+      console.log("projectOnHandId", projectOnHandId);
+      const uniqueId = projectId.filter(unique);
+      console.log("uniqueId", uniqueId);
+
+      let query = await db.query(
+        `SELECT project_team_id, project_on_hand_id FROM project_team WHERE project_team_id = ANY($1::int[]) AND project_on_hand_id = $2`,
+        [projectId, projectOnHandId]
+      );
+      let results = query.rows;
+      console.log("updatedu", results);
+      console.log("results", results.length);
+      if (results.length < uniqueId.length) {
+        console.log("checkduplicateId fail");
+        res.status(404).send({
+          code: "WEPT404",
+          description: "Project Id Not Found",
+          // results:results
+        });
+      } else {
+        if (results.length == 0) {
+          res.status(404).send({
+            code: "WEPT404",
+            description: "Project Id Not Found",
+            // results:results
+          });
+          return resolve(results);
+        } else {
+          console.log(" checkduplicateId pass");
+          next();
+        }
+        return resolve(results);
+      }
+    });
+  } catch (error) {
+    console.error("### Error ", error);
+    // return resolve(false);
+    return res.status(500).send({
+      code: "WEPT500",
+      description: error.message,
+    });
+  }
+}
+
+function isDup(req, res, next) {
+  console.log("**isDup")
+  let requestArrayBody = req.body;
+  let userId = [];
+  const unique = (value, index, self) => {
+    return self.indexOf(value) === index;
+  };
+  requestArrayBody.map((req) => {
+    userId.push(req.user_id);
+  });
+  console.log("userId", userId);
+
+  const uniqueId = userId.filter(unique);
+  console.log("uniqueId", uniqueId.length);
+  console.log("userId", userId.length);
+  if (userId.length > 0) {
+    if (userId.length > uniqueId.length) {
+      res.status(404).send({
+        code: "WEPT404",
+        description: "User Id is Duplicate",
+      });
+    } else {
+      next();
+    }
+  } else {
+    next();
+  }
+}
+function checkcreateduplicateId(req, res, next) {
+  try {
+    return new Promise(async (resolve) => {
+      console.log("**checkcreateduplicateId")
+      let requestArrayBody = req.body;
+      let userId = [];
+      let projectOnHandId = req.params.project_on_hand_id;
+      const unique = (value, index, self) => {
+        return self.indexOf(value) === index;
+      };
+      requestArrayBody.map((req) => {
+        userId.push(req.user_id);
+      });
+      console.log("userId", userId);
+
+      const uniqueId = userId.filter(unique);
+      console.log("uniqueId", uniqueId);
+      console.log("projectOnHandId", projectOnHandId);
+      let query = await db.query(
+        `SELECT user_id, project_on_hand_id FROM project_team WHERE user_id = ANY($1::int[]) AND project_on_hand_id = $2`,
+        [userId, projectOnHandId]
+      );
+      let results = query.rows;
+      console.log("results", results);
+      if (results.length > 0) {
+        res.status(404).send({
+          code: "WEPT404",
+          description: "User Id Already in Project",
+          // results:results
+        });
+        return resolve(results);
+      } else {
+        console.log(" checkduplicateId pass");
+        next();
+      }
+      return resolve(results);
+    });
+  } catch (error) {
+    console.error("### Error ", error);
+    // return resolve(false);
+    return res.status(500).send({
+      code: "WEPT500",
+      description: error.message,
+    });
+  }
+}
+
 function updateuserId(req, res, next) {
   try {
     return new Promise(async (resolve) => {
+      console.log("**updateuserid")
       let requestArrayBody = req.body;
       let userId = [];
+      const unique = (value, index, self) => {
+        return self.indexOf(value) === index;
+      };
       requestArrayBody.map((req) => {
         userId.push(req.updateby);
       });
       console.log(userId);
+      const uniqueId = userId.filter(unique);
+      console.log("uniqueId", uniqueId.length);
       let query = await db.query(
         `SELECT user_id FROM users WHERE user_id = ANY($1::int[])`,
         [userId]
@@ -403,14 +576,25 @@ function updateuserId(req, res, next) {
       let results = query.rows;
       console.log("updateby", results.length);
       console.log("userId", userId.length);
-      if (results.length == userId.length) {
-        console.log("checkuserId pass");
-        next();
-        return resolve(results);
+      if (results.length > 0) {
+        console.log("results.length > 0", results.length);
+
+        if (results.length >= 1 && results.length == uniqueId.length) {
+          console.log("results.length == userId.length");
+          next();
+          return resolve(results);
+        }
+        if (results.length >= 1 && results.length != uniqueId.length) {
+          console.log("results.length != userId.length");
+          res.status(404).send({
+            code: "WEPT404",
+            description: "Updateby Id Not Found",
+          });
+        }
       } else {
         res.status(404).send({
           code: "WEPT404",
-          description: "Update Id Not Found",
+          description: "Updateby Id Not Found",
         });
       }
     });
@@ -424,25 +608,47 @@ function updateuserId(req, res, next) {
   }
 }
 
-
-function checkonhand(req, res, next) {
+//  check user from user_id
+function checkId(req, res, next) {
   try {
     return new Promise(async (resolve) => {
-      const project_on_hand_id = req.params.project_on_hand_id
-      let query = await db.query(
-        `SELECT project_on_hand_id FROM project_team WHERE project_on_hand_id = $1`,
-        [project_on_hand_id]
-      );
-      let results = query.rows;
-      if (results.length > 0) {
-        console.log("checkproject_on_hand_id pass");
-        next();
-        return resolve(results);
-      } else {
+console.log("**checkid")
+      let requestArrayBody = req.body;
+      let projectTeamId = [];
+      const unique = (value, index, self) => {
+        return self.indexOf(value) === index;
+      };
+      requestArrayBody.map((req) => {
+        projectTeamId.push(req.project_team_id);
+      });
+      console.log(projectTeamId);
+      const uniqueId = projectTeamId.filter(unique);
+      console.log("uniqueId", uniqueId.length);
+      if (projectTeamId.length > uniqueId.length) {
+        console.log("projectTeamId.length > uniqueId.length");
         res.status(404).send({
           code: "WEPT404",
-          description: "Project Onhand Id Id Not Found",
+          description: "Project Team Id is Duplicate",
         });
+      } else {
+        let query = await db.query(
+          `SELECT project_team_id FROM project_team WHERE project_team_id = ANY($1::int[])`,
+          [projectTeamId]
+        );
+        let results = query.rows;
+        console.log("results.length", results.length);
+        console.log("results", results);
+        console.log("userId", projectTeamId.length);
+        if (results.length == projectTeamId.length) {
+          console.log("checkprojectId pass");
+          next();
+          return resolve(results);
+        } else {
+          res.status(404).send({
+            code: "WEPT404",
+            description: "Project Team Id Not Found",
+          });
+        }
       }
     });
   } catch (error) {
@@ -454,11 +660,6 @@ function checkonhand(req, res, next) {
     });
   }
 }
-
-
-
-
-
 
 const projectteam = {
   listProjectTeam: listProjectTeam,
@@ -471,6 +672,10 @@ const projectteam = {
   checkuserId: checkuserId,
   checkonhandId: checkonhandId,
   updateuserId: updateuserId,
-  checkonhand: checkonhand
+  checkonhand: checkonhand,
+  checkcreateduplicateId: checkcreateduplicateId,
+  isDup: isDup,
+  checkId: checkId,
+  updateduplicateId: updateduplicateId,
 };
 module.exports = projectteam;
