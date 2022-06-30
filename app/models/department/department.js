@@ -38,9 +38,9 @@ function departmentList(req, res) {
             dataDepartment["department_id"] = oldDept
             dataDepartment["department_name"] = oldDeptName
             dataDepartment["company_id"] = oldCompany
+            dataDepartment["updatedate"] = oldUpdateDate
             dataDepartment["total_department_user"] = userCount
             dataDepartment["department_user"] = dataDepartmentUser
-            dataDepartment["updatedate"] = oldUpdateDate
             dataReturn.push(dataDepartment)
             userCount = 0
             dataDepartment = {}
@@ -48,8 +48,8 @@ function departmentList(req, res) {
             oldDept = row.department_id
             oldDeptName = row.department_name
             oldCompany = row.company_id
+            oldUpdateDate = row.updatedate
           }
-          console.log(dataDepartment);
           dataUser = {}
           dataUser["employee_id"] = row["employee_id"]
           dataUser["firstname"] = row["firstname"]
@@ -66,10 +66,12 @@ function departmentList(req, res) {
         dataDepartment["department_id"] = oldDept
         dataDepartment["department_name"] = oldDeptName
         dataDepartment["company_id"] = oldCompany
+        dataDepartment["updatedate"] = oldUpdateDate
         dataDepartment["total_department_user"] = userCount
         dataDepartment["department_user"] = dataDepartmentUser
         dataReturn.push(dataDepartment)
       }
+      console.log(dataReturn);
 
       return resolve(dataReturn);
     } catch (error) {
