@@ -19,7 +19,7 @@ module.exports = function (app) {
 
   app.get(
     "/projectteam/team/id/:project_on_hand_id",
-    [authJwt.verifyToken, projectteam.checkonhand],
+    [authJwt.verifyToken, projectteam.checkonhandfromonhand],
     controller.listProjectteam
   );
 
