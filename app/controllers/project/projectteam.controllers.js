@@ -5,7 +5,6 @@ const projectteam = require("../../models/project/projectteam");
 exports.getProjectbyCompany = async (req, res) => {
   let getProject = "";
   getProject = await projectteam.ProjectTeambyCompany(req, res);
-
   if (getProject.length == 0) {
     res
       .status(200)
@@ -73,7 +72,7 @@ exports.deleteProjectteam = async (req, res) => {
         .status(404)
         .send({ code: "WEPT404", description: "User id Not found." });
     } else {
-      res.status(200).send({ code: "WEPT200", description: "Success" });
+      res.status(200).send({ code: "WEPT200", description: "Delete Complete" });
     }
     // console.log("ss testss", departmentData.length);
   } catch (error) {
