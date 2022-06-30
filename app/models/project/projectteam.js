@@ -238,8 +238,9 @@ function ckdeleteProjectTeam(req, res, next) {
         [userId, projectOnHandId]
       );
       let results = query.rows;
+      console.log("projectOnHandId", projectOnHandId.length);
       console.log("results", results);
-      if (results.length == 0) {
+      if (results.length != projectOnHandId.length) {
         res.status(200).send({
           code: "WEPT404",
           description: "User Id Not Found",
@@ -423,6 +424,42 @@ function updateuserId(req, res, next) {
   }
 }
 
+
+function checkonhand(req, res, next) {
+  try {
+    return new Promise(async (resolve) => {
+      const project_on_hand_id = req.params.project_on_hand_id
+      let query = await db.query(
+        `SELECT project_on_hand_id FROM project_team WHERE project_on_hand_id = $1`,
+        [project_on_hand_id]
+      );
+      let results = query.rows;
+      if (results.length > 0) {
+        console.log("checkproject_on_hand_id pass");
+        next();
+        return resolve(results);
+      } else {
+        res.status(404).send({
+          code: "WEPT404",
+          description: "Project Onhand Id Id Not Found",
+        });
+      }
+    });
+  } catch (error) {
+    console.error("### Error ", error);
+    // return resolve(false);
+    return res.status(500).send({
+      code: "WEPT500",
+      description: error.message,
+    });
+  }
+}
+
+
+
+
+
+
 const projectteam = {
   listProjectTeam: listProjectTeam,
   createProjectTeam: createProjectTeam,
@@ -434,5 +471,6 @@ const projectteam = {
   checkuserId: checkuserId,
   checkonhandId: checkonhandId,
   updateuserId: updateuserId,
+  checkonhand: checkonhand
 };
 module.exports = projectteam;
