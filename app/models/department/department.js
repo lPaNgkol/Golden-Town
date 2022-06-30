@@ -23,6 +23,7 @@ function departmentList(req, res) {
       var oldDept = 0
       var oldDeptName = ''
       var oldCompany = 0
+      var oldUpdateDate = ''
       if(results.length<=0){
 
       }else{
@@ -31,6 +32,7 @@ function departmentList(req, res) {
             oldDept = row.department_id
             oldDeptName = row.department_name
             oldCompany = row.company_id
+            oldUpdateDate = row.updatedate
           }
           if(oldDept!=0 && oldDept!=row.department_id){
             dataDepartment["department_id"] = oldDept
@@ -38,6 +40,7 @@ function departmentList(req, res) {
             dataDepartment["company_id"] = oldCompany
             dataDepartment["total_department_user"] = userCount
             dataDepartment["department_user"] = dataDepartmentUser
+            dataDepartment["updatedate"] = oldUpdateDate
             dataReturn.push(dataDepartment)
             userCount = 0
             dataDepartment = {}
