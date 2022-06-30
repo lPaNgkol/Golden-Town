@@ -24,9 +24,11 @@ module.exports = function (app) {
   );
 
   app.post(
-    "/projectteam/team",
+    "/projectteam/team/:project_on_hand_id",
     [
       authJwt.verifyToken,
+      projectteam.isDup,
+      projectteam.checkcreateduplicateId,
       projectteam.checkuserId,
       projectteam.checkonhandId,
       projectteam.checkduplicateId,
@@ -35,10 +37,15 @@ module.exports = function (app) {
   );
 
   app.post(
-    "/projectteam/team/:project_on_hand_id",
+    "/projectteam/team/id/:project_on_hand_id",
     [
       authJwt.verifyToken,
+      projectteam.updateduplicateId,
+      projectteam.checkId,
+      projectteam.isDup,
       projectteam.checkduplicateId,
+      projectteam.checkuserId,
+      projectteam.checkonhand,
       projectteam.updateuserId,
     ],
     controller.updateProjectteam
@@ -47,6 +54,7 @@ module.exports = function (app) {
   app.delete(
     "/projectteam/team/:project_on_hand_id",
     [authJwt.verifyToken],
+    projectteam.checkonhand,
     projectteam.ckdeleteProjectTeam,
     controller.deleteProjectteam
   );
