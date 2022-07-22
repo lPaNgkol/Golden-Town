@@ -226,7 +226,7 @@ function createAccount(req, res){
 
 function listEmployee(req, res){
   return new Promise(function(resolve){
-    let query = `SELECT username, employee_id, user_id, firstname, lastname, nickname, gender,a.department_id, a.department_id,
+    let query = `SELECT username, employee_id, user_id, firstname, lastname, nickname, gender,a.department_id, a.department_id, d.department_name,
                       dob, job_start_date, working_status, a.position_id, mobileno, a.company_id, work_start_time,
                       work_end_time, work_hours, image_url, b.position_name, c.company_name, count(a.*) OVER() AS total_row
                   FROM users a
