@@ -182,7 +182,8 @@ function attendanceList(req, res){
                  FROM attendance a 
                  INNER JOIN users b on a.user_id=b.user_id
                  LEFT JOIN positions c on c.position_id=b.position_id 
-                 WHERE a.active=$1`
+                 WHERE a.active=$1
+                 ORDER BY a.createdate DESC`
     let dataquery = ["T"];
     if(req.body.limit){
       query = query + " LIMIT $2"
