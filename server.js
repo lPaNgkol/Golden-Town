@@ -24,9 +24,9 @@ console.log(new Date().toString());
 require('./app/routes/user.routes')(app);
 require('./app/routes/reserve.routes')(app);
 // set port, listen for requests
-const PORT = 3000;
+const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
   console.log(`Server is running on port ${PORT}.`);
   const db = require("./app/models/dbconnection");
-// console.log(db);
+  // console.log(db);
 });
