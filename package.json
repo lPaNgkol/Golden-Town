@@ -1,16 +1,12 @@
 {
-  "name": "we-links-api",
-  "version": "1.0.14",
-  "description": "we-links connecting your teams",
+  "name": "golden-town",
+  "version": "1.0.0",
+  "description": "Golden town village facility management system",
   "main": "index.js",
   "scripts": {
     "start": "node server.js",
     "test": "echo \"Error: no test specified\" && exit 1",
     "swagger-autogen": "node swagger.js"
-  },
-  "repository": {
-    "type": "git",
-    "url": "http://111.223.48.198/thanakorn.n/we-links-api.git"
   },
   "keywords": [],
   "author": "",
@@ -25,6 +21,7 @@
     "fs": "^0.0.1-security",
     "jsonwebtoken": "^8.5.1",
     "moment": "^2.29.3",
+    "mysql": "^2.18.1",
     "pg": "^8.7.3",
     "pg-format": "^1.0.4",
     "pg-hstore": "^2.3.4",

@@ -1,130 +1,154 @@
-const db = require("../../models/dbconnection");
-const config = require("../../config/auth.config");
-const authJwt = require("../../models/user/authentication");
-const employee = require("../../models/user/employee");
-var jwt = require("jsonwebtoken");
-let fs = require('fs');
+const user = require("../../models/user/user");
 
-exports.signup = async (req, res) => {
-  // Save User to Database
-  if (req.files) {
-    const file = req.files.image_url
-    const fileName = file.name
-    let dir = __dirname.split("/app")[0]
-    fs.mkdir(`./upload/user/${req.body.employee_id}`, {recursive: true}, (err) => {
-        if (err) {
-            console.error(err);
-        }else{
-            file.mv(`./upload/user/${req.body.employee_id}/${fileName}`, async (err) => {
-                req.body.image_url = `${dir}/upload/user/${req.body.employee_id}/${fileName}`
-                user = await employee.createAccount(req, res)
-                if (!user) {
-                    res.status(500).send({code:"WEUS500", description: "Internal error." });
-                }else{
-                  res.status(200).send({
-                    code:"WEUS200",
-                    description: "Register complete."
-                  });
-                }
-            })
-        }
-        console.log('Directory created successfully!');
+exports.userLogin = async (req, res) => {
+  var listUserLogin = "";
+  listUserLogin = await user.userLogin(req, res);
+  if (listUserLogin.length == 0) {
+    res.status(404).send({
+      code: "USER404",
+      description: "User Not found."
     });
-  }else{
-    user = await employee.createAccount(req, res)
-    if (!user) {
-        res.status(500).send({code:"WEUS500", description: "Internal error." });
-    }else{
-      res.status(200).send({
-        code:"WEUS200",
-        description: "Register complete."
-      });
-    }
-  }
-};
-
-exports.signin = async (req, res) => {
-  var user = ""
-  user = await authJwt.signIn(req)
-  user = user[0]
-  if (!user) {
-     return res.status(404).send({code:"WEUS404", description: "User Not found." });
-  }else{
-    var passwordIsValid = false
-    if(user.password==req.body.password){
-      passwordIsValid = true
-    }
-    if (!passwordIsValid) {
-      return res.status(401).send({
-        code:"WEUS401",
-        accessToken: null,
-        description: "Invalid Password!"
-      });
-    }
-    const token = jwt.sign({ id: user.user_id }, config.secret, {
-      expiresIn: config.jwtExpiration
-    });
-    let refreshToken = await authJwt.createRefresh(user.user_id);
-    var authorities = [];
-    let roles = await authJwt.getRoles(user.user_id);
-    for (let i = 0; i < roles.length; i++) {
-      authorities.push("ROLE_" + roles[i].name.toUpperCase());
-    }
+  } else {
     res.status(200).send({
-      code:"WEUS200",
-      user_id: user.user_id,
-      employee_id: user.employee_id,
-      username: user.username,
-      roles: authorities,
-      accessToken: token,
-      refreshToken: refreshToken
+      code: "USER200",
+      user_id: listUserLogin[0].user_id,
+      username: listUserLogin[0].username,
+      password: listUserLogin[0].password,
+      firstname: listUserLogin[0].firstname,
+      lastname: listUserLogin[0].lastname,
+      gender: listUserLogin[0].gender,
+      email: listUserLogin[0].email,
     });
-  }
+  };
 };
 
-exports.refreshToken = async (req, res) => {
-  const { refreshToken: requestToken } = req.body;
-  if (requestToken == null) {
-    return res.status(403).json({code:"WEUS403", description: "Refresh Token is required!" });
-  }
-  try {
-    let refreshToken = await authJwt.getRefreshToken(requestToken);
-    console.log(refreshToken)
-    if (!refreshToken) {
-      res.status(403).json({code:"WEUS403", description: "Refresh token is not in database!" });
-      return;
-    }else if(refreshToken=="expire"){
-      res.status(403).json({
-        code:"WEUS403",
-        description: "Refresh token was expired. Please make a new signin request",
+exports.userEmail = async (req, res) => {
+  var listUserEmail = "";
+  listUserEmail = await user.userEmail(req, res);
+  if (listUserEmail.length == 0) {
+    res.status(404).send({
+      code: "USER404",
+      description: "Email User Doesn't Match."
+    });
+  } else {
+    res.status(200).send({
+      code: "USER200",
+      description: "Email User Match!",
+      number_random: listUserEmail[0].number_random,
+    });
+  };
+};
+
+exports.userOTP = async (req, res) => {
+  var listUserOTP = "";
+  listUserOTP = await user.userOTP(req, res);
+  if (listUserOTP.length == 0) {
+    res.status(404).send({
+      code: "USER404",
+      description: "OTP User Doesn't Match."
+    });
+  } else {
+    res.status(200).send({
+      code: "USER200",
+      description: "OTP User Match!",
+      user_id: listUserOTP[0].user_id,
+    });
+  };
+};
+
+exports.userList = async (req, res) => {
+  var listUser = "";
+  listUser = await user.userList(req, res);
+  if (listUser.length == 0) {
+    res.status(404).send({
+      code: "USER404",
+      description: "User Not found."
+    });
+  } else {
+    res.status(200).send({
+      code: "USER200",
+      total: listUser.length,
+      listUser: listUser,
+    });
+  };
+};
+
+exports.userListUserId = async (req, res) => {
+  var listUserId = "";
+  listUserId = await user.userListUserId(req, res);
+  if (listUserId.length == 0) {
+    res.status(404).send({
+      code: "USER404",
+      description: "User Id Not found."
+    });
+  } else {
+    res.status(200).send({
+      code: "USER200",
+      total: listUserId.length,
+      listUser: listUserId,
+    });
+  };
+};
+
+exports.userCreate = async (req, res) => {
+  var createUser = "";
+  if (!req.body.password) {
+    res.status(200).send({
+      code: "USER404",
+      description: "Password doesn't match."
+    });
+  } else {
+    createUser = await user.userCreate(req, res);
+    if (createUser.length == 0) {
+      res.status(404).send({
+        code: "USER404",
+        description: "User Not found."
       });
-      return;
-    }else{
-      return res.status(200).json({
-        code:"WEUS200",
-        accessToken: refreshToken.accessToken,
-        refreshToken: refreshToken.refreshToken,
+    } else {
+      res.status(200).send({
+        user_id: createUser,
+        code: "USER200",
+        description: "Create User Success."
       });
-    }
-    
-  } catch (err) {
-    return res.status(500).send({code:"WEUS500", description: err });
-  }
+    };
+  };
 };
 
-exports.logout = async (req, res) => {
-  await authJwt.logout(req, res)
+exports.userUpdate = async (req, res) => {
+  var updateUser = "";
+  updateUser = await user.userUpdate(req, res);
+  if (updateUser.length == 0) {
+    res.status(404).send({
+      code: "USER404",
+      description: "User Not found."
+    });
+  } else {
+    res.status(200).send({
+      code: "USER200",
+      description: "Update User Success."
+    });
+  };
 };
 
-exports.allAccess = (req, res) => {
-  res.status(200).send("Public Content.");
-};
-exports.userBoard = (req, res) => {
-  res.status(200).send("User Content.");
-};
-exports.adminBoard = (req, res) => {
-  res.status(200).send("Admin Content.");
-};
-exports.moderatorBoard = (req, res) => {
-  res.status(200).send("Moderator Content.");
+exports.userUpdatePassword = async (req, res) => {
+  var updateUserPassword = "";
+  if (!req.body.password) {
+    res.status(200).send({
+      code: "USER404",
+      description: "Password doesn't match."
+    });
+  } else {
+    updateUserPassword = await user.userUpdatePassword(req, res);
+    if (updateUserPassword.length == 0) {
+      res.status(404).send({
+        code: "USER404",
+        description: "User Not found."
+      });
+    } else {
+      res.status(200).send({
+        code: "USER200",
+        description: "Update Password Success."
+      });
+    };
+  };
 };

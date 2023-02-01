@@ -1,14 +1,12 @@
 const config = require("../config/db.config.js");
-const postgres = require('pg')
-const Pool = require('pg').Pool
-const db = new Pool({
+const mysql = require('mysql');
+
+const db = mysql.createConnection({
   user: config.USER,
   host: config.HOST,
   database: config.DB,
   password: config.PASSWORD,
-  port: 5432,
-})
-postgres.types.setTypeParser(1114, function (value) {
-  return value
-})
+  port: 3306,
+});
+
 module.exports = db;
